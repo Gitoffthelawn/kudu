@@ -1,3 +1,9 @@
+# [1.1.0](https://github.com/AdventDevInc/kudu/compare/v1.0.5...v1.1.0) (2026-03-14)
+
+
+### Bug Fixes
+
+* daemon crash on headless Linux without X server ([d9fe47d](https://github.com/AdventDevInc/kudu/commit/d9fe47d7610ff14e5cfb2d019a82ce67e2ff5a57))
 ## [1.0.5](https://github.com/AdventDevInc/kudu/compare/v1.0.4...v1.0.5) (2026-03-14)
 
 
