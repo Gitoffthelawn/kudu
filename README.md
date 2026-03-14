@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/dbfx/kudu/releases"><img src="https://img.shields.io/github/v/release/dbfx/kudu?style=flat-square" alt="Release" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/dbfx/kudu?style=flat-square" alt="License" /></a>
-  <a href="https://github.com/dbfx/kudu/actions"><img src="https://img.shields.io/github/actions/workflow/status/dbfx/kudu/release.yml?style=flat-square&label=build" alt="Build" /></a>
+  <a href="https://github.com/adventdevinc/kudu/releases"><img src="https://img.shields.io/github/v/release/adventdevinc/kudu?style=flat-square" alt="Release" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/adventdevinc/kudu?style=flat-square" alt="License" /></a>
+  <a href="https://github.com/adventdevinc/kudu/actions"><img src="https://img.shields.io/github/actions/workflow/status/adventdevinc/kudu/release.yml?style=flat-square&label=build" alt="Build" /></a>
 </p>
 
 ---
@@ -141,7 +141,7 @@ The `clean` key is only present when `--clean` is used.
 
 ## Download
 
-Get the latest installer from the [Releases](https://github.com/dbfx/kudu/releases) page.
+Get the latest installer from the [Releases](https://github.com/adventdevinc/kudu/releases) page.
 
 ## Disclaimer
 

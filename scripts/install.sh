@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Kudu Linux installer
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/dbfx/kudu/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/adventdevinc/kudu/main/scripts/install.sh | bash
 #   curl -fsSL ... | bash -s -- --api-key YOUR_KEY
 #   curl -fsSL ... | bash -s -- --api-key YOUR_KEY --server-url https://custom.server
 #   curl -fsSL ... | bash -s -- --no-daemon   (install only, don't enable daemon)
@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-REPO="dbfx/kudu"
+REPO="adventdevinc/kudu"
 INSTALL_DIR="/opt/kudu"
 BIN_LINK="/usr/local/bin/kudu"
 SERVICE_NAME="kudu-daemon"

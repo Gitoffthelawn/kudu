@@ -548,8 +548,8 @@ export function SettingsPage() {
           </div>
 
           <div className="mt-5 flex items-center gap-2.5">
-            <LinkButton icon={Github} label="GitHub" href="https://github.com/dbfx/kudu" />
-            <LinkButton icon={Bug} label="Report Bug" href="https://github.com/dbfx/kudu/issues" />
+            <LinkButton icon={Github} label="GitHub" href="https://github.com/adventdevinc/kudu" />
+            <LinkButton icon={Bug} label="Report Bug" href="https://github.com/adventdevinc/kudu/issues" />
           </div>
         </div>
       </Section>
