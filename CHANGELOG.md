@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/AdventDevInc/kudu/compare/v1.0.2...v1.0.3) (2026-03-14)
+
+
+### Bug Fixes
+
+* elevation relaunch not starting new instance on Windows ([807f50b](https://github.com/AdventDevInc/kudu/commit/807f50b1280a4540a9fd061bdc448389e72a3381))
 ## [1.0.2](https://github.com/AdventDevInc/kudu/compare/v1.0.1...v1.0.2) (2026-03-14)
 ## [1.0.1](https://github.com/AdventDevInc/kudu/compare/v1.0.0...v1.0.1) (2026-03-14)
 
