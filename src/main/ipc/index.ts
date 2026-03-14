@@ -116,7 +116,10 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
       }).unref()
     }
 
-    app.quit()
+    // Use app.exit() instead of app.quit() to bypass the close-to-tray
+    // interceptor — app.quit() fires 'close' on each window, which the
+    // minimize-to-tray handler prevents, leaving the old instance alive.
+    app.exit(0)
   })
 
   // System Restore Point
