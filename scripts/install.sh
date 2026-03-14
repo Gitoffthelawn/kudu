@@ -134,11 +134,10 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=${APPIMAGE_PATH} --no-sandbox --daemon
+ExecStart=${APPIMAGE_PATH} --no-sandbox --ozone-platform=headless --daemon
 Restart=on-failure
 RestartSec=10
 Environment=APPIMAGE=${APPIMAGE_PATH}
-Environment=DISPLAY=:0
 
 [Install]
 WantedBy=multi-user.target

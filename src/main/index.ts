@@ -16,7 +16,12 @@ import { runDaemon } from './daemon'
 // ─── Headless mode flags ─────────────────────────────────────
 // When running without a GUI (daemon or CLI), disable GPU and sandbox
 // so Electron works on headless Linux servers without X11/Wayland.
+// IMPORTANT: Clear DISPLAY before Chromium initializes — otherwise the
+// native layer picks the X11 ozone backend before app.commandLine
+// switches are processed, and crashes if no X server is running.
 if (process.argv.includes('--daemon') || process.argv.includes('--cli')) {
+  delete process.env.DISPLAY
+  delete process.env.WAYLAND_DISPLAY
   app.disableHardwareAcceleration()
   app.commandLine.appendSwitch('no-sandbox')
   app.commandLine.appendSwitch('ozone-platform', 'headless')
