@@ -91,35 +91,42 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
   ipcMain.handle(IPC.ELEVATION_RELAUNCH, () => {
     const exePath = app.getPath('exe')
 
+    let child: ReturnType<typeof spawn>
+
     if (process.platform === 'win32') {
       const psScript = `Start-Process -FilePath '${exePath.replace(/'/g, "''")}' -Verb RunAs`
       const encoded = Buffer.from(psScript, 'utf16le').toString('base64')
-      spawn('powershell.exe', [
+      child = spawn('powershell.exe', [
         '-NoProfile', '-NonInteractive', '-EncodedCommand', encoded,
       ], {
         detached: true,
         stdio: 'ignore',
         windowsHide: true,
-      }).unref()
+      })
     } else if (process.platform === 'linux') {
-      spawn('pkexec', [exePath, '--no-sandbox'], {
+      child = spawn('pkexec', [exePath, '--no-sandbox'], {
         detached: true,
         stdio: 'ignore',
-      }).unref()
+      })
     } else if (process.platform === 'darwin') {
-      // Use AppleScript's "quoted form of" to safely handle any special
-      // characters in the path (quotes, backslashes, spaces, single quotes, etc.)
       const script = `set appPath to "${exePath.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}" as POSIX file\ndo shell script quoted form of POSIX path of appPath with administrator privileges`
-      spawn('osascript', ['-e', script], {
+      child = spawn('osascript', ['-e', script], {
         detached: true,
         stdio: 'ignore',
-      }).unref()
+      })
+    } else {
+      return
     }
 
-    // Use app.exit() instead of app.quit() to bypass the close-to-tray
-    // interceptor — app.quit() fires 'close' on each window, which the
-    // minimize-to-tray handler prevents, leaving the old instance alive.
-    app.exit(0)
+    // Wait for the child to actually launch before terminating, then use
+    // app.exit() to bypass the close-to-tray interceptor.
+    child.on('spawn', () => {
+      child.unref()
+      app.exit(0)
+    })
+    child.on('error', () => {
+      // Spawn failed (e.g. user declined UAC) — don't quit
+    })
   })
 
   // System Restore Point
