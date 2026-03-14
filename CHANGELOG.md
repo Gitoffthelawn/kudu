@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/AdventDevInc/kudu/compare/v1.0.3...v1.0.4) (2026-03-14)
+
+
+### Bug Fixes
+
+* update repository URLs from dbfx to adventdevinc ([dede320](https://github.com/AdventDevInc/kudu/commit/dede32049b51e67bad3c6f55e38ded3eaa7322bf))
 ## [1.0.3](https://github.com/AdventDevInc/kudu/compare/v1.0.2...v1.0.3) (2026-03-14)
 
 
