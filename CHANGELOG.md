@@ -1,3 +1,9 @@
+## [1.0.5](https://github.com/AdventDevInc/kudu/compare/v1.0.4...v1.0.5) (2026-03-14)
+
+
+### Bug Fixes
+
+* cloud agent not connecting after initial device link ([42e6e47](https://github.com/AdventDevInc/kudu/commit/42e6e47b560ecc7f0724306ba06b01a74d64dee1))
 ## [1.0.4](https://github.com/AdventDevInc/kudu/compare/v1.0.3...v1.0.4) (2026-03-14)
 
 
