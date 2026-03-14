@@ -312,12 +312,26 @@ describe('parsePacmanQu', () => {
 // ─── isValidAppId ───────────────────────────────────────────
 
 describe('isValidAppId', () => {
-  it('accepts a typical winget ID', () => {
-    expect(isValidAppId('Google.Chrome')).toBe(true)
+  const platformId =
+    process.platform === 'darwin'
+      ? 'google-chrome'
+      : process.platform === 'linux'
+        ? 'google-chrome-stable'
+        : 'Google.Chrome'
+
+  const platformIdAlt =
+    process.platform === 'darwin'
+      ? 'visual-studio-code'
+      : process.platform === 'linux'
+        ? 'code'
+        : 'Microsoft.VisualStudioCode'
+
+  it('accepts a typical package ID', () => {
+    expect(isValidAppId(platformId)).toBe(true)
   })
 
-  it('accepts a typical winget ID with hyphens', () => {
-    expect(isValidAppId('Microsoft.VisualStudioCode')).toBe(true)
+  it('accepts another typical package ID', () => {
+    expect(isValidAppId(platformIdAlt)).toBe(true)
   })
 
   it('rejects empty string', () => {
