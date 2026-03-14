@@ -184,8 +184,12 @@ class CloudAgentService {
       setSettings({ cloud: { ...settings.cloud, apiKey } })
       this.linkedAt = new Date().toISOString()
       this.error = null
+      this.reconnectAttempts = 0
 
-      this.start()
+      // Discovery and registration already done above — go straight to the
+      // WebSocket connection instead of calling start() which would redo both
+      // and, because it was previously unawaited, could fail silently.
+      this.connect()
       cloudLog('INFO', `Linked device ${this.deviceId} to ${this.serverUrl}`)
       return { success: true }
     } catch (err) {

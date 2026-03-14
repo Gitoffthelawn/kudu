@@ -55,7 +55,7 @@ fi
 
 ARCH=$(uname -m)
 case "$ARCH" in
-  x86_64)  ARCH_LABEL="x64" ;;
+  x86_64)  ARCH_LABEL="x86_64" ;;
   *)       err "Unsupported architecture: $ARCH (only x86_64 is supported)"; exit 1 ;;
 esac
 
