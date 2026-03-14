@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { spawn } from 'child_process'
+import { execFile, spawn } from 'child_process'
 import { IPC } from '../../shared/channels'
 import { registerSystemCleanerIpc } from './system-cleaner.ipc'
 import { registerBrowserCleanerIpc } from './browser-cleaner.ipc'
@@ -91,42 +91,34 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
   ipcMain.handle(IPC.ELEVATION_RELAUNCH, () => {
     const exePath = app.getPath('exe')
 
-    let child: ReturnType<typeof spawn>
-
     if (process.platform === 'win32') {
+      // Use execFile so we wait for PowerShell to finish (including the UAC
+      // prompt).  Start-Process -Verb RunAs blocks until the user accepts or
+      // declines UAC, then returns.  If the user declines, PowerShell exits
+      // with an error and we don't quit.
       const psScript = `Start-Process -FilePath '${exePath.replace(/'/g, "''")}' -Verb RunAs`
       const encoded = Buffer.from(psScript, 'utf16le').toString('base64')
-      child = spawn('powershell.exe', [
-        '-NoProfile', '-NonInteractive', '-EncodedCommand', encoded,
-      ], {
-        detached: true,
-        stdio: 'ignore',
-        windowsHide: true,
+      execFile('powershell.exe', [
+        '-NoProfile', '-EncodedCommand', encoded,
+      ], { windowsHide: true }, (err) => {
+        if (!err) app.exit(0)
       })
     } else if (process.platform === 'linux') {
-      child = spawn('pkexec', [exePath, '--no-sandbox'], {
+      const child = spawn('pkexec', [exePath, '--no-sandbox'], {
         detached: true,
         stdio: 'ignore',
       })
+      child.on('spawn', () => { child.unref(); app.exit(0) })
+      child.on('error', () => { /* user declined — don't quit */ })
     } else if (process.platform === 'darwin') {
       const script = `set appPath to "${exePath.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}" as POSIX file\ndo shell script quoted form of POSIX path of appPath with administrator privileges`
-      child = spawn('osascript', ['-e', script], {
+      const child = spawn('osascript', ['-e', script], {
         detached: true,
         stdio: 'ignore',
       })
-    } else {
-      return
+      child.on('spawn', () => { child.unref(); app.exit(0) })
+      child.on('error', () => { /* user declined — don't quit */ })
     }
-
-    // Wait for the child to actually launch before terminating, then use
-    // app.exit() to bypass the close-to-tray interceptor.
-    child.on('spawn', () => {
-      child.unref()
-      app.exit(0)
-    })
-    child.on('error', () => {
-      // Spawn failed (e.g. user declined UAC) — don't quit
-    })
   })
 
   // System Restore Point
