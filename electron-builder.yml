@@ -1,0 +1,64 @@
+appId: com.kudu.app
+productName: Kudu
+copyright: Copyright © 2024 Kudu Contributors
+
+directories:
+  buildResources: resources
+  output: dist
+
+files:
+  - out/**/*
+
+extraResources:
+  - from: resources/icon.ico
+    to: icon.ico
+    filter:
+      - "**/*"
+  - from: resources/icon.png
+    to: icon.png
+    filter:
+      - "**/*"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+  requestedExecutionLevel: asInvoker
+
+nsis:
+  oneClick: true
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: false
+  shortcutName: Kudu
+  artifactName: Kudu-Setup-${version}.${ext}
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: resources/icon.png
+  category: public.app-categories.utilities
+  hardenedRuntime: true
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+  artifactName: Kudu-${version}-${arch}.${ext}
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  icon: resources/icons/
+  category: Utility
+  artifactName: Kudu-${version}-${arch}.${ext}
+
+publish:
+  provider: github
+  releaseType: release

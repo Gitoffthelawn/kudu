@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract release notes and create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Extract the current version's section from the committed CHANGELOG.md
+          node -e "
+            const fs = require('fs');
+            const log = fs.readFileSync('CHANGELOG.md', 'utf-8');
+            const sections = log.split(/^(?=##? \[)/m);
+            const current = sections.find(s => s.includes('${{ github.ref_name }}'));
+            if (current) {
+              // Remove the heading line, keep only the body
+              const body = current.replace(/^##? .+\n+/, '').trim();
+              fs.writeFileSync('_RELEASE_NOTES.md', body);
+            } else {
+              fs.writeFileSync('_RELEASE_NOTES.md', '');
+            }
+          "
+          gh release create ${{ github.ref_name }} --title "${{ github.ref_name }}" --notes-file _RELEASE_NOTES.md
+
+  build:
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            build-args: --win
+          - os: macos-latest
+            build-args: --mac
+          - os: ubuntu-latest
+            build-args: --linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build, package, and upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npx electron-vite build && npx electron-builder ${{ matrix.build-args }} --publish always

@@ -1,0 +1,153 @@
+export const IPC = {
+  // System cleaner
+  SYSTEM_SCAN: 'cleaner:system:scan',
+  SYSTEM_CLEAN: 'cleaner:system:clean',
+
+  // Browser cleaner
+  BROWSER_SCAN: 'cleaner:browser:scan',
+  BROWSER_CLEAN: 'cleaner:browser:clean',
+
+  // App cleaner
+  APP_SCAN: 'cleaner:app:scan',
+  APP_CLEAN: 'cleaner:app:clean',
+
+  // Gaming cleaner
+  GAMING_SCAN: 'cleaner:gaming:scan',
+  GAMING_CLEAN: 'cleaner:gaming:clean',
+
+  // Recycle bin
+  RECYCLE_BIN_SCAN: 'cleaner:recyclebin:scan',
+  RECYCLE_BIN_CLEAN: 'cleaner:recyclebin:clean',
+
+  // Uninstall leftovers
+  UNINSTALL_LEFTOVERS_SCAN: 'cleaner:uninstall-leftovers:scan',
+  UNINSTALL_LEFTOVERS_CLEAN: 'cleaner:uninstall-leftovers:clean',
+
+  // Registry
+  REGISTRY_SCAN: 'cleaner:registry:scan',
+  REGISTRY_FIX: 'cleaner:registry:fix',
+
+  // Startup
+  STARTUP_LIST: 'startup:list',
+  STARTUP_TOGGLE: 'startup:toggle',
+  STARTUP_DELETE: 'startup:delete',
+  STARTUP_BOOT_TRACE: 'startup:boot-trace',
+
+  // Debloater
+  DEBLOATER_SCAN: 'debloater:scan',
+  DEBLOATER_REMOVE: 'debloater:remove',
+  DEBLOATER_REMOVE_PROGRESS: 'debloater:remove:progress',
+
+  // Disk analyzer
+  DISK_ANALYZE: 'disk:analyze',
+  DISK_DRIVES: 'disk:drives',
+  DISK_FILE_TYPES: 'disk:file-types',
+
+  // Network cleanup
+  NETWORK_SCAN: 'cleaner:network:scan',
+  NETWORK_CLEAN: 'cleaner:network:clean',
+
+  // Progress events (main -> renderer)
+  SCAN_PROGRESS: 'scan:progress',
+  REGISTRY_FIX_PROGRESS: 'registry:fix:progress',
+
+  // Settings
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_SET: 'settings:set',
+
+  // System
+  ELEVATION_CHECK: 'elevation:check',
+  ELEVATION_RELAUNCH: 'elevation:relaunch',
+  RESTORE_POINT_CREATE: 'system:restore-point:create',
+
+  // Scheduled scans
+  SCHEDULE_NEXT_SCAN: 'schedule:next-scan',
+  SCHEDULE_SCAN_TRIGGER: 'schedule:scan-trigger',
+  SCHEDULE_SCAN_COMPLETE: 'schedule:scan-complete',
+
+  // Settings apply (renderer -> main, fire-and-forget)
+  SETTINGS_APPLY_STARTUP: 'settings:apply-startup',
+  SETTINGS_APPLY_TRAY: 'settings:apply-tray',
+
+  // Scan history
+  HISTORY_GET: 'history:get',
+  HISTORY_ADD: 'history:add',
+  HISTORY_CLEAR: 'history:clear',
+
+  // Malware scanner
+  MALWARE_SCAN: 'malware:scan',
+  MALWARE_QUARANTINE: 'malware:quarantine',
+  MALWARE_DELETE: 'malware:delete',
+  MALWARE_RESTORE: 'malware:restore',
+  MALWARE_PROGRESS: 'malware:progress',
+
+  // Privacy Shield
+  PRIVACY_SCAN: 'privacy:scan',
+  PRIVACY_APPLY: 'privacy:apply',
+  PRIVACY_PROGRESS: 'privacy:progress',
+
+  // Driver Manager
+  DRIVER_SCAN: 'driver:scan',
+  DRIVER_CLEAN: 'driver:clean',
+  DRIVER_PROGRESS: 'driver:progress',
+  DRIVER_UPDATE_SCAN: 'driver:update:scan',
+  DRIVER_UPDATE_INSTALL: 'driver:update:install',
+  DRIVER_UPDATE_PROGRESS: 'driver:update:progress',
+
+  // Program Uninstaller
+  UNINSTALLER_LIST: 'uninstaller:list',
+  UNINSTALLER_UNINSTALL: 'uninstaller:uninstall',
+  UNINSTALLER_PROGRESS: 'uninstaller:progress',
+
+  // Onboarding
+  ONBOARDING_GET: 'onboarding:get',
+  ONBOARDING_SET: 'onboarding:set',
+
+  // Performance Monitor
+  PERF_GET_SYSTEM_INFO: 'perf:system-info',
+  PERF_START_MONITORING: 'perf:start',
+  PERF_STOP_MONITORING: 'perf:stop',
+  PERF_SNAPSHOT: 'perf:snapshot',
+  PERF_PROCESS_LIST: 'perf:process-list',
+  PERF_KILL_PROCESS: 'perf:kill',
+  PERF_DISK_HEALTH: 'perf:disk-health',
+
+  // Auto-updater
+  UPDATER_CHECK: 'updater:check',
+  UPDATER_DOWNLOAD: 'updater:download',
+  UPDATER_INSTALL: 'updater:install',
+  UPDATER_GET_STATUS: 'updater:get-status',
+  UPDATER_STATUS: 'updater:status',
+
+  // Service Manager
+  SERVICE_SCAN: 'service:scan',
+  SERVICE_APPLY: 'service:apply',
+  SERVICE_PROGRESS: 'service:progress',
+
+  // Software Updater
+  SOFTWARE_UPDATE_CHECK: 'software-update:check',
+  SOFTWARE_UPDATE_RUN: 'software-update:run',
+  SOFTWARE_UPDATE_PROGRESS: 'software-update:progress',
+
+  // Cloud Agent
+  CLOUD_LINK: 'cloud:link',
+  CLOUD_UNLINK: 'cloud:unlink',
+  CLOUD_GET_STATUS: 'cloud:get-status',
+  CLOUD_RECONNECT: 'cloud:reconnect',
+
+  // Cloud Action History
+  CLOUD_HISTORY_GET: 'cloud:history:get',
+  CLOUD_HISTORY_CLEAR: 'cloud:history:clear',
+
+  // History push events (main -> renderer)
+  HISTORY_CHANGED: 'history:changed',
+  CLOUD_HISTORY_CHANGED: 'cloud:history:changed',
+
+  // Platform
+  PLATFORM_INFO: 'platform:info',
+
+  // Window controls
+  WINDOW_MINIMIZE: 'window:minimize',
+  WINDOW_MAXIMIZE: 'window:maximize',
+  WINDOW_CLOSE: 'window:close',
+} as const

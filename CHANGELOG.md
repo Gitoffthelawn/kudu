@@ -1,0 +1,124 @@
+# 1.0.0 (2026-03-14)
+# 1.0.0 (2026-03-14)
+# [2.13.0](https://github.com/dbfx/kudu/compare/v2.12.0...v2.13.0) (2026-03-14)
+
+
+### Features
+
+* add macOS system hardening and extract shared config utils ([684df60](https://github.com/dbfx/kudu/commit/684df60852aa96149c244432a7d99539cb8c33ba))
+# [2.12.0](https://github.com/dbfx/kudu/compare/v2.11.0...v2.12.0) (2026-03-14)
+
+
+### Features
+
+* add Linux system hardening via sysctl and access control ([177fd8a](https://github.com/dbfx/kudu/commit/177fd8a0f1674fa84a164bc2158d66a5e630f233))
+# [2.11.0](https://github.com/dbfx/kudu/compare/v2.10.0...v2.11.0) (2026-03-14)
+
+
+### Bug Fixes
+
+* harden security across cloud agent, settings store, and IPC handlers ([b54d41b](https://github.com/dbfx/kudu/commit/b54d41bdd94e0f4f3aff6b978594bac2bf071a5f))
+# [2.10.0](https://github.com/dbfx/kudu/compare/v2.9.1...v2.10.0) (2026-03-14)
+
+
+### Features
+
+* add Linux software updater support via apt, dnf, and pacman ([8215a16](https://github.com/dbfx/kudu/commit/8215a16ca762a063aae9376d221144779fe5a655))
+## [2.9.1](https://github.com/dbfx/kudu/compare/v2.9.0...v2.9.1) (2026-03-14)
+
+
+### Features
+
+* add daemon auto-update with auto-restart and Linux install script ([9a52d13](https://github.com/dbfx/kudu/commit/9a52d13cb615e624f7e33d97a585318bed4b6999))
+# [2.9.0](https://github.com/dbfx/kudu/compare/v2.8.2...v2.9.0) (2026-03-14)
+
+
+### Features
+
+* one-click installer, elevated auto-launch via Task Scheduler, and startup manager improvements ([50f8cff](https://github.com/dbfx/kudu/commit/50f8cffc8671a706f47709752a62d334bdacdd23))
+## [2.8.2](https://github.com/dbfx/kudu/compare/v2.8.1...v2.8.2) (2026-03-14)
+
+
+### Bug Fixes
+
+* handle Chromium --no-sandbox requirement when running as root on Linux ([48af4be](https://github.com/dbfx/kudu/commit/48af4be21b52b9e7cabe1ee4ef5cffed1841f71d))
+## [2.8.1](https://github.com/dbfx/kudu/compare/v2.8.0...v2.8.1) (2026-03-14)
+# [2.8.0](https://github.com/dbfx/kudu/compare/v2.7.0...v2.8.0) (2026-03-14)
+
+
+### Features
+
+* wire up cross-platform GUI and IPC handlers for Linux and macOS ([9aa5a14](https://github.com/dbfx/kudu/commit/9aa5a14662695bc5372a459c4dc3520d88306a7f))
+# [2.7.0](https://github.com/dbfx/kudu/compare/v2.6.1...v2.7.0) (2026-03-14)
+
+
+### Features
+
+* add Linux and macOS platform support for system cleaner features ([a556729](https://github.com/dbfx/kudu/commit/a5567299160fcdc8bf8b4f9d312d66215296ac37))
+## [2.6.1](https://github.com/dbfx/kudu/compare/v2.6.0...v2.6.1) (2026-03-14)
+
+
+### Bug Fixes
+
+* correct operstate detection for virtual/tunnel network adapters ([ab34f3a](https://github.com/dbfx/kudu/commit/ab34f3adaa8cb2f7b09b58a8ee49fa0054b55a22))
+# [2.6.0](https://github.com/dbfx/kudu/compare/v2.5.0...v2.6.0) (2026-03-14)
+
+
+### Features
+
+* group history chart by day, harden platform code, remove docs site ([fb3b8d8](https://github.com/dbfx/kudu/commit/fb3b8d8f908c0cb606c2bde82ed8e63c7cf1d0c3))
+# [2.5.0](https://github.com/dbfx/kudu/compare/v2.4.7...v2.5.0) (2026-03-13)
+
+
+### Features
+
+* improve Linux/macOS daemon support and cross-platform guards ([2034288](https://github.com/dbfx/kudu/commit/2034288ea71df9a4601ec8ab6ed99fd7fda03641))
+## [2.4.7](https://github.com/dbfx/kudu/compare/v2.4.6...v2.4.7) (2026-03-13)
+
+
+### Features
+
+* add daemon mode, CLI config/service commands, and slim down health report ([b7b75f1](https://github.com/dbfx/kudu/commit/b7b75f147df3525809da2fc12079d332915bd79c))
+## [2.4.6](https://github.com/dbfx/kudu/compare/v2.4.5...v2.4.6) (2026-03-13)
+
+
+### Bug Fixes
+
+* handle PowerShell DateTime[] in hotfix InstalledOn field ([335b571](https://github.com/dbfx/kudu/commit/335b57171a95631bbbc5dbdcbc20d6532684d6c0))
+* remove persistent PowerShell and optimize telemetry tick frequency ([d309c05](https://github.com/dbfx/kudu/commit/d309c05b6164d516c4cfc49adb2fe0edff079ae3))
+## [2.4.5](https://github.com/dbfx/kudu/compare/v2.4.4...v2.4.5) (2026-03-13)
+
+
+### Bug Fixes
+
+* prevent cloud agent silent hangs with timeouts and watchdog ([9b6dcba](https://github.com/dbfx/kudu/commit/9b6dcba776701d25899e5b497005e2a100747bb7))
+## [2.4.4](https://github.com/dbfx/kudu/compare/v2.4.3...v2.4.4) (2026-03-13)
+
+
+### Bug Fixes
+
+* prevent duplicate cloud commands and reduce CPU usage ([bfebbfd](https://github.com/dbfx/kudu/commit/bfebbfdeeaf39cd4a23701e95f418c0cb5c72854))
+## [2.4.3](https://github.com/dbfx/kudu/compare/v2.4.2...v2.4.3) (2026-03-13)
+
+
+### Bug Fixes
+
+* prevent cloud update timeouts with silent mode and concurrency ([34e55d1](https://github.com/dbfx/kudu/commit/34e55d115f9fa2e7cdff4100e8499dc5defcb988))
+## [2.4.2](https://github.com/dbfx/kudu/compare/v2.4.1...v2.4.2) (2026-03-13)
+
+
+### Features
+
+* table-based scan history views with auto-refresh ([18df5e9](https://github.com/dbfx/kudu/commit/18df5e92d962ce044532b502cf2145a68ca43182))
+## [2.4.1](https://github.com/dbfx/kudu/compare/v2.4.0...v2.4.1) (2026-03-13)
+# [2.4.0](https://github.com/dbfx/kudu/compare/v2.2.0...v2.4.0) (2026-03-13)
+
+
+### Bug Fixes
+
+* retry gh release edit in CI to handle race condition ([5d634b6](https://github.com/dbfx/kudu/commit/5d634b6dc42873b0be544e166ccf34beccdbe17d))
+
+
+### Features
+
+* auto-fetch threat blacklist on connect and always show threat list in settings ([39bdbd3](https://github.com/dbfx/kudu/commit/39bdbd3f00a84d4adb8694a03949dd548947a829))
