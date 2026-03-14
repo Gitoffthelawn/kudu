@@ -96,8 +96,30 @@ chmod +x "$TMP_FILE"
 mv -f "$TMP_FILE" "$APPIMAGE_PATH"
 trap - EXIT
 
-# Symlink to PATH
-ln -sf "$APPIMAGE_PATH" "$BIN_LINK"
+# Create wrapper script in PATH (instead of a plain symlink) so that
+# --no-sandbox and --ozone-platform=headless are always injected for
+# daemon/CLI usage.  Chromium checks the real argv for --no-sandbox
+# before Electron's app.commandLine.appendSwitch runs, so the flag
+# must be on the actual command line.
+cat > "$BIN_LINK" <<'WRAPPER'
+#!/usr/bin/env bash
+EXTRA_ARGS=()
+# Always add --no-sandbox when running as root (required by Chromium)
+if [[ $EUID -eq 0 ]]; then
+  EXTRA_ARGS+=(--no-sandbox)
+fi
+# Add headless ozone platform for daemon/CLI (no display needed)
+for arg in "$@"; do
+  case "$arg" in
+    --daemon|--cli)
+      EXTRA_ARGS+=(--ozone-platform=headless)
+      break
+      ;;
+  esac
+done
+exec /opt/kudu/Kudu.AppImage "${EXTRA_ARGS[@]}" "$@"
+WRAPPER
+chmod +x "$BIN_LINK"
 
 ok "Installed Kudu $VERSION to $APPIMAGE_PATH"
 
