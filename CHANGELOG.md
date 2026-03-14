@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/AdventDevInc/kudu/compare/v1.1.0...v1.1.1) (2026-03-14)
+
+
+### Bug Fixes
+
+* install script wrapper auto-injects --no-sandbox for root ([fb81a09](https://github.com/AdventDevInc/kudu/commit/fb81a09739279bceed6b081218ea3f2ae61d21f4))
 # [1.1.0](https://github.com/AdventDevInc/kudu/compare/v1.0.5...v1.1.0) (2026-03-14)
 
 
