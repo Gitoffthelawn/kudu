@@ -36,9 +36,9 @@ export type AllowedScanType =
 
 export type CloudCommand =
   | { type: 'scan'; requestId: string; scanType: AllowedScanType }
-  | { type: 'clean'; requestId: string; scanType: AllowedScanType; itemIds: string[] }
+  | { type: 'clean'; requestId: string; scanType: AllowedScanType; itemIds?: string[] }
   | { type: 'software-update-check'; requestId: string }
-  | { type: 'software-update-run'; requestId: string; appIds: string[] }
+  | { type: 'software-update-run'; requestId: string; appIds?: string[] }
   | { type: 'get-status'; requestId: string }
   | { type: 'get-system-info'; requestId: string }
   | { type: 'get-health-report'; requestId: string }
@@ -59,23 +59,23 @@ export type CloudCommand =
   | { type: 'get-installed-apps'; requestId: string }
   // Phase 1: Fleet essentials
   | { type: 'driver-update-scan'; requestId: string }
-  | { type: 'driver-update-install'; requestId: string; updateIds: string[] }
-  | { type: 'driver-clean'; requestId: string; publishedNames: string[] }
+  | { type: 'driver-update-install'; requestId: string; updateIds?: string[] }
+  | { type: 'driver-clean'; requestId: string; publishedNames?: string[] }
   | { type: 'startup-list'; requestId: string }
   | { type: 'startup-toggle'; requestId: string; name: string; location: string; command: string; source: string; enabled: boolean }
   | { type: 'disk-health'; requestId: string }
   // Phase 2: Compliance & security
   | { type: 'privacy-scan'; requestId: string }
-  | { type: 'privacy-apply'; requestId: string; settingIds: string[] }
+  | { type: 'privacy-apply'; requestId: string; settingIds?: string[] }
   | { type: 'debloater-scan'; requestId: string }
-  | { type: 'debloater-remove'; requestId: string; packageNames: string[] }
+  | { type: 'debloater-remove'; requestId: string; packageNames?: string[] }
   | { type: 'service-scan'; requestId: string }
-  | { type: 'service-apply'; requestId: string; changes: Array<{ name: string; targetStartType: string }> }
+  | { type: 'service-apply'; requestId: string; changes?: Array<{ name: string; targetStartType: string }> }
   // Phase 3: Maintenance
-  | { type: 'malware-quarantine'; requestId: string; paths: string[] }
-  | { type: 'malware-delete'; requestId: string; paths: string[] }
+  | { type: 'malware-quarantine'; requestId: string; paths?: string[] }
+  | { type: 'malware-delete'; requestId: string; paths?: string[] }
   | { type: 'registry-scan'; requestId: string }
-  | { type: 'registry-fix'; requestId: string; entryIds: string[] }
+  | { type: 'registry-fix'; requestId: string; entryIds?: string[] }
   // Phase 4: Threat monitoring
   | { type: 'update-threat-blacklist'; requestId: string; url: string }
   | { type: 'get-threat-status'; requestId: string }

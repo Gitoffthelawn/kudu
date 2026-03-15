@@ -567,6 +567,86 @@ class CloudAgentService {
     return null
   }
 
+  private async getApi(path: string): Promise<unknown> {
+    if (!this.connectConfig) throw new Error('Not connected — no server config')
+    const url = `${this.connectConfig.api}${path}`
+    cloudLog('DEBUG', `GET ${url}`)
+    await assertPublicResolution(url)
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30_000)
+    let res: Response
+    try {
+      res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        signal: controller.signal,
+      })
+    } finally {
+      clearTimeout(timeout)
+    }
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      cloudLog('ERROR', `GET ${url} → ${res.status}`, text.slice(0, 300))
+      throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`)
+    }
+
+    cloudLog('DEBUG', `GET ${url} → ${res.status}`)
+    const contentType = res.headers.get('content-type')
+    if (contentType?.includes('application/json')) {
+      return res.json()
+    }
+    return null
+  }
+
+  /**
+   * Checks whether a broadcast command is missing its payload arrays
+   * (trimmed by the server to stay within Reverb's message size limit).
+   * If so, fetches the full command from the REST endpoint.
+   */
+  private needsPayloadFetch(cmd: CloudCommand): boolean {
+    switch (cmd.type) {
+      case 'clean':              return !cmd.itemIds
+      case 'software-update-run': return !cmd.appIds
+      case 'driver-update-install': return !cmd.updateIds
+      case 'driver-clean':       return !cmd.publishedNames
+      case 'privacy-apply':      return !cmd.settingIds
+      case 'debloater-remove':   return !cmd.packageNames
+      case 'service-apply':      return !cmd.changes
+      case 'malware-quarantine': return !cmd.paths
+      case 'malware-delete':     return !cmd.paths
+      case 'registry-fix':       return !cmd.entryIds
+      default:                   return false
+    }
+  }
+
+  private async fetchFullCommandPayload(cmd: CloudCommand): Promise<CloudCommand> {
+    // Sanitise requestId before interpolating into URL path — only allow
+    // alphanumeric, hyphens, underscores, and dots to prevent path traversal
+    // or query-string injection via crafted requestIds.
+    if (!/^[\w.:-]+$/.test(cmd.requestId)) {
+      throw new Error('Invalid requestId format for payload fetch')
+    }
+
+    cloudLog('DEBUG', `Fetching full payload for ${cmd.type} requestId=${cmd.requestId}`)
+    const full = await this.getApi(
+      `/devices/${encodeURIComponent(this.deviceId)}/commands/${encodeURIComponent(cmd.requestId)}`,
+    ) as Record<string, unknown>
+
+    if (!full || typeof full !== 'object' || Array.isArray(full)) {
+      throw new Error('Server returned invalid command payload')
+    }
+
+    // Merge fetched data into the command, but never allow the server
+    // response to overwrite security-critical fields already validated
+    // by onCommand (type, requestId).
+    const { type: _t, requestId: _r, ...payloadFields } = full
+    return { ...cmd, ...payloadFields } as CloudCommand
+  }
+
   private getDisabledCapabilities(): string[] {
     const s = getSettings().cloud
     const disabled: string[] = []
@@ -651,7 +731,24 @@ class CloudAgentService {
     }
 
     this.lastCommandAt = new Date().toISOString()
-    this.executeCommand(cmd)
+
+    // Broadcast payloads may have large arrays trimmed to stay within
+    // Reverb's message size limit. Fetch the full payload if needed.
+    if (this.needsPayloadFetch(cmd)) {
+      this.fetchFullCommandPayload(cmd)
+        .then((fullCmd) => this.executeCommand(fullCmd))
+        .catch((err) => {
+          cloudLog('ERROR', `Failed to fetch full command payload for requestId=${cmd.requestId}`, err)
+          this.postCommandResult(
+            cmd.requestId,
+            false,
+            undefined,
+            `Failed to fetch command payload: ${err instanceof Error ? err.message : String(err)}`.slice(0, 200),
+          ).catch(() => {})
+        })
+    } else {
+      this.executeCommand(cmd)
+    }
   }
 
   // ─── Telemetry (frequent, lightweight) ────────────────
@@ -1211,13 +1308,13 @@ class CloudAgentService {
           await this.handleScan(cmd.requestId, cmd.scanType)
           break
         case 'clean':
-          await this.handleClean(cmd.requestId, cmd.itemIds)
+          await this.handleClean(cmd.requestId, cmd.itemIds!)
           break
         case 'software-update-check':
           await this.handleUpdateCheck(cmd.requestId)
           break
         case 'software-update-run':
-          await this.handleUpdateRun(cmd.requestId, cmd.appIds)
+          await this.handleUpdateRun(cmd.requestId, cmd.appIds!)
           break
         case 'get-status':
           await this.handleGetStatus(cmd.requestId)
@@ -1246,7 +1343,7 @@ class CloudAgentService {
         case 'run-sfc':
         case 'run-dism':
           if (process.platform === 'darwin') {
-            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
+            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
             break
           }
           if (cmd.type === 'run-sfc') await this.handleRunSfc(cmd.requestId)
@@ -1269,12 +1366,12 @@ class CloudAgentService {
         case 'driver-update-install':
         case 'driver-clean':
           if (process.platform !== 'win32') {
-            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
+            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
             break
           }
           if (cmd.type === 'driver-update-scan') await this.handleDriverUpdateScan(cmd.requestId)
-          else if (cmd.type === 'driver-update-install') await this.handleDriverUpdateInstall(cmd.requestId, cmd.updateIds)
-          else await this.handleDriverClean(cmd.requestId, cmd.publishedNames)
+          else if (cmd.type === 'driver-update-install') await this.handleDriverUpdateInstall(cmd.requestId, cmd.updateIds!)
+          else await this.handleDriverClean(cmd.requestId, cmd.publishedNames!)
           break
         case 'startup-list':
           await this.handleStartupList(cmd.requestId)
@@ -1289,37 +1386,37 @@ class CloudAgentService {
         case 'privacy-scan':
         case 'privacy-apply':
           if (cmd.type === 'privacy-scan') await this.handlePrivacyScan(cmd.requestId)
-          else await this.handlePrivacyApply(cmd.requestId, cmd.settingIds)
+          else await this.handlePrivacyApply(cmd.requestId, cmd.settingIds!)
           break
         case 'debloater-scan':
         case 'debloater-remove':
           if (process.platform !== 'win32') {
-            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
+            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
             break
           }
           if (cmd.type === 'debloater-scan') await this.handleDebloaterScan(cmd.requestId)
-          else await this.handleDebloaterRemove(cmd.requestId, cmd.packageNames)
+          else await this.handleDebloaterRemove(cmd.requestId, cmd.packageNames!)
           break
         case 'service-scan':
         case 'service-apply':
           if (cmd.type === 'service-scan') await this.handleServiceScan(cmd.requestId)
-          else await this.handleServiceApply(cmd.requestId, cmd.changes)
+          else await this.handleServiceApply(cmd.requestId, cmd.changes!)
           break
         // Phase 3: Maintenance
         case 'malware-quarantine':
-          await this.handleMalwareQuarantine(cmd.requestId, cmd.paths)
+          await this.handleMalwareQuarantine(cmd.requestId, cmd.paths!)
           break
         case 'malware-delete':
-          await this.handleMalwareDelete(cmd.requestId, cmd.paths)
+          await this.handleMalwareDelete(cmd.requestId, cmd.paths!)
           break
         case 'registry-scan':
         case 'registry-fix':
           if (process.platform !== 'win32') {
-            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
+            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
             break
           }
           if (cmd.type === 'registry-scan') await this.handleRegistryScan(cmd.requestId)
-          else await this.handleRegistryFix(cmd.requestId, cmd.entryIds)
+          else await this.handleRegistryFix(cmd.requestId, cmd.entryIds!)
           break
         // Phase 4: Threat monitoring
         case 'update-threat-blacklist':
@@ -1450,7 +1547,7 @@ class CloudAgentService {
 
       case 'registry': {
         if (process.platform !== 'win32') {
-          await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
+          await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
           return
         }
         const entries = await scanRegistry()
@@ -1483,7 +1580,7 @@ class CloudAgentService {
 
       case 'network': {
         if (process.platform !== 'win32') {
-          await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
+          await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
           return
         }
         const items = await scanNetwork()
@@ -1497,7 +1594,7 @@ class CloudAgentService {
       }
 
       default:
-        await this.postCommandResult(requestId, false, undefined, 'Scan type not yet supported via cloud')
+        await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
         return
     }
   }
@@ -1628,7 +1725,7 @@ class CloudAgentService {
   private async handleWindowsUpdateCheck(requestId: string): Promise<void> {
     const updates = await getPlatform().commands.checkOsUpdates()
     if (!updates) {
-      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
+      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
       return
     }
     await this.postCommandResult(requestId, true, {
@@ -1640,7 +1737,7 @@ class CloudAgentService {
   private async handleWindowsUpdateInstall(requestId: string): Promise<void> {
     const result = await getPlatform().commands.installOsUpdates()
     if (!result) {
-      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
+      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
       return
     }
     await this.postCommandResult(requestId, true, result)
@@ -1652,7 +1749,7 @@ class CloudAgentService {
     cloudLog('INFO', 'Running system file check')
     const result = await getPlatform().commands.runSystemFileCheck()
     if (!result) {
-      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
+      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
       return
     }
     await this.postCommandResult(requestId, true, result)
@@ -1662,7 +1759,7 @@ class CloudAgentService {
     cloudLog('INFO', 'Running system image repair')
     const result = await getPlatform().commands.runSystemImageRepair()
     if (!result) {
-      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
+      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
       return
     }
     await this.postCommandResult(requestId, true, result)
