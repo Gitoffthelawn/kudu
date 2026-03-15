@@ -1,3 +1,9 @@
+## [1.4.10](https://github.com/AdventDevInc/kudu/compare/v1.4.9...v1.4.10) (2026-03-15)
+
+
+### Bug Fixes
+
+* rename Chocolatey package ID to usekudu ([3904bf1](https://github.com/AdventDevInc/kudu/commit/3904bf14fb6229c9d1f511500e6fc14a6866d263))
 ## [1.4.9](https://github.com/AdventDevInc/kudu/compare/v1.4.8...v1.4.9) (2026-03-15)
 
 
