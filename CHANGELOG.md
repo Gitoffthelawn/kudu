@@ -1,3 +1,9 @@
+## [1.4.3](https://github.com/AdventDevInc/kudu/compare/v1.4.2...v1.4.3) (2026-03-15)
+
+
+### Bug Fixes
+
+* silently succeed for unsupported platform scan types and unwrap data envelope in payload fetch ([1a7cbb5](https://github.com/AdventDevInc/kudu/commit/1a7cbb50ce4171fb4f884848c7126a37e1789518))
 ## [1.4.2](https://github.com/AdventDevInc/kudu/compare/v1.4.1...v1.4.2) (2026-03-15)
 
 
