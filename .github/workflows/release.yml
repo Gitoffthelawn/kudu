@@ -170,9 +170,21 @@ jobs:
           results=""
           for file in artifacts/*; do
             filename=$(basename "$file")
-            echo "Uploading $filename to VirusTotal..."
+            filesize=$(stat -c%s "$file")
+            echo "Uploading $filename ($filesize bytes) to VirusTotal..."
+
+            if [ "$filesize" -gt 33554432 ]; then
+              # Files > 32MB need the large-file upload URL
+              echo "  Using large-file upload flow..."
+              upload_url=$(curl -s --request GET \
+                --url "https://www.virustotal.com/api/v3/files/upload_url" \
+                --header "x-apikey: $VT_API_KEY" | jq -r '.data')
+            else
+              upload_url="https://www.virustotal.com/api/v3/files"
+            fi
+
             response=$(curl -s --request POST \
-              --url "https://www.virustotal.com/api/v3/files" \
+              --url "$upload_url" \
               --header "x-apikey: $VT_API_KEY" \
               --form "file=@$file")
             analysis_id=$(echo "$response" | jq -r '.data.id')
