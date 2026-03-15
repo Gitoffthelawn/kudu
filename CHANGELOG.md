@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/AdventDevInc/kudu/compare/v1.1.1...v1.1.2) (2026-03-15)
+
+
+### Bug Fixes
+
+* AppImage hangs on headless Linux without FUSE ([8faed7f](https://github.com/AdventDevInc/kudu/commit/8faed7f0bdd98797e437344f174f4dc2cf90a468))
+* install script overwrites AppImage binary via old symlink ([a71eb4e](https://github.com/AdventDevInc/kudu/commit/a71eb4ecd509d44ae4ca7ac8783da65f31029f92))
 ## [1.1.1](https://github.com/AdventDevInc/kudu/compare/v1.1.0...v1.1.1) (2026-03-14)
 
 
