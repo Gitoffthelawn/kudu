@@ -173,6 +173,7 @@ Type=simple
 ExecStart=${APPIMAGE_PATH} --no-sandbox --ozone-platform=headless --daemon
 Restart=on-failure
 RestartSec=10
+Environment=HOME=/root
 Environment=APPIMAGE=${APPIMAGE_PATH}
 Environment=APPIMAGE_EXTRACT_AND_RUN=1
 
