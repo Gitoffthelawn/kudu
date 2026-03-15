@@ -1,3 +1,9 @@
+## [1.4.1](https://github.com/AdventDevInc/kudu/compare/v1.4.0...v1.4.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* race condition in payload fetch and revert incorrect success:true for unsupported platforms ([14e727b](https://github.com/AdventDevInc/kudu/commit/14e727b532ca8013d3bf0d4a9a0a45344fb57188))
 # [1.4.0](https://github.com/AdventDevInc/kudu/compare/v1.3.0...v1.4.0) (2026-03-15)
 
 
