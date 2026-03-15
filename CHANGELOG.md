@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/AdventDevInc/kudu/compare/v1.5.0...v1.5.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* flush settings before exit in CLI config set ([a6576b4](https://github.com/AdventDevInc/kudu/commit/a6576b4698426ec6e3e5ae9fe1f17b7928c2f6bc))
+* install runtime deps and use CLI for config in install.sh ([82f37d6](https://github.com/AdventDevInc/kudu/commit/82f37d61054159d18bf748a526ec61f5def5663d))
 # [1.5.0](https://github.com/AdventDevInc/kudu/compare/v1.4.10...v1.5.0) (2026-03-15)
 
 
