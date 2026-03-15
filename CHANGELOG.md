@@ -1,3 +1,14 @@
+# [1.5.0](https://github.com/AdventDevInc/kudu/compare/v1.4.10...v1.5.0) (2026-03-15)
+
+
+### Bug Fixes
+
+* use large-file upload flow for VirusTotal submissions ([54f028f](https://github.com/AdventDevInc/kudu/commit/54f028fb171be2290dd37efe69902234e172caf0))
+
+
+### Performance Improvements
+
+* fix UI lag from perf monitor rendering overhead ([ea4fa1f](https://github.com/AdventDevInc/kudu/commit/ea4fa1fa26539994db7aa272b30cbebe73978093))
 ## [1.4.10](https://github.com/AdventDevInc/kudu/compare/v1.4.9...v1.4.10) (2026-03-15)
 
 
