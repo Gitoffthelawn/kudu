@@ -1,3 +1,9 @@
+## [1.4.8](https://github.com/AdventDevInc/kudu/compare/v1.4.7...v1.4.8) (2026-03-15)
+
+
+### Bug Fixes
+
+* pass Azure credentials as env vars for Windows code signing ([ec7c325](https://github.com/AdventDevInc/kudu/commit/ec7c3254007b7b68f0190a8b47ab384b40a3658a))
 ## [1.4.7](https://github.com/AdventDevInc/kudu/compare/v1.4.6...v1.4.7) (2026-03-15)
 
 
