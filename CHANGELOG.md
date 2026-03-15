@@ -1,3 +1,9 @@
+# [1.4.0](https://github.com/AdventDevInc/kudu/compare/v1.3.0...v1.4.0) (2026-03-15)
+
+
+### Features
+
+* fetch full command payload when broadcast arrays are trimmed ([d530df3](https://github.com/AdventDevInc/kudu/commit/d530df34428c4c5c86389549c841a2c6728cea7b))
 # [1.3.0](https://github.com/AdventDevInc/kudu/compare/v1.2.3...v1.3.0) (2026-03-15)
 
 
