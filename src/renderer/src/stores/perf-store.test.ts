@@ -25,24 +25,29 @@ describe('perf-store', () => {
     expect(state.isMonitoring).toBe(false)
   })
 
-  it('pushSnapshot adds to history and sets current', () => {
+  it('pushSnapshot sets currentSnapshot immediately', () => {
     const snap = makeSnapshot(1)
     usePerfStore.getState().pushSnapshot(snap)
     const state = usePerfStore.getState()
     expect(state.currentSnapshot).toEqual(snap)
-    expect(state.history).toHaveLength(1)
+    // Ring buffer should have 1 entry
+    expect(state._ringSize).toBe(1)
   })
 
-  it('pushSnapshot caps history at MAX_HISTORY (900)', () => {
+  it('pushSnapshot flushes history to React after throttle window', () => {
+    // First push triggers flush (lastHistoryFlush starts at 0)
+    usePerfStore.getState().pushSnapshot(makeSnapshot(1))
+    expect(usePerfStore.getState().history.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('pushSnapshot caps ring buffer at MAX_HISTORY (900)', () => {
     for (let i = 0; i < 910; i++) {
       usePerfStore.getState().pushSnapshot(makeSnapshot(i))
     }
     const state = usePerfStore.getState()
-    expect(state.history).toHaveLength(900)
-    // Should keep the latest entries
-    expect(state.history[state.history.length - 1].timestamp).toBe(909)
-    // Oldest should have been evicted
-    expect(state.history[0].timestamp).toBe(10)
+    expect(state._ringSize).toBe(900)
+    // Latest snapshot should always be current
+    expect(state.currentSnapshot!.timestamp).toBe(909)
   })
 
   it('setProcessSort toggles direction on same column', () => {

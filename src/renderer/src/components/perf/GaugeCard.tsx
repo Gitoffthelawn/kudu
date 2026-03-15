@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { cn } from '@/lib/utils'
 
 interface GaugeCardProps {
@@ -18,7 +19,7 @@ const STROKE = 6
 const RADIUS = (SIZE - STROKE * 2) / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
-export function GaugeCard({ label, percent, detail, className }: GaugeCardProps) {
+export const GaugeCard = memo(function GaugeCard({ label, percent, detail, className }: GaugeCardProps) {
   const clamped = Math.max(0, Math.min(100, percent))
   const offset = CIRCUMFERENCE - (clamped / 100) * CIRCUMFERENCE
   const color = getColor(clamped)
@@ -75,4 +76,4 @@ export function GaugeCard({ label, percent, detail, className }: GaugeCardProps)
       </span>
     </div>
   )
-}
+})

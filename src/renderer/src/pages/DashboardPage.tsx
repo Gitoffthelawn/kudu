@@ -24,7 +24,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { StatCard } from '@/components/shared/StatCard'
 import { HealthScore } from '@/components/shared/HealthScore'
-import { formatBytes, formatDate, formatNumber } from '@/lib/utils'
+import { cn, formatBytes, formatDate, formatNumber } from '@/lib/utils'
 import { useStatsStore } from '@/stores/stats-store'
 import { useHistoryStore } from '@/stores/history-store'
 import { useScanStore } from '@/stores/scan-store'
@@ -409,10 +409,11 @@ export function DashboardPage() {
         <button
           onClick={() => setShowQuickConfirm(true)}
           disabled={isRunning}
-          className="group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60"
+          className={cn(
+            'group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60',
+            !isRunning && 'hover:border-amber-500/20'
+          )}
           style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
-          onMouseEnter={(e) => { if (!isRunning) e.currentTarget.style.borderColor = 'rgba(245,158,11,0.2)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)' }}
         >
           <div
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
@@ -435,10 +436,11 @@ export function DashboardPage() {
         <button
           onClick={() => setShowFullConfirm(true)}
           disabled={isRunning}
-          className="group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60"
+          className={cn(
+            'group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60',
+            !isRunning && 'hover:border-blue-500/20'
+          )}
           style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
-          onMouseEnter={(e) => { if (!isRunning) e.currentTarget.style.borderColor = 'rgba(59,130,246,0.2)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)' }}
         >
           <div
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
@@ -628,18 +630,8 @@ function QuickAction({
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-2.5 rounded-xl py-4 text-zinc-500 transition-all"
+      className="flex flex-col items-center gap-2.5 rounded-xl py-4 text-zinc-500 transition-all hover:bg-white/5 hover:border-white/8 hover:text-zinc-300"
       style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
-        e.currentTarget.style.color = '#d4d4d8'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'
-        e.currentTarget.style.color = ''
-      }}
     >
       <Icon className="h-5 w-5" strokeWidth={1.6} />
       <span className="text-[12px] font-medium">{label}</span>

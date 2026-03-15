@@ -2,11 +2,21 @@ import { create } from 'zustand'
 import type { PerfSystemInfo, PerfSnapshot, PerfProcess, DiskSmartInfo } from '@shared/types'
 
 const MAX_HISTORY = 900 // 15 minutes at 1s intervals
+const CHART_THROTTLE_MS = 2000 // Only update chart-facing history every 2s
 
 interface PerfState {
   systemInfo: PerfSystemInfo | null
   currentSnapshot: PerfSnapshot | null
+  /** Ring buffer backing store — mutated in place to avoid GC pressure */
+  _ringBuffer: PerfSnapshot[]
+  _ringWriteIndex: number
+  _ringSize: number
+  /**
+   * Snapshot of the ring buffer exposed to React — only updated every CHART_THROTTLE_MS
+   * to avoid re-rendering charts on every 1s tick.
+   */
   history: PerfSnapshot[]
+  _lastHistoryFlush: number
   processList: PerfProcess[]
   processCount: number
   isMonitoring: boolean
@@ -27,10 +37,26 @@ interface PerfState {
   reset: () => void
 }
 
+function ringToArray(buf: PerfSnapshot[], writeIdx: number, size: number): PerfSnapshot[] {
+  if (size === 0) return []
+  if (size <= buf.length) {
+    // Buffer not yet wrapped — just slice
+    const start = writeIdx - size
+    if (start >= 0) return buf.slice(start, writeIdx)
+    // Wrapped — concat tail + head
+    return buf.slice(buf.length + start).concat(buf.slice(0, writeIdx))
+  }
+  return buf.slice(0, size)
+}
+
 export const usePerfStore = create<PerfState>((set, get) => ({
   systemInfo: null,
   currentSnapshot: null,
+  _ringBuffer: new Array<PerfSnapshot>(MAX_HISTORY),
+  _ringWriteIndex: 0,
+  _ringSize: 0,
   history: [],
+  _lastHistoryFlush: 0,
   processList: [],
   processCount: 0,
   isMonitoring: false,
@@ -42,13 +68,33 @@ export const usePerfStore = create<PerfState>((set, get) => ({
 
   setSystemInfo: (info) => set({ systemInfo: info }),
 
-  pushSnapshot: (snap) =>
-    set((state) => {
-      const next = state.history.length >= MAX_HISTORY
-        ? [...state.history.slice(state.history.length - MAX_HISTORY + 1), snap]
-        : [...state.history, snap]
-      return { currentSnapshot: snap, history: next }
-    }),
+  pushSnapshot: (snap) => {
+    const state = get()
+    const buf = state._ringBuffer
+    const idx = state._ringWriteIndex
+    buf[idx] = snap
+    const nextIdx = (idx + 1) % MAX_HISTORY
+    const nextSize = Math.min(state._ringSize + 1, MAX_HISTORY)
+
+    const now = Date.now()
+    const shouldFlush = now - state._lastHistoryFlush >= CHART_THROTTLE_MS
+
+    if (shouldFlush) {
+      set({
+        currentSnapshot: snap,
+        _ringWriteIndex: nextIdx,
+        _ringSize: nextSize,
+        history: ringToArray(buf, nextIdx, nextSize),
+        _lastHistoryFlush: now
+      })
+    } else {
+      set({
+        currentSnapshot: snap,
+        _ringWriteIndex: nextIdx,
+        _ringSize: nextSize
+      })
+    }
+  },
 
   setProcessList: (processes, totalCount) =>
     set({ processList: processes, processCount: totalCount }),
@@ -73,7 +119,11 @@ export const usePerfStore = create<PerfState>((set, get) => ({
   reset: () =>
     set({
       currentSnapshot: null,
+      _ringBuffer: new Array<PerfSnapshot>(MAX_HISTORY),
+      _ringWriteIndex: 0,
+      _ringSize: 0,
       history: [],
+      _lastHistoryFlush: 0,
       processList: [],
       processCount: 0,
       isMonitoring: false,

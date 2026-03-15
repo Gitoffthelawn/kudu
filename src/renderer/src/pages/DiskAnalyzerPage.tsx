@@ -254,10 +254,8 @@ export function DiskAnalyzerPage() {
                       const percent = currentNode.size > 0 ? (child.size / currentNode.size) * 100 : 0
                       return (
                         <button key={child.path} onClick={() => drillDown(child)}
-                          className="flex w-full items-center gap-4 px-5 py-3 text-left transition-colors"
-                          style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
+                          className="flex w-full items-center gap-4 px-5 py-3 text-left transition-colors hover:bg-white/2"
+                          style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                           <div className="flex flex-1 items-center gap-2.5 min-w-0">
                             {child.children ? <Folder className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={1.8} /> : <File className="h-4 w-4 shrink-0" style={{ color: '#4e4e56' }} strokeWidth={1.8} />}
                             <span className="truncate text-[13px] text-zinc-300">{child.name}</span>
@@ -344,10 +342,8 @@ export function DiskAnalyzerPage() {
                         const percent = fileTypesTotal > 0 ? (ft.totalSize / fileTypesTotal) * 100 : 0
                         return (
                           <div key={ft.extension}
-                            className="flex w-full items-center gap-4 px-5 py-3 transition-colors"
-                            style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
+                            className="flex w-full items-center gap-4 px-5 py-3 transition-colors hover:bg-white/2"
+                            style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                             <div className="flex flex-1 items-center gap-2.5 min-w-0">
                               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded" style={{ background: COLORS[i % COLORS.length] + '22' }}>
                                 <FileType2 className="h-3.5 w-3.5" style={{ color: COLORS[i % COLORS.length] }} strokeWidth={2} />

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import type { PerfSnapshot } from '@shared/types'
 
@@ -12,25 +12,33 @@ interface TimeSeriesChartProps {
 
 const rangeSeconds = { '60s': 60, '5m': 300, '15m': 900 }
 
-export function TimeSeriesChart({ history, timeRange, dataKey, label, color }: TimeSeriesChartProps) {
+// Cap the number of data points rendered to avoid Recharts SVG thrashing
+const MAX_CHART_POINTS = 120
+
+export const TimeSeriesChart = memo(function TimeSeriesChart({ history, timeRange, dataKey, label, color }: TimeSeriesChartProps) {
   const data = useMemo(() => {
     const count = rangeSeconds[timeRange]
     const slice = history.slice(-count)
 
-    return slice.map((s, i) => {
+    // Downsample if there are too many points
+    const step = slice.length > MAX_CHART_POINTS ? Math.ceil(slice.length / MAX_CHART_POINTS) : 1
+
+    const result: Array<Record<string, number>> = []
+    for (let i = 0; i < slice.length; i += step) {
+      const s = slice[i]
       if (dataKey === 'cpu') {
-        return { t: i, value: s.cpu.overall }
+        result.push({ t: result.length, value: s.cpu.overall })
+      } else if (dataKey === 'memory') {
+        result.push({ t: result.length, value: s.memory.percent })
+      } else {
+        result.push({
+          t: result.length,
+          read: s.disk.readBytesPerSec / (1024 * 1024),
+          write: s.disk.writeBytesPerSec / (1024 * 1024)
+        })
       }
-      if (dataKey === 'memory') {
-        return { t: i, value: s.memory.percent }
-      }
-      // disk: combined read+write in MB/s
-      return {
-        t: i,
-        read: s.disk.readBytesPerSec / (1024 * 1024),
-        write: s.disk.writeBytesPerSec / (1024 * 1024)
-      }
-    })
+    }
+    return result
   }, [history, timeRange, dataKey])
 
   const isDisk = dataKey === 'disk'
@@ -109,4 +117,4 @@ export function TimeSeriesChart({ history, timeRange, dataKey, label, color }: T
       </ResponsiveContainer>
     </div>
   )
-}
+})

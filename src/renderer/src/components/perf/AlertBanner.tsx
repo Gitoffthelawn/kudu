@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PerfSnapshot } from '@shared/types'
@@ -8,7 +8,7 @@ interface AlertBannerProps {
   history: PerfSnapshot[]
 }
 
-export function AlertBanner({ snapshot, history }: AlertBannerProps) {
+export const AlertBanner = memo(function AlertBanner({ snapshot, history }: AlertBannerProps) {
   const [dismissed, setDismissed] = useState<string[]>([])
 
   if (!snapshot) return null
@@ -56,4 +56,4 @@ export function AlertBanner({ snapshot, history }: AlertBannerProps) {
       </AnimatePresence>
     </div>
   )
-}
+})
