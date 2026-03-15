@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import { IPC } from '../../shared/channels'
 import { cloudAgent } from '../services/cloud-agent'
+import { threatMonitor } from '../services/threat-monitor'
 
 export function registerCloudAgentIpc(): void {
   ipcMain.handle(IPC.CLOUD_LINK, async (_event, apiKey: string) => {
@@ -20,5 +21,9 @@ export function registerCloudAgentIpc(): void {
 
   ipcMain.handle(IPC.CLOUD_RECONNECT, async () => {
     return cloudAgent.reconnect()
+  })
+
+  ipcMain.handle(IPC.THREAT_MONITOR_GET_SNAPSHOT, () => {
+    return threatMonitor.getThreatSnapshot()
   })
 }

@@ -90,29 +90,8 @@ export interface ThreatBlacklist {
   cidrs: string[]
 }
 
-export interface FlaggedConnection {
-  remoteAddress: string
-  remotePort: number
-  pid: number | null
-  matchedRule: string
-  matchType: 'ip' | 'cidr'
-  detectedAt: string
-}
-
-export interface FlaggedDnsEntry {
-  domain: string
-  resolvedAddress: string | null
-  matchedRule: string
-  detectedAt: string
-}
-
-export interface ThreatSnapshot {
-  flaggedConnections: FlaggedConnection[]
-  flaggedDns: FlaggedDnsEntry[]
-  blacklistVersion: string | null
-  lastConnectionScanAt: string | null
-  lastDnsScanAt: string | null
-}
+import type { FlaggedConnection, FlaggedDnsEntry, ThreatSnapshot } from '../../shared/types'
+export type { FlaggedConnection, FlaggedDnsEntry, ThreatSnapshot }
 
 // ─── Telemetry (frequent, lightweight) ──────────────────────
 

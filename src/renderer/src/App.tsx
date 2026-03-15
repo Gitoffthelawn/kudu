@@ -14,6 +14,7 @@ import { DiskAnalyzerPage } from './pages/DiskAnalyzerPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { NetworkCleanupPage } from './pages/NetworkCleanupPage'
 import { MalwareScannerPage } from './pages/MalwareScannerPage'
+import { ThreatMonitorPage } from './pages/ThreatMonitorPage'
 import { PrivacyShieldPage } from './pages/PrivacyShieldPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { DriverManagerPage } from './pages/DriverManagerPage'
@@ -84,6 +85,7 @@ export function App() {
           <Route path="/disk" element={<DiskAnalyzerPage />} />
           <Route path="/network" element={<NetworkCleanupPage />} />
           <Route path="/malware" element={<MalwareScannerPage />} />
+          <Route path="/threat-monitor" element={<ThreatMonitorPage />} />
           <Route path="/performance" element={<PerformanceMonitorPage />} />
           <Route path="/uninstaller" element={<UninstallerPage />} />
           <Route path="/history" element={<HistoryPage />} />

@@ -477,6 +477,7 @@ export interface UninstallResult {
 export interface KuduSettings {
   minimizeToTray: boolean
   showNotificationOnComplete: boolean
+  showThreatNotifications: boolean
   runAtStartup: boolean
   autoUpdate: boolean
   /** Automatically restart the app to apply downloaded updates */
@@ -625,4 +626,30 @@ export interface UpdateResult {
   succeeded: number
   failed: number
   errors: { appId: string; name: string; reason: string }[]
+}
+
+// ─── Threat Monitor ────────────────────────────────────────
+
+export interface FlaggedConnection {
+  remoteAddress: string
+  remotePort: number
+  pid: number | null
+  matchedRule: string
+  matchType: 'ip' | 'cidr'
+  detectedAt: string
+}
+
+export interface FlaggedDnsEntry {
+  domain: string
+  resolvedAddress: string | null
+  matchedRule: string
+  detectedAt: string
+}
+
+export interface ThreatSnapshot {
+  flaggedConnections: FlaggedConnection[]
+  flaggedDns: FlaggedDnsEntry[]
+  blacklistVersion: string | null
+  lastConnectionScanAt: string | null
+  lastDnsScanAt: string | null
 }

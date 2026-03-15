@@ -5,6 +5,7 @@ import { IPC } from '../../shared/channels'
 import type { BloatwareApp } from '../../shared/types'
 import { randomUUID } from 'crypto'
 import type { WindowGetter } from './index'
+import { validateStringArray } from '../services/ipc-validation'
 
 const execFileAsync = promisify(execFile)
 
@@ -183,7 +184,9 @@ export function registerDebloaterIpc(getWindow: WindowGetter): void {
 
   ipcMain.handle(IPC.DEBLOATER_REMOVE, async (_event, packageNames: string[]): Promise<{ removed: number; failed: number }> => {
     if (process.platform !== 'win32') return { removed: 0, failed: 0 }
-    return removeBloatware(packageNames, (current, total, currentApp, status) => {
+    const valid = validateStringArray(packageNames, 500)
+    if (!valid) return { removed: 0, failed: 0 }
+    return removeBloatware(valid, (current, total, currentApp, status) => {
       const win = getWindow()
       if (win && !win.isDestroyed()) win.webContents.send(IPC.DEBLOATER_REMOVE_PROGRESS, { current, total, currentApp, status })
     })

@@ -6,6 +6,7 @@ import { createHash } from 'crypto'
 import { join } from 'path'
 import { readdirSync, statSync } from 'fs'
 import { IPC } from '../../shared/channels'
+import { validateStringArray } from '../services/ipc-validation'
 import type {
   DriverPackage,
   DriverScanResult,
@@ -658,18 +659,16 @@ export function registerDriverManagerIpc(getWindow: WindowGetter): void {
   ipcMain.handle(IPC.DRIVER_SCAN, () => scanDrivers(sendProgress))
 
   ipcMain.handle(IPC.DRIVER_CLEAN, async (_event, publishedNames: string[]) => {
-    if (!Array.isArray(publishedNames) || !publishedNames.every((n) => typeof n === 'string')) {
-      return { removed: 0, failed: 0, spaceRecovered: 0, errors: [] }
-    }
-    return cleanDrivers(publishedNames)
+    const valid = validateStringArray(publishedNames, 500)
+    if (!valid) return { removed: 0, failed: 0, spaceRecovered: 0, errors: [] }
+    return cleanDrivers(valid)
   })
 
   ipcMain.handle(IPC.DRIVER_UPDATE_SCAN, () => scanDriverUpdates(sendUpdateProgress))
 
   ipcMain.handle(IPC.DRIVER_UPDATE_INSTALL, async (_event, wuUpdateIds: string[]) => {
-    if (!Array.isArray(wuUpdateIds) || !wuUpdateIds.every((id) => typeof id === 'string')) {
-      return { installed: 0, failed: 0, rebootRequired: false, errors: [] }
-    }
-    return installDriverUpdates(wuUpdateIds, sendUpdateProgress)
+    const valid = validateStringArray(wuUpdateIds, 500)
+    if (!valid) return { installed: 0, failed: 0, rebootRequired: false, errors: [] }
+    return installDriverUpdates(valid, sendUpdateProgress)
   })
 }

@@ -12,8 +12,8 @@ export function validateSettingsPartial(input: unknown): Record<string, unknown>
   const obj = input as Record<string, unknown>
 
   const allowedTopKeys = new Set([
-    'minimizeToTray', 'showNotificationOnComplete', 'runAtStartup',
-    'autoUpdate', 'autoRestart', 'updateCheckIntervalHours',
+    'minimizeToTray', 'showNotificationOnComplete', 'showThreatNotifications',
+    'runAtStartup', 'autoUpdate', 'autoRestart', 'updateCheckIntervalHours',
     'cleaner', 'exclusions', 'schedule', 'cloud'
   ])
 
@@ -22,7 +22,7 @@ export function validateSettingsPartial(input: unknown): Record<string, unknown>
   }
 
   // Validate boolean fields have correct types
-  const boolKeys = ['minimizeToTray', 'showNotificationOnComplete', 'runAtStartup', 'autoUpdate', 'autoRestart'] as const
+  const boolKeys = ['minimizeToTray', 'showNotificationOnComplete', 'showThreatNotifications', 'runAtStartup', 'autoUpdate', 'autoRestart'] as const
   for (const bk of boolKeys) {
     if (bk in obj && obj[bk] !== undefined && typeof obj[bk] !== 'boolean') return null
   }
@@ -110,6 +110,21 @@ export function validateSettingsPartial(input: unknown): Record<string, unknown>
   }
 
   return obj
+}
+
+/**
+ * Validate that an IPC argument is a string array within reasonable bounds.
+ * Returns the validated array (filtered to strings only) or an empty array on invalid input.
+ */
+export function validateStringArray(
+  input: unknown,
+  maxItems: number = 10_000,
+  maxItemLength: number = 1024
+): string[] | null {
+  if (!Array.isArray(input)) return null
+  if (input.length > maxItems) return null
+  if (!input.every((v: unknown) => typeof v === 'string' && v.length <= maxItemLength)) return null
+  return input as string[]
 }
 
 /** Validate a scan history entry has the expected shape and reasonable size */

@@ -8,6 +8,7 @@ import { IPC } from '../../shared/channels'
 import type { RegistryEntry } from '../../shared/types'
 import { randomUUID } from 'crypto'
 import type { WindowGetter } from './index'
+import { validateStringArray } from '../services/ipc-validation'
 
 const execFileAsync = promisify(execFile)
 
@@ -1123,9 +1124,11 @@ export function registerRegistryCleanerIpc(getWindow: WindowGetter): void {
 
   ipcMain.handle(IPC.REGISTRY_FIX, async (_event, entryIds: string[]): Promise<{ fixed: number; failed: number; failures: { issue: string; reason: string }[] }> => {
     if (process.platform !== 'win32') return { fixed: 0, failed: 0, failures: [] }
+    const valid = validateStringArray(entryIds)
+    if (!valid) return { fixed: 0, failed: 0, failures: [] }
     const session = scanSessions.get(activeScanId)
     const entriesToFix: RegistryEntry[] = []
-    for (const id of entryIds) {
+    for (const id of valid) {
       const entry = session?.get(id)
       if (entry) entriesToFix.push(entry)
     }

@@ -176,6 +176,9 @@ export function SettingsPage() {
         <Row label="Show notifications" desc="Display a notification when operations complete">
           <Toggle checked={settings.showNotificationOnComplete} onChange={(v) => save({ showNotificationOnComplete: v })} />
         </Row>
+        <Row label="Threat detection alerts" desc="Show a system notification when suspicious network activity is detected">
+          <Toggle checked={settings.showThreatNotifications} onChange={(v) => save({ showThreatNotifications: v })} />
+        </Row>
         <Row label="Auto-update" desc="Automatically download and install updates">
           <Toggle checked={settings.autoUpdate} onChange={(v) => save({ autoUpdate: v })} />
         </Row>

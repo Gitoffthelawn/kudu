@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto'
 import { IPC } from '../../shared/channels'
 import type { NetworkItem, NetworkCleanResult } from '../../shared/types'
 import { getPlatform } from '../platform'
+import { validateStringArray } from '../services/ipc-validation'
 
 const execFileAsync = promisify(execFile)
 
@@ -217,9 +218,11 @@ export function registerNetworkCleanupIpc(): void {
   })
 
   ipcMain.handle(IPC.NETWORK_CLEAN, async (_event, itemIds: string[]): Promise<NetworkCleanResult> => {
+    const valid = validateStringArray(itemIds)
+    if (!valid) return { cleaned: 0, failed: 0, details: [] }
     const session = scanSessions.get(activeScanId)
     const items: NetworkItem[] = []
-    for (const id of itemIds) {
+    for (const id of valid) {
       const item = session?.get(id)
       if (item) items.push(item)
     }

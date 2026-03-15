@@ -45,6 +45,7 @@ import type {
   UpdateResult,
   FileTypeInfo,
   CloudActionEntry,
+  ThreatSnapshot,
 } from '../shared/types'
 
 const api = {
@@ -293,6 +294,14 @@ const api = {
     error: string | null
     threatBlacklist: { version: string; updatedAt: string; domains: number; ips: number; cidrs: number } | null
   }> => ipcRenderer.invoke(IPC.CLOUD_GET_STATUS),
+
+  // Threat Monitor
+  threatMonitorGetSnapshot: (): Promise<ThreatSnapshot | null> => ipcRenderer.invoke(IPC.THREAT_MONITOR_GET_SNAPSHOT),
+  onThreatMonitorUpdated: (callback: (data: ThreatSnapshot) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: ThreatSnapshot) => callback(data)
+    ipcRenderer.on(IPC.THREAT_MONITOR_UPDATED, handler)
+    return () => { ipcRenderer.removeListener(IPC.THREAT_MONITOR_UPDATED, handler) }
+  },
 
   // Progress events
   onScanProgress: (callback: (data: ProgressData) => void) => {

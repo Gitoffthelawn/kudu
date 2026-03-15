@@ -1,4 +1,5 @@
-import { app } from 'electron'
+import { app, BrowserWindow, Notification } from 'electron'
+import { IPC } from '../../shared/channels'
 import * as si from 'systeminformation'
 import { hostname } from 'os'
 import { lookup } from 'dns/promises'
@@ -960,8 +961,31 @@ class CloudAgentService {
     // Wire up immediate alert callback — fires the moment new threats are detected
     // The snapshot contains only NEWLY-detected items from this scan cycle
     threatMonitor.setThreatCallback((snapshot) => {
-      if (this.status !== 'connected') return
-      this.queueThreatAlert(snapshot)
+      // Push to renderer for live UI updates
+      const win = BrowserWindow.getAllWindows()[0]
+      if (win && !win.isDestroyed()) {
+        win.webContents.send(IPC.THREAT_MONITOR_UPDATED, snapshot)
+      }
+
+      // OS notification
+      const currentSettings = getSettings()
+      if (currentSettings.showThreatNotifications && Notification.isSupported()) {
+        const connCount = snapshot.flaggedConnections.length
+        const dnsCount = snapshot.flaggedDns.length
+        const parts: string[] = []
+        if (connCount > 0) parts.push(`${connCount} suspicious connection${connCount > 1 ? 's' : ''}`)
+        if (dnsCount > 0) parts.push(`${dnsCount} suspicious DNS entr${dnsCount > 1 ? 'ies' : 'y'}`)
+        new Notification({
+          title: 'Kudu - Threat Detected',
+          body: `Detected ${parts.join(' and ')}.`,
+          silent: false,
+        }).show()
+      }
+
+      // Cloud alert
+      if (this.status === 'connected') {
+        this.queueThreatAlert(snapshot)
+      }
     })
 
     threatMonitor.start()

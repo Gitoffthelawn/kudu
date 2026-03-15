@@ -18,8 +18,11 @@ function makeSettings(
   return {
     minimizeToTray: false,
     showNotificationOnComplete: true,
+    showThreatNotifications: true,
     runAtStartup: false,
     autoUpdate: true,
+    autoRestart: true,
+    updateCheckIntervalHours: 4,
     cleaner: {
       skipRecentMinutes: 60,
       secureDelete: false,

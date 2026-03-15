@@ -10,6 +10,7 @@ import { getSettings } from '../services/settings-store'
 import { CleanerType } from '../../shared/enums'
 import type { ScanResult, CleanResult } from '../../shared/types'
 import type { WindowGetter } from './index'
+import { validateStringArray } from '../services/ipc-validation'
 
 interface ChromiumBrowserDef {
   key: string
@@ -109,11 +110,13 @@ export function registerBrowserCleanerIpc(getWindow: WindowGetter): void {
   })
 
   ipcMain.handle(IPC.BROWSER_CLEAN, async (_event, itemIds: string[]): Promise<CleanResult> => {
+    const valid = validateStringArray(itemIds)
+    if (!valid) return { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [], needsElevation: false }
     const settings = getSettings()
     if (settings.cleaner.closeBrowsersBeforeClean) {
       await getPlatform().browser.closeBrowsers()
     }
-    return cleanItems(itemIds)
+    return cleanItems(valid)
   })
 }
 

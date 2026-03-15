@@ -36,6 +36,7 @@ const defaults: StoreData = {
   settings: {
     minimizeToTray: false,
     showNotificationOnComplete: true,
+    showThreatNotifications: true,
     runAtStartup: false,
     autoUpdate: true,
     autoRestart: true,

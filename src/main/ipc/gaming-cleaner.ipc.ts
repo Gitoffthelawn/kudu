@@ -10,6 +10,7 @@ import { cacheItems } from '../services/scan-cache'
 import { CleanerType } from '../../shared/enums'
 import type { ScanItem, ScanResult, CleanResult } from '../../shared/types'
 import type { WindowGetter } from './index'
+import { validateStringArray } from '../services/ipc-validation'
 
 export function registerGamingCleanerIpc(getWindow: WindowGetter): void {
   ipcMain.handle(IPC.GAMING_SCAN, async (): Promise<ScanResult[]> => {
@@ -78,7 +79,9 @@ export function registerGamingCleanerIpc(getWindow: WindowGetter): void {
   })
 
   ipcMain.handle(IPC.GAMING_CLEAN, async (_event, itemIds: string[]): Promise<CleanResult> => {
-    return cleanItems(itemIds)
+    const valid = validateStringArray(itemIds)
+    if (!valid) return { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [], needsElevation: false }
+    return cleanItems(valid)
   })
 }
 

@@ -11,6 +11,7 @@ interface SettingsState {
 const defaultSettings: KuduSettings = {
   minimizeToTray: false,
   showNotificationOnComplete: true,
+  showThreatNotifications: true,
   runAtStartup: false,
   autoUpdate: true,
   autoRestart: true,

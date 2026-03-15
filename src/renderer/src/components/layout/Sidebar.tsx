@@ -10,6 +10,7 @@ import {
   History,
   ShieldAlert,
   Shield,
+  Radar,
   Activity,
   Trash2,
   Download
@@ -17,6 +18,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
 import logoSrc from '@/assets/logo.png'
+import { useThreatMonitorStore } from '@/stores/threat-monitor-store'
 import { useAppUpdateStore } from '@/stores/app-update-store'
 import { useUpdaterStore } from '@/stores/updater-store'
 import { useDriverStore } from '@/stores/driver-store'
@@ -41,6 +43,7 @@ const navGroups: NavGroup[] = [
     heading: 'SECURITY',
     items: [
       { icon: ShieldAlert, label: 'Malware Scanner', path: '/malware' },
+      { icon: Radar, label: 'Threat Monitor', path: '/threat-monitor' },
       { icon: Shield, label: 'System Hardening', path: '/hardening' }
     ]
   },
@@ -73,21 +76,26 @@ const bottomNavItems: NavItemDef[] = [
 function useBadgeCounts(): Record<string, number> {
   const updaterApps = useUpdaterStore((s) => s.apps)
   const driverUpdates = useDriverStore((s) => s.updates)
+  const threatSnapshot = useThreatMonitorStore((s) => s.snapshot)
+  const threatCount = (threatSnapshot?.flaggedConnections.length ?? 0) + (threatSnapshot?.flaggedDns.length ?? 0)
 
   return {
-    '/updates': updaterApps.length + driverUpdates.length
+    '/updates': updaterApps.length + driverUpdates.length,
+    '/threat-monitor': threatCount,
   }
 }
 
 export function Sidebar() {
   const badgeCounts = useBadgeCounts()
   const { features } = usePlatform()
+  const threatMonitorActive = useThreatMonitorStore((s) => s.snapshot) !== null
 
-  // Filter nav items based on platform features
+  // Filter nav items based on platform features and cloud state
   const filteredNavGroups = navGroups.map((group) => ({
     ...group,
     items: group.items.filter((item) => {
       if (item.path === '/registry' && !features.registry) return false
+      if (item.path === '/threat-monitor' && !threatMonitorActive) return false
       return true
     }),
   }))

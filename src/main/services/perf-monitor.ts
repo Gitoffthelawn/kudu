@@ -88,6 +88,16 @@ export class PerfMonitorService {
     this.sender = null
   }
 
+  async getProcessName(pid: number): Promise<string | null> {
+    try {
+      const data = await si.processes()
+      const proc = data.list.find((p) => p.pid === pid)
+      return proc?.name ?? null
+    } catch {
+      return null
+    }
+  }
+
   async killProcess(pid: number): Promise<PerfKillResult> {
     try {
       process.kill(pid)

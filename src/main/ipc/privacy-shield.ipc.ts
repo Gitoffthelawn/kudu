@@ -9,6 +9,7 @@ import type {
 } from '../../shared/types'
 import type { WindowGetter } from './index'
 import { getPlatform } from '../platform'
+import { validateStringArray } from '../services/ipc-validation'
 
 const execFileAsync = promisify(execFile)
 
@@ -569,9 +570,8 @@ export function registerPrivacyShieldIpc(getWindow: WindowGetter): void {
   }))
 
   ipcMain.handle(IPC.PRIVACY_APPLY, async (_event, ids: string[]) => {
-    if (!Array.isArray(ids) || !ids.every((id) => typeof id === 'string')) {
-      return { succeeded: 0, failed: 0, errors: [] }
-    }
-    return applyPrivacySettings(ids)
+    const valid = validateStringArray(ids, 1_000)
+    if (!valid) return { succeeded: 0, failed: 0, errors: [] }
+    return applyPrivacySettings(valid)
   })
 }

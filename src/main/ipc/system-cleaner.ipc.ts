@@ -7,6 +7,7 @@ import { isAdmin } from '../services/elevation'
 import type { ScanResult, CleanResult } from '../../shared/types'
 import { CleanerType } from '../../shared/enums'
 import type { WindowGetter } from './index'
+import { validateStringArray } from '../services/ipc-validation'
 
 export function registerSystemCleanerIpc(getWindow: WindowGetter): void {
   ipcMain.handle(IPC.SYSTEM_SCAN, async (): Promise<ScanResult[]> => {
@@ -94,6 +95,8 @@ export function registerSystemCleanerIpc(getWindow: WindowGetter): void {
   })
 
   ipcMain.handle(IPC.SYSTEM_CLEAN, async (_event, itemIds: string[]): Promise<CleanResult> => {
-    return cleanItems(itemIds)
+    const valid = validateStringArray(itemIds)
+    if (!valid) return { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [], needsElevation: false }
+    return cleanItems(valid)
   })
 }
