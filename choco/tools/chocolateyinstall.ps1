@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $version = '1.4.8'
 
 $packageArgs = @{
-  packageName    = 'kudu'
+  packageName    = 'usekudu'
   fileType       = 'exe'
   url64bit       = "https://github.com/AdventDevInc/kudu/releases/download/v$version/Kudu-Setup-$version.exe"
   silentArgs     = '/S'

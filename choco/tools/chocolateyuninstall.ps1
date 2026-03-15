@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$packageName = 'kudu'
+$packageName = 'usekudu'
 $softwareName = 'Kudu*'
 
 [array]$key = Get-UninstallRegistryKey -SoftwareName $softwareName

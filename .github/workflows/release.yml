@@ -145,4 +145,4 @@ jobs:
         shell: pwsh
         run: |
           choco pack choco/kudu.nuspec --out .
-          choco push kudu.${{ steps.version.outputs.version }}.nupkg --source "https://push.chocolatey.org/" --api-key "${{ secrets.CHOCOLATEY_API_KEY }}"
+          choco push usekudu.${{ steps.version.outputs.version }}.nupkg --source "https://push.chocolatey.org/" --api-key "${{ secrets.CHOCOLATEY_API_KEY }}"
