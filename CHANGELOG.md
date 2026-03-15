@@ -1,3 +1,9 @@
+## [1.4.4](https://github.com/AdventDevInc/kudu/compare/v1.4.3...v1.4.4) (2026-03-15)
+
+
+### Features
+
+* add Azure Trusted Signing for Windows builds, parallel malware scan, and misc improvements ([eb3f9df](https://github.com/AdventDevInc/kudu/commit/eb3f9dfee342e214e379413955ead0268b9ad5f0))
 ## [1.4.3](https://github.com/AdventDevInc/kudu/compare/v1.4.2...v1.4.3) (2026-03-15)
 
 
