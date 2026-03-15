@@ -1,3 +1,9 @@
+## [1.4.6](https://github.com/AdventDevInc/kudu/compare/v1.4.5...v1.4.6) (2026-03-15)
+
+
+### Bug Fixes
+
+* allow-no-subscriptions for Azure login in CI ([62d895f](https://github.com/AdventDevInc/kudu/commit/62d895fbd90a091dda0ecdfa1e4047529c4c0bb8))
 ## [1.4.5](https://github.com/AdventDevInc/kudu/compare/v1.4.4...v1.4.5) (2026-03-15)
 
 
