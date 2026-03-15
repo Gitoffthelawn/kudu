@@ -604,7 +604,9 @@ class CloudAgentService {
     cloudLog('DEBUG', `GET ${url} → ${res.status}`)
     const contentType = res.headers.get('content-type')
     if (contentType?.includes('application/json')) {
-      return res.json()
+      const body = await res.json()
+      cloudLog('DEBUG', `GET ${url} response body`, JSON.stringify(body).slice(0, 500))
+      return body
     }
     return null
   }
@@ -639,13 +641,21 @@ class CloudAgentService {
     }
 
     cloudLog('DEBUG', `Fetching full payload for ${cmd.type} requestId=${cmd.requestId}`)
-    const full = await this.getApi(
+    const raw = await this.getApi(
       `/devices/${encodeURIComponent(this.deviceId)}/commands/${encodeURIComponent(cmd.requestId)}`,
     ) as Record<string, unknown>
 
-    if (!full || typeof full !== 'object' || Array.isArray(full)) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
       throw new Error('Server returned invalid command payload')
     }
+
+    cloudLog('DEBUG', `Payload response keys: ${Object.keys(raw).join(', ')}`)
+
+    // Unwrap `data` envelope if the API returns { data: { ... } }
+    const full: Record<string, unknown> =
+      'data' in raw && raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data)
+        ? raw.data as Record<string, unknown>
+        : raw
 
     // Merge fetched data into the command, but never allow the server
     // response to overwrite security-critical fields already validated
