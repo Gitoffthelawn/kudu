@@ -1,3 +1,9 @@
+## [1.4.5](https://github.com/AdventDevInc/kudu/compare/v1.4.4...v1.4.5) (2026-03-15)
+
+
+### Bug Fixes
+
+* move Azure signing config to CI-only to fix mac/linux validation error ([4c02e75](https://github.com/AdventDevInc/kudu/commit/4c02e75942acd1b37bd3ef5d63397965bc8ec81e))
 ## [1.4.4](https://github.com/AdventDevInc/kudu/compare/v1.4.3...v1.4.4) (2026-03-15)
 
 
