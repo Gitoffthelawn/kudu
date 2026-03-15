@@ -117,6 +117,8 @@ for arg in "$@"; do
       ;;
   esac
 done
+# Run without FUSE mount (avoids hang on servers without libfuse)
+export APPIMAGE_EXTRACT_AND_RUN=1
 exec /opt/kudu/Kudu.AppImage "${EXTRA_ARGS[@]}" "$@"
 WRAPPER
 chmod +x "$BIN_LINK"
@@ -126,7 +128,7 @@ ok "Installed Kudu $VERSION to $APPIMAGE_PATH"
 # ── Configure API key / server URL ───────────────────────────────
 if [[ -n "$API_KEY" ]]; then
   log "Saving API key..."
-  "$APPIMAGE_PATH" --no-sandbox --daemon --api-key "$API_KEY" &
+  APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE_PATH" --no-sandbox --ozone-platform=headless --daemon --api-key "$API_KEY" &
   CONFIG_PID=$!
   sleep 3
   kill "$CONFIG_PID" 2>/dev/null || true
@@ -136,7 +138,7 @@ fi
 
 if [[ -n "$SERVER_URL" ]]; then
   log "Saving server URL..."
-  "$APPIMAGE_PATH" --no-sandbox --daemon --server-url "$SERVER_URL" &
+  APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE_PATH" --no-sandbox --ozone-platform=headless --daemon --server-url "$SERVER_URL" &
   CONFIG_PID=$!
   sleep 3
   kill "$CONFIG_PID" 2>/dev/null || true
@@ -160,6 +162,7 @@ ExecStart=${APPIMAGE_PATH} --no-sandbox --ozone-platform=headless --daemon
 Restart=on-failure
 RestartSec=10
 Environment=APPIMAGE=${APPIMAGE_PATH}
+Environment=APPIMAGE_EXTRACT_AND_RUN=1
 
 [Install]
 WantedBy=multi-user.target
