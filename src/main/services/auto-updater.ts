@@ -1,44 +1,12 @@
 import { app, BrowserWindow } from 'electron'
-import { execFile } from 'child_process'
 import { autoUpdater } from 'electron-updater'
 import { IPC } from '../../shared/channels'
 import { getSettings } from './settings-store'
-import { isAdmin } from './elevation'
 import type { UpdateStatus } from '../../shared/types'
 
 let status: UpdateStatus = { state: 'idle' }
 let daemonMode = false
 let checkInterval: ReturnType<typeof setInterval> | null = null
-
-/**
- * On Windows, if the app is running elevated (admin), the NSIS installer's
- * relaunch will drop back to a non-admin process.  To preserve elevation we
- * install silently (no auto-relaunch from NSIS) and then relaunch ourselves
- * via PowerShell Start-Process -Verb RunAs.
- */
-function quitAndInstallPreservingElevation(): void {
-  if (process.platform === 'win32' && isAdmin()) {
-    // Spawn the elevated relaunch first, THEN install silently.
-    // quitAndInstall() exits the app immediately, so anything scheduled
-    // after it (setTimeout, etc.) will never run.
-    const exePath = app.getPath('exe')
-    const psScript = [
-      // Wait for the NSIS installer to finish (the old exe is replaced)
-      'Start-Sleep -Seconds 5;',
-      `Start-Process -FilePath '${exePath.replace(/'/g, "''")}' -Verb RunAs`,
-    ].join(' ')
-    const encoded = Buffer.from(psScript, 'utf16le').toString('base64')
-    execFile('powershell.exe', [
-      '-NoProfile', '-EncodedCommand', encoded,
-    ], { detached: true, windowsHide: true } as any)
-
-    // Now install silently (isSilent=true) and suppress auto-relaunch
-    // (isForceRunAfter=false) — our PowerShell script handles the relaunch.
-    autoUpdater.quitAndInstall(true, false)
-  } else {
-    autoUpdater.quitAndInstall(false, true)
-  }
-}
 
 function broadcast(s: UpdateStatus): void {
   status = s
@@ -97,14 +65,14 @@ export function initAutoUpdater(opts: InitOptions = {}): void {
     broadcast({ state: 'downloaded', version: info.version })
     if (daemonMode) {
       process.stdout.write(`[${new Date().toISOString()}] [updater] Installing v${info.version} and restarting...\n`)
-      quitAndInstallPreservingElevation()
+      autoUpdater.quitAndInstall(false, true)
       return
     }
     // GUI mode: auto-restart if the user opted in
     const current = getSettings()
     if (current.autoRestart) {
       console.log(`Auto-updater: auto-restart enabled, installing v${info.version} and restarting...`)
-      quitAndInstallPreservingElevation()
+      autoUpdater.quitAndInstall(false, true)
     }
   })
 
@@ -152,7 +120,7 @@ export function downloadUpdate(): Promise<void> {
 
 export function installUpdate(): void {
   if (!app.isPackaged) return
-  quitAndInstallPreservingElevation()
+  autoUpdater.quitAndInstall(false, true)
 }
 
 export function getUpdateStatus(): UpdateStatus {
