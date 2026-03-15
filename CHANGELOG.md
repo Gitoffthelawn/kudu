@@ -1,3 +1,9 @@
+# [1.3.0](https://github.com/AdventDevInc/kudu/compare/v1.2.3...v1.3.0) (2026-03-15)
+
+
+### Features
+
+* require admin elevation via manifest instead of runtime re-launch ([f870da1](https://github.com/AdventDevInc/kudu/commit/f870da100ef5f22116e50bc0dfce956b0c564a9b))
 ## [1.2.3](https://github.com/AdventDevInc/kudu/compare/v1.2.2...v1.2.3) (2026-03-15)
 
 
