@@ -990,6 +990,14 @@ class CloudAgentService {
 
     threatMonitor.start()
 
+    // Notify the renderer that the threat monitor is now active so the
+    // sidebar tab appears.  The push callback only fires on NEW threats,
+    // so without this the renderer never learns the blacklist is loaded.
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win && !win.isDestroyed()) {
+      win.webContents.send(IPC.THREAT_MONITOR_UPDATED, null)
+    }
+
     // If no blacklist on disk, ask the cloud for one
     if (!loadBlacklist()) {
       this.fetchInitialBlacklist()
