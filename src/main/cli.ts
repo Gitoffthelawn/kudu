@@ -815,7 +815,7 @@ async function handleRestorePoint(args: string[], json: boolean): Promise<void> 
 
 async function handleConfig(args: string[], json: boolean): Promise<void> {
   const sub = args[0]
-  const { getSettings, setSettings } = await import('./services/settings-store')
+  const { getSettings, setSettings, flushSettings } = await import('./services/settings-store')
 
   if (sub === 'get') {
     const key = args[1]
@@ -865,6 +865,7 @@ async function handleConfig(args: string[], json: boolean): Promise<void> {
     }
     cursor[parts[parts.length - 1]] = value
     setSettings(obj as any)
+    await flushSettings()
     if (!json) log(`  Set ${key} = ${typeof value === 'string' && key.includes('apiKey') ? '****' : value}`)
     else out({ success: true, key, value: key.includes('apiKey') ? '****' : value }, true)
   } else {
