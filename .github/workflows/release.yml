@@ -146,3 +146,58 @@ jobs:
         run: |
           choco pack choco/kudu.nuspec --out .
           choco push usekudu.${{ steps.version.outputs.version }}.nupkg --source "https://push.chocolatey.org/" --api-key "${{ secrets.CHOCOLATEY_API_KEY }}"
+
+  virustotal-scan:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          gh release download "v$version" --repo AdventDevInc/kudu --pattern "Kudu-Setup-*.exe" --pattern "Kudu-*.dmg" --pattern "Kudu-*.AppImage" --pattern "Kudu-*.deb" --dir artifacts/
+
+      - name: Scan with VirusTotal
+        env:
+          VT_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+        run: |
+          results=""
+          for file in artifacts/*; do
+            filename=$(basename "$file")
+            echo "Uploading $filename to VirusTotal..."
+            response=$(curl -s --request POST \
+              --url "https://www.virustotal.com/api/v3/files" \
+              --header "x-apikey: $VT_API_KEY" \
+              --form "file=@$file")
+            analysis_id=$(echo "$response" | jq -r '.data.id')
+            if [ "$analysis_id" != "null" ] && [ -n "$analysis_id" ]; then
+              echo "  Analysis ID: $analysis_id"
+              results="$results- **$filename**: https://www.virustotal.com/gui/file-analysis/$analysis_id\n"
+            else
+              echo "  Failed to upload: $response"
+              results="$results- **$filename**: upload failed\n"
+            fi
+            # VirusTotal free API rate limit: 4 requests/minute
+            sleep 20
+          done
+
+          echo "## VirusTotal Scan Results" > vt_report.md
+          echo "" >> vt_report.md
+          echo -e "$results" >> vt_report.md
+
+      - name: Append scan results to release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          existing=$(gh release view "v$version" --repo AdventDevInc/kudu --json body -q .body)
+          vt_report=$(cat vt_report.md)
+          gh release edit "v$version" --repo AdventDevInc/kudu --notes "${existing}
+
+          ${vt_report}"
