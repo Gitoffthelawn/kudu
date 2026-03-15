@@ -1,3 +1,9 @@
+## [1.4.9](https://github.com/AdventDevInc/kudu/compare/v1.4.8...v1.4.9) (2026-03-15)
+
+
+### Features
+
+* add Chocolatey package and automated publishing ([99d5c14](https://github.com/AdventDevInc/kudu/commit/99d5c14e704980824c47f07e2c6c1a22e50d455f))
 ## [1.4.8](https://github.com/AdventDevInc/kudu/compare/v1.4.7...v1.4.8) (2026-03-15)
 
 
