@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/AdventDevInc/kudu/compare/v1.2.0...v1.2.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* preserve admin elevation after auto-update and show threat monitor tab ([7378696](https://github.com/AdventDevInc/kudu/commit/73786963dd42da08bc3ec6ba898cbbf62abb71f4))
 # [1.2.0](https://github.com/AdventDevInc/kudu/compare/v1.1.3...v1.2.0) (2026-03-15)
 
 
