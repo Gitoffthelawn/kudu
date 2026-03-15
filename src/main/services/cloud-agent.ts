@@ -50,6 +50,7 @@ const COMMAND_TIMEOUT_MS = 5 * 60 * 1000
 const LONG_COMMAND_TIMEOUT_MS = 30 * 60 * 1000 // for bulk update / install commands
 
 const LONG_RUNNING_COMMANDS = new Set([
+  'scan',
   'software-update-run',
   'windows-update-install',
   'driver-update-install',

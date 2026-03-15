@@ -77,6 +77,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Azure login (Windows signing)
+        if: runner.os == 'Windows'
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Build, package, and upload
         env:
           GH_TOKEN: ${{ github.token }}

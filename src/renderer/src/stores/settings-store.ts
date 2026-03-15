@@ -58,3 +58,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       }
     }))
 }))
+
+// Hydrate settings eagerly so pages that depend on them (e.g. ThreatMonitorPage)
+// don't see stale defaults before the user visits Settings.
+if (typeof window !== 'undefined' && window.kudu) {
+  window.kudu.settingsGet?.().then((settings) => {
+    useSettingsStore.getState().setSettings(settings)
+  }).catch(() => {})
+}

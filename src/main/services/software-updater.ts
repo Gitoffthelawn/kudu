@@ -297,7 +297,7 @@ async function attemptWingetUpgrade(
     const result = await execFileAsync(
       'winget',
       ['upgrade', appId, ...WINGET_UPGRADE_ARGS, ...extraArgs],
-      { timeout: 5 * 60 * 1000, maxBuffer: 10 * 1024 * 1024, windowsHide: true },
+      { timeout: 10 * 60 * 1000, maxBuffer: 10 * 1024 * 1024, windowsHide: true },
     )
     upgradeStdout = result.stdout
   } catch (err: any) {
@@ -358,7 +358,7 @@ async function attemptElevatedUpgrade(appId: string): Promise<{ success: boolean
 }
 
 /** Concurrency limit for parallel winget upgrades */
-const WINGET_UPDATE_CONCURRENCY = 3
+const WINGET_UPDATE_CONCURRENCY = 4
 
 /** Run a single app through the winget upgrade pipeline: normal → elevated → force */
 async function upgradeAppWinget(
@@ -649,7 +649,7 @@ async function attemptBrewUpgrade(
     await execFileAsync(
       'brew',
       ['upgrade', name],
-      { timeout: 5 * 60 * 1000, maxBuffer: 10 * 1024 * 1024 },
+      { timeout: 10 * 60 * 1000, maxBuffer: 10 * 1024 * 1024 },
     )
     return { success: true }
   } catch (err: any) {
@@ -1008,17 +1008,17 @@ async function attemptLinuxUpgrade(
   try {
     if (pm === 'apt') {
       await execFileAsync('/usr/bin/apt-get', ['install', '-y', '-qq', appId], {
-        timeout: 5 * 60 * 1000,
+        timeout: 10 * 60 * 1000,
         maxBuffer: 10 * 1024 * 1024,
       })
     } else if (pm === 'dnf') {
       await execFileAsync('/usr/bin/dnf', ['upgrade', '-y', '-q', appId], {
-        timeout: 5 * 60 * 1000,
+        timeout: 10 * 60 * 1000,
         maxBuffer: 10 * 1024 * 1024,
       })
     } else {
       await execFileAsync('/usr/bin/pacman', ['-S', '--noconfirm', appId], {
-        timeout: 5 * 60 * 1000,
+        timeout: 10 * 60 * 1000,
         maxBuffer: 10 * 1024 * 1024,
       })
     }

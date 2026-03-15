@@ -26,6 +26,10 @@ win:
         - x64
   icon: resources/icon.ico
   requestedExecutionLevel: requireAdministrator
+  azureSignOptions:
+    endpoint: https://eus.codesigning.azure.net
+    codeSigningAccountName: kudu-signing
+    certificateProfileName: kudu-sign
 
 nsis:
   oneClick: true
