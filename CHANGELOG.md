@@ -1,3 +1,9 @@
+## [1.2.3](https://github.com/AdventDevInc/kudu/compare/v1.2.2...v1.2.3) (2026-03-15)
+
+
+### Bug Fixes
+
+* threat monitor tab not appearing despite blacklist being loaded ([2494c7b](https://github.com/AdventDevInc/kudu/commit/2494c7be354276cbf2ce2b55cf9210887c04b4bd))
 ## [1.2.2](https://github.com/AdventDevInc/kudu/compare/v1.2.1...v1.2.2) (2026-03-15)
 
 
