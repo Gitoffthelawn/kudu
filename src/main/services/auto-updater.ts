@@ -3,6 +3,7 @@ import { execFile } from 'child_process'
 import { autoUpdater } from 'electron-updater'
 import { IPC } from '../../shared/channels'
 import { getSettings } from './settings-store'
+import { isAdmin } from './elevation'
 import type { UpdateStatus } from '../../shared/types'
 
 let status: UpdateStatus = { state: 'idle' }
@@ -16,8 +17,7 @@ let checkInterval: ReturnType<typeof setInterval> | null = null
  * via PowerShell Start-Process -Verb RunAs.
  */
 function quitAndInstallPreservingElevation(): void {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  if (process.platform === 'win32' && require('../platform/win32/elevation').createWin32Elevation().isAdmin()) {
+  if (process.platform === 'win32' && isAdmin()) {
     // Spawn the elevated relaunch first, THEN install silently.
     // quitAndInstall() exits the app immediately, so anything scheduled
     // after it (setTimeout, etc.) will never run.
