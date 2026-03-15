@@ -1,3 +1,9 @@
+## [1.4.2](https://github.com/AdventDevInc/kudu/compare/v1.4.1...v1.4.2) (2026-03-15)
+
+
+### Features
+
+* add cloud scan handlers for browser, app, gaming, recycle-bin, and uninstall-leftovers ([6cea8a6](https://github.com/AdventDevInc/kudu/commit/6cea8a63e37aced1cb09dbc0e43e03f94b3803f7))
 ## [1.4.1](https://github.com/AdventDevInc/kudu/compare/v1.4.0...v1.4.1) (2026-03-15)
 
 
