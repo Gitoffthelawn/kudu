@@ -2,10 +2,15 @@ import { app, BrowserWindow, Notification } from 'electron'
 import { IPC } from '../../shared/channels'
 import * as si from 'systeminformation'
 import { hostname } from 'os'
+import { existsSync } from 'fs'
+import { readdir } from 'fs/promises'
+import { join } from 'path'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
 import { lookup } from 'dns/promises'
 import Pusher from 'pusher-js'
 import { getSettings, setSettings, getMachineId } from './settings-store'
-import { scanDirectory, cleanItems } from './file-utils'
+import { scanDirectory, scanMultipleDirectories, scanDirectoriesAsItems, cleanItems } from './file-utils'
 import { cacheItems } from './scan-cache'
 import { getPlatform } from '../platform'
 import { CleanerType } from '../../shared/enums'
@@ -21,6 +26,7 @@ import { applyPrivacySettings } from '../ipc/privacy-shield.ipc'
 import { scanBloatware, removeBloatware } from '../ipc/debloater.ipc'
 import { applyServiceChanges } from '../ipc/service-manager.ipc'
 import { quarantineMalware, deleteMalware } from '../ipc/malware-scanner.ipc'
+import { scanForLeftovers } from './uninstall-leftovers'
 import { PerfMonitorService } from './perf-monitor'
 import { cloudLog } from './logger'
 import type {
@@ -37,6 +43,7 @@ import { addCloudHistoryEntry } from './cloud-history-store'
 import { downloadAndUpdateBlacklist, loadBlacklist } from './threat-blacklist-store'
 import { threatMonitor } from './threat-monitor'
 
+const execFileAsync = promisify(execFile)
 const DEFAULT_SERVER_URL = app.isPackaged ? 'https://cloud.usekudu.com' : 'http://localhost:8000'
 
 const COMMAND_TIMEOUT_MS = 5 * 60 * 1000
@@ -1535,6 +1542,209 @@ class CloudAgentService {
         return
       }
 
+      case 'browser': {
+        const browserResults: ScanResult[] = []
+        const browserPaths = getPlatform().paths.browserPaths()
+        const browserCategory = CleanerType.Browser
+
+        const chromiumBrowsers = [
+          { label: 'Chrome', ...browserPaths.chrome, hasProfiles: true },
+          { label: 'Edge', ...browserPaths.edge, hasProfiles: true },
+          { label: 'Brave', ...browserPaths.brave, hasProfiles: true },
+          { label: 'Vivaldi', ...browserPaths.vivaldi, hasProfiles: true },
+          { label: 'Opera', ...browserPaths.opera, hasProfiles: false },
+          { label: 'Opera GX', ...browserPaths.operaGX, hasProfiles: false },
+        ]
+
+        for (const browser of chromiumBrowsers) {
+          if (!existsSync(browser.base)) continue
+          const cacheDirs = [
+            { dir: browser.cache, label: 'Cache' },
+            { dir: browser.codeCache, label: 'Code Cache' },
+            { dir: browser.gpuCache, label: 'GPU Cache' },
+            { dir: browser.serviceWorker, label: 'Service Worker Cache' },
+          ]
+          if (browser.hasProfiles) {
+            const profiles = await getChromiumProfiles(browser.base)
+            for (const profile of profiles) {
+              for (const { dir, label } of cacheDirs) {
+                const cachePath = join(browser.base, profile, dir)
+                if (existsSync(cachePath)) {
+                  try {
+                    const r = await scanDirectory(cachePath, browserCategory, `${browser.label} - ${profile} ${label}`)
+                    if (r.items.length > 0) { cacheItems(r.items); browserResults.push(r) }
+                  } catch { /* skip */ }
+                }
+              }
+            }
+          } else {
+            for (const { dir, label } of cacheDirs) {
+              const cachePath = join(browser.base, dir)
+              if (existsSync(cachePath)) {
+                try {
+                  const r = await scanDirectory(cachePath, browserCategory, `${browser.label} - ${label}`)
+                  if (r.items.length > 0) { cacheItems(r.items); browserResults.push(r) }
+                } catch { /* skip */ }
+              }
+            }
+          }
+        }
+
+        // Firefox
+        if (existsSync(browserPaths.firefox.cache)) {
+          try {
+            const profileDirs = await readdir(browserPaths.firefox.cache, { withFileTypes: true })
+            for (const dir of profileDirs) {
+              if (dir.isDirectory()) {
+                const cachePath = join(browserPaths.firefox.cache, dir.name, 'cache2', 'entries')
+                if (existsSync(cachePath)) {
+                  const r = await scanDirectory(cachePath, browserCategory, `Firefox - ${dir.name} Cache`)
+                  if (r.items.length > 0) { cacheItems(r.items); browserResults.push(r) }
+                }
+              }
+            }
+          } catch { /* skip */ }
+        }
+
+        await this.postCommandResult(requestId, true, {
+          scanType,
+          results: browserResults.map((r) => ({
+            category: r.category,
+            subcategory: r.subcategory,
+            totalSize: r.totalSize,
+            itemCount: r.itemCount,
+            items: r.items.map((i) => ({ id: i.id, size: i.size, category: i.category, subcategory: i.subcategory })),
+          })),
+          totalSize: browserResults.reduce((s, r) => s + r.totalSize, 0),
+          totalItems: browserResults.reduce((s, r) => s + r.itemCount, 0),
+        })
+        return
+      }
+
+      case 'app': {
+        const appResults: ScanResult[] = []
+        const appCategory = CleanerType.App
+        for (const appDef of getPlatform().paths.appPaths()) {
+          try {
+            const r = await scanMultipleDirectories(appDef.paths, appCategory, appDef.name)
+            if (r.items.length > 0) { cacheItems(r.items); appResults.push(r) }
+          } catch { /* skip */ }
+        }
+        await this.postCommandResult(requestId, true, {
+          scanType,
+          results: appResults.map((r) => ({
+            category: r.category,
+            subcategory: r.subcategory,
+            totalSize: r.totalSize,
+            itemCount: r.itemCount,
+            items: r.items.map((i) => ({ id: i.id, size: i.size, category: i.category, subcategory: i.subcategory })),
+          })),
+          totalSize: appResults.reduce((s, r) => s + r.totalSize, 0),
+          totalItems: appResults.reduce((s, r) => s + r.itemCount, 0),
+        })
+        return
+      }
+
+      case 'gaming': {
+        const gamingResults: ScanResult[] = []
+        const gamingCategory = CleanerType.Gaming
+
+        for (const launcher of getPlatform().paths.gamingPaths()) {
+          try {
+            const r = await scanDirectoriesAsItems(launcher.paths, gamingCategory, launcher.name, 'Launcher Caches')
+            if (r.items.length > 0) { cacheItems(r.items); gamingResults.push(r) }
+          } catch { /* skip */ }
+        }
+
+        for (const gpu of getPlatform().paths.gpuCachePaths()) {
+          try {
+            const r = await scanDirectoriesAsItems(gpu.paths, gamingCategory, gpu.name, 'GPU Shader Caches')
+            if (r.items.length > 0) { cacheItems(r.items); gamingResults.push(r) }
+          } catch { /* skip */ }
+        }
+
+        await this.postCommandResult(requestId, true, {
+          scanType,
+          results: gamingResults.map((r) => ({
+            category: r.category,
+            subcategory: r.subcategory,
+            group: r.group,
+            totalSize: r.totalSize,
+            itemCount: r.itemCount,
+            items: r.items.map((i) => ({ id: i.id, size: i.size, category: i.category, subcategory: i.subcategory })),
+          })),
+          totalSize: gamingResults.reduce((s, r) => s + r.totalSize, 0),
+          totalItems: gamingResults.reduce((s, r) => s + r.itemCount, 0),
+        })
+        return
+      }
+
+      case 'recycle-bin': {
+        const trashPath = getPlatform().paths.trashPath()
+        if (trashPath) {
+          // macOS / Linux
+          if (!existsSync(trashPath)) {
+            await this.postCommandResult(requestId, true, { scanType, results: [], totalSize: 0, totalItems: 0 })
+            return
+          }
+          try {
+            const r = await scanDirectory(trashPath, CleanerType.RecycleBin, 'Trash', 0)
+            if (r.items.length > 0) cacheItems(r.items)
+            await this.postCommandResult(requestId, true, {
+              scanType,
+              results: r.items.length > 0 ? [{
+                category: r.category,
+                subcategory: r.subcategory,
+                totalSize: r.totalSize,
+                itemCount: r.itemCount,
+                items: r.items.map((i) => ({ id: i.id, size: i.size, category: i.category, subcategory: i.subcategory })),
+              }] : [],
+              totalSize: r.totalSize,
+              totalItems: r.itemCount,
+            })
+          } catch {
+            await this.postCommandResult(requestId, true, { scanType, results: [], totalSize: 0, totalItems: 0 })
+          }
+          return
+        }
+        // Windows: COM-based recycle bin query
+        try {
+          const { stdout } = await execFileAsync('powershell.exe', [
+            '-NoProfile', '-Command',
+            `$shell = New-Object -ComObject Shell.Application; $rb = $shell.NameSpace(0x0a); $items = $rb.Items(); $count = $items.Count; $size = ($items | Measure-Object -Property Size -Sum).Sum; Write-Output "$count|$size"`
+          ])
+          const [countStr, sizeStr] = stdout.trim().split('|')
+          const count = parseInt(countStr) || 0
+          const size = parseInt(sizeStr) || 0
+          await this.postCommandResult(requestId, true, {
+            scanType,
+            totalSize: size,
+            totalItems: count,
+          })
+        } catch {
+          await this.postCommandResult(requestId, true, { scanType, results: [], totalSize: 0, totalItems: 0 })
+        }
+        return
+      }
+
+      case 'uninstall-leftovers': {
+        const leftoverResults = await scanForLeftovers(() => null)
+        for (const r of leftoverResults) cacheItems(r.items)
+        await this.postCommandResult(requestId, true, {
+          scanType,
+          results: leftoverResults.map((r) => ({
+            category: r.category,
+            subcategory: r.subcategory,
+            totalSize: r.totalSize,
+            itemCount: r.itemCount,
+            items: r.items.map((i) => ({ id: i.id, size: i.size, category: i.category, subcategory: i.subcategory })),
+          })),
+          totalSize: leftoverResults.reduce((s, r) => s + r.totalSize, 0),
+          totalItems: leftoverResults.reduce((s, r) => s + r.itemCount, 0),
+        })
+        return
+      }
+
       case 'registry': {
         if (process.platform !== 'win32') {
           await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
@@ -2262,3 +2472,18 @@ class CloudAgentService {
 }
 
 export const cloudAgent = new CloudAgentService()
+
+async function getChromiumProfiles(basePath: string): Promise<string[]> {
+  const profiles = ['Default']
+  try {
+    const entries = await readdir(basePath, { withFileTypes: true })
+    for (const entry of entries) {
+      if (entry.isDirectory() && entry.name.startsWith('Profile ')) {
+        profiles.push(entry.name)
+      }
+    }
+  } catch {
+    // Skip
+  }
+  return profiles
+}
