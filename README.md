@@ -17,7 +17,7 @@
 ---
 
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="Kudu Dashboard" width="800" />
+  <img src="https://usekudu.com/img/screenshots/kudu-app-home.png" alt="Kudu Dashboard" width="800" />
 </p>
 
 ## Features
