@@ -1,3 +1,9 @@
+## [1.4.7](https://github.com/AdventDevInc/kudu/compare/v1.4.6...v1.4.7) (2026-03-15)
+
+
+### Bug Fixes
+
+* set shell to bash for build step to fix Windows PowerShell error ([b33dd87](https://github.com/AdventDevInc/kudu/commit/b33dd87e44a87bf4049b518b292f6d2e58c2dfac))
 ## [1.4.6](https://github.com/AdventDevInc/kudu/compare/v1.4.5...v1.4.6) (2026-03-15)
 
 
