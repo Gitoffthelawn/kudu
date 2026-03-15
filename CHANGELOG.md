@@ -1,3 +1,9 @@
+## [1.2.2](https://github.com/AdventDevInc/kudu/compare/v1.2.1...v1.2.2) (2026-03-15)
+
+
+### Bug Fixes
+
+* auto-updater crash from dynamic require of platform elevation module ([f3d9e5f](https://github.com/AdventDevInc/kudu/commit/f3d9e5fc7f93113cc0bed45aa01435ec09d92b29))
 ## [1.2.1](https://github.com/AdventDevInc/kudu/compare/v1.2.0...v1.2.1) (2026-03-15)
 
 
