@@ -96,6 +96,10 @@ chmod +x "$TMP_FILE"
 mv -f "$TMP_FILE" "$APPIMAGE_PATH"
 trap - EXIT
 
+# Remove any old symlink first — if BIN_LINK is a symlink pointing at
+# APPIMAGE_PATH, writing through it would overwrite the real binary.
+rm -f "$BIN_LINK"
+
 # Create wrapper script in PATH (instead of a plain symlink) so that
 # --no-sandbox and --ozone-platform=headless are always injected for
 # daemon/CLI usage.  Chromium checks the real argv for --no-sandbox
