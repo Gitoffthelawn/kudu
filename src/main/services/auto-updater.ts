@@ -18,20 +18,23 @@ let checkInterval: ReturnType<typeof setInterval> | null = null
 function quitAndInstallPreservingElevation(): void {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   if (process.platform === 'win32' && require('../platform/win32/elevation').createWin32Elevation().isAdmin()) {
-    // Install silently — NSIS won't relaunch the app
-    autoUpdater.quitAndInstall(true, true)
+    // Spawn the elevated relaunch first, THEN install silently.
+    // quitAndInstall() exits the app immediately, so anything scheduled
+    // after it (setTimeout, etc.) will never run.
+    const exePath = app.getPath('exe')
+    const psScript = [
+      // Wait for the NSIS installer to finish (the old exe is replaced)
+      'Start-Sleep -Seconds 5;',
+      `Start-Process -FilePath '${exePath.replace(/'/g, "''")}' -Verb RunAs`,
+    ].join(' ')
+    const encoded = Buffer.from(psScript, 'utf16le').toString('base64')
+    execFile('powershell.exe', [
+      '-NoProfile', '-EncodedCommand', encoded,
+    ], { detached: true, windowsHide: true } as any)
 
-    // Give the installer a moment to start, then relaunch elevated
-    setTimeout(() => {
-      const exePath = app.getPath('exe')
-      const psScript = `Start-Process -FilePath '${exePath.replace(/'/g, "''")}' -Verb RunAs`
-      const encoded = Buffer.from(psScript, 'utf16le').toString('base64')
-      execFile('powershell.exe', [
-        '-NoProfile', '-EncodedCommand', encoded,
-      ], { windowsHide: true }, () => {
-        app.exit(0)
-      })
-    }, 1000)
+    // Now install silently (isSilent=true) and suppress auto-relaunch
+    // (isForceRunAfter=false) — our PowerShell script handles the relaunch.
+    autoUpdater.quitAndInstall(true, false)
   } else {
     autoUpdater.quitAndInstall(false, true)
   }

@@ -88,14 +88,15 @@ function useBadgeCounts(): Record<string, number> {
 export function Sidebar() {
   const badgeCounts = useBadgeCounts()
   const { features } = usePlatform()
-  const threatMonitorActive = useThreatMonitorStore((s) => s.snapshot) !== null
+  const threatMonitorLoaded = useThreatMonitorStore((s) => s.loaded)
+  const threatBlacklistActive = useThreatMonitorStore((s) => s.snapshot) !== null
 
   // Filter nav items based on platform features and cloud state
   const filteredNavGroups = navGroups.map((group) => ({
     ...group,
     items: group.items.filter((item) => {
       if (item.path === '/registry' && !features.registry) return false
-      if (item.path === '/threat-monitor' && !threatMonitorActive) return false
+      if (item.path === '/threat-monitor' && !(threatMonitorLoaded && threatBlacklistActive)) return false
       return true
     }),
   }))
