@@ -64,6 +64,20 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+# ── Install runtime dependencies ─────────────────────────────────
+log "Installing runtime dependencies..."
+apt-get update -qq
+apt-get install -y -qq \
+  libfuse2 \
+  libgtk-3-0 \
+  libatk1.0-0 \
+  libnss3 \
+  libxss1 \
+  libasound2t64 \
+  libgbm1 \
+  > /dev/null
+ok "Dependencies installed."
+
 # ── Fetch latest release ────────────────────────────────────────
 log "Finding latest Kudu release..."
 RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")
@@ -132,21 +146,15 @@ ok "Installed Kudu $VERSION to $APPIMAGE_PATH"
 # ── Configure API key / server URL ───────────────────────────────
 if [[ -n "$API_KEY" ]]; then
   log "Saving API key..."
-  APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE_PATH" --no-sandbox --ozone-platform=headless --daemon --api-key "$API_KEY" &
-  CONFIG_PID=$!
-  sleep 3
-  kill "$CONFIG_PID" 2>/dev/null || true
-  wait "$CONFIG_PID" 2>/dev/null || true
+  APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE_PATH" --no-sandbox --ozone-platform=headless \
+    --cli config set cloud.apiKey "$API_KEY"
   ok "API key saved."
 fi
 
 if [[ -n "$SERVER_URL" ]]; then
   log "Saving server URL..."
-  APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE_PATH" --no-sandbox --ozone-platform=headless --daemon --server-url "$SERVER_URL" &
-  CONFIG_PID=$!
-  sleep 3
-  kill "$CONFIG_PID" 2>/dev/null || true
-  wait "$CONFIG_PID" 2>/dev/null || true
+  APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE_PATH" --no-sandbox --ozone-platform=headless \
+    --cli config set cloud.serverUrl "$SERVER_URL"
   ok "Server URL saved."
 fi
 
