@@ -88,6 +88,9 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          AZURE_TENANT_ID: ${{ runner.os == 'Windows' && secrets.AZURE_TENANT_ID || '' }}
+          AZURE_CLIENT_ID: ${{ runner.os == 'Windows' && secrets.AZURE_CLIENT_ID || '' }}
+          AZURE_CLIENT_SECRET: ${{ runner.os == 'Windows' && secrets.AZURE_CLIENT_SECRET || '' }}
         run: |
           npx electron-vite build
           if [ "$RUNNER_OS" = "Windows" ]; then
