@@ -732,23 +732,7 @@ class CloudAgentService {
 
     this.lastCommandAt = new Date().toISOString()
 
-    // Broadcast payloads may have large arrays trimmed to stay within
-    // Reverb's message size limit. Fetch the full payload if needed.
-    if (this.needsPayloadFetch(cmd)) {
-      this.fetchFullCommandPayload(cmd)
-        .then((fullCmd) => this.executeCommand(fullCmd))
-        .catch((err) => {
-          cloudLog('ERROR', `Failed to fetch full command payload for requestId=${cmd.requestId}`, err)
-          this.postCommandResult(
-            cmd.requestId,
-            false,
-            undefined,
-            `Failed to fetch command payload: ${err instanceof Error ? err.message : String(err)}`.slice(0, 200),
-          ).catch(() => {})
-        })
-    } else {
-      this.executeCommand(cmd)
-    }
+    this.executeCommand(cmd)
   }
 
   // ─── Telemetry (frequent, lightweight) ────────────────
@@ -1303,6 +1287,12 @@ class CloudAgentService {
         return
       }
 
+      // Broadcast payloads may have large arrays trimmed to stay within
+      // Reverb's message size limit. Fetch the full payload before executing.
+      if (this.needsPayloadFetch(cmd)) {
+        cmd = await this.fetchFullCommandPayload(cmd)
+      }
+
       switch (cmd.type) {
         case 'scan':
           await this.handleScan(cmd.requestId, cmd.scanType)
@@ -1343,7 +1333,7 @@ class CloudAgentService {
         case 'run-sfc':
         case 'run-dism':
           if (process.platform === 'darwin') {
-            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
             break
           }
           if (cmd.type === 'run-sfc') await this.handleRunSfc(cmd.requestId)
@@ -1366,7 +1356,7 @@ class CloudAgentService {
         case 'driver-update-install':
         case 'driver-clean':
           if (process.platform !== 'win32') {
-            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
             break
           }
           if (cmd.type === 'driver-update-scan') await this.handleDriverUpdateScan(cmd.requestId)
@@ -1391,7 +1381,7 @@ class CloudAgentService {
         case 'debloater-scan':
         case 'debloater-remove':
           if (process.platform !== 'win32') {
-            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
             break
           }
           if (cmd.type === 'debloater-scan') await this.handleDebloaterScan(cmd.requestId)
@@ -1412,7 +1402,7 @@ class CloudAgentService {
         case 'registry-scan':
         case 'registry-fix':
           if (process.platform !== 'win32') {
-            await this.postCommandResult(cmd.requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+            await this.postCommandResult(cmd.requestId, false, undefined, 'Not supported on this platform')
             break
           }
           if (cmd.type === 'registry-scan') await this.handleRegistryScan(cmd.requestId)
@@ -1547,7 +1537,7 @@ class CloudAgentService {
 
       case 'registry': {
         if (process.platform !== 'win32') {
-          await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+          await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
           return
         }
         const entries = await scanRegistry()
@@ -1580,7 +1570,7 @@ class CloudAgentService {
 
       case 'network': {
         if (process.platform !== 'win32') {
-          await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+          await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
           return
         }
         const items = await scanNetwork()
@@ -1594,7 +1584,7 @@ class CloudAgentService {
       }
 
       default:
-        await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+        await this.postCommandResult(requestId, false, undefined, 'Scan type not yet supported via cloud')
         return
     }
   }
@@ -1725,7 +1715,7 @@ class CloudAgentService {
   private async handleWindowsUpdateCheck(requestId: string): Promise<void> {
     const updates = await getPlatform().commands.checkOsUpdates()
     if (!updates) {
-      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
       return
     }
     await this.postCommandResult(requestId, true, {
@@ -1737,7 +1727,7 @@ class CloudAgentService {
   private async handleWindowsUpdateInstall(requestId: string): Promise<void> {
     const result = await getPlatform().commands.installOsUpdates()
     if (!result) {
-      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
       return
     }
     await this.postCommandResult(requestId, true, result)
@@ -1749,7 +1739,7 @@ class CloudAgentService {
     cloudLog('INFO', 'Running system file check')
     const result = await getPlatform().commands.runSystemFileCheck()
     if (!result) {
-      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
       return
     }
     await this.postCommandResult(requestId, true, result)
@@ -1759,7 +1749,7 @@ class CloudAgentService {
     cloudLog('INFO', 'Running system image repair')
     const result = await getPlatform().commands.runSystemImageRepair()
     if (!result) {
-      await this.postCommandResult(requestId, true, { items: [], skipped: true, reason: 'Scan type not supported on this platform' })
+      await this.postCommandResult(requestId, false, undefined, 'Not supported on this platform')
       return
     }
     await this.postCommandResult(requestId, true, result)
