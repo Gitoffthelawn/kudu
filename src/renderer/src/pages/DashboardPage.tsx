@@ -41,8 +41,13 @@ interface OneClickResult {
   spaceRecovered: number
   filesCleaned: number
   registryFixed: number
-  networkCleaned: number
   driversRemoved: number
+  threatsFound: number
+  threatsQuarantined: number
+  privacyScore: number
+  privacyIssues: number
+  startupHighImpact: number
+  updatesAvailable: number
 }
 
 const CLEANER_SCAN_FNS: { type: CleanerType; scan: () => Promise<ScanResult[]>; clean: (ids: string[]) => Promise<CleanResult> }[] = [
@@ -192,19 +197,54 @@ export function DashboardPage() {
     }
   }, [])
 
-  // Scan+clean network
-  const runNetwork = useCallback(async (): Promise<number> => {
+  // Scan for malware and quarantine threats
+  const runMalwareScan = useCallback(async (): Promise<{ found: number; quarantined: number }> => {
     try {
-      setPhaseLabel('Scanning network...')
-      const items = await window.usekudu.comworkScan()
-      if (!Array.isArray(items)) return 0
-      const selectedIds = items.filter((i) => i?.selected).map((i) => i.id)
-      if (selectedIds.length === 0) return 0
-      setPhaseLabel('Cleaning network...')
-      const res = await window.usekudu.comworkClean(selectedIds)
-      return res?.cleaned ?? 0
+      setPhaseLabel('Scanning for malware...')
+      const result = await window.kudu.malwareScan()
+      if (result.threats.length === 0) return { found: 0, quarantined: 0 }
+      setPhaseLabel('Quarantining threats...')
+      const paths = result.threats.map((t) => t.path)
+      const actionResult = await window.kudu.malwareQuarantine(paths)
+      return { found: result.threats.length, quarantined: actionResult.succeeded }
     } catch {
-      toast.error('Network cleanup failed')
+      toast.error('Malware scan failed')
+      return { found: 0, quarantined: 0 }
+    }
+  }, [])
+
+  // Check privacy settings (report only)
+  const runPrivacyCheck = useCallback(async (): Promise<{ score: number; issues: number }> => {
+    try {
+      setPhaseLabel('Checking privacy settings...')
+      const state = await window.kudu.privacyScan()
+      return { score: state.score, issues: state.total - state.protected }
+    } catch {
+      toast.error('Privacy check failed')
+      return { score: 0, issues: 0 }
+    }
+  }, [])
+
+  // Check startup items (report only)
+  const runStartupCheck = useCallback(async (): Promise<number> => {
+    try {
+      setPhaseLabel('Checking startup items...')
+      const items = await window.kudu.startupList()
+      return items.filter((i) => i.enabled && i.impact === 'high').length
+    } catch {
+      toast.error('Startup check failed')
+      return 0
+    }
+  }, [])
+
+  // Check for software updates (report only)
+  const runSoftwareUpdateCheck = useCallback(async (): Promise<number> => {
+    try {
+      setPhaseLabel('Checking for software updates...')
+      const result = await window.kudu.softwareUpdateCheck()
+      return result.apps.length
+    } catch {
+      toast.error('Software update check failed')
       return 0
     }
   }, [])
@@ -242,8 +282,13 @@ export function DashboardPage() {
       spaceRecovered: space,
       filesCleaned: files,
       registryFixed: regFixed,
-      networkCleaned: 0,
-      driversRemoved: 0
+      driversRemoved: 0,
+      threatsFound: 0,
+      threatsQuarantined: 0,
+      privacyScore: 0,
+      privacyIssues: 0,
+      startupHighImpact: 0,
+      updatesAvailable: 0
     }
 
     const totalItems = files + regFixed
@@ -280,34 +325,58 @@ export function DashboardPage() {
     cleanStartRef.current = Date.now()
     setPhase('scanning')
     setResult(null)
-    setStepProgress({ current: 0, total: 4 })
+    const totalSteps = 5 + (features.registry ? 1 : 0) + (features.drivers ? 1 : 0)
+    let step = 0
+    setStepProgress({ current: step, total: totalSteps })
 
+    // Clean
     setPhase('cleaning')
-    setStepProgress({ current: 1, total: 4 })
+    setStepProgress({ current: ++step, total: totalSteps })
     const { space, files } = await runCleaners()
-    setStepProgress({ current: 2, total: 4 })
-    const regFixed = features.registry ? await runRegistry() : 0
-    setStepProgress({ current: 3, total: 4 })
-    const netCleaned = await runNetwork()
-    setStepProgress({ current: 4, total: 4 })
-    const drivers = features.drivers ? await runDrivers() : { removed: 0, space: 0 }
+    let regFixed = 0
+    if (features.registry) {
+      setStepProgress({ current: ++step, total: totalSteps })
+      regFixed = await runRegistry()
+    }
+    let drivers = { removed: 0, space: 0 }
+    if (features.drivers) {
+      setStepProgress({ current: ++step, total: totalSteps })
+      drivers = await runDrivers()
+    }
+
+    // Protect
+    setStepProgress({ current: ++step, total: totalSteps })
+    const malware = await runMalwareScan()
+    setStepProgress({ current: ++step, total: totalSteps })
+    const privacy = await runPrivacyCheck()
+
+    // Optimize
+    setStepProgress({ current: ++step, total: totalSteps })
+    const startupHighImpact = await runStartupCheck()
+    setStepProgress({ current: ++step, total: totalSteps })
+    const updatesAvailable = await runSoftwareUpdateCheck()
 
     const oneClickResult: OneClickResult = {
       spaceRecovered: space + drivers.space,
       filesCleaned: files,
       registryFixed: regFixed,
-      networkCleaned: netCleaned,
-      driversRemoved: drivers.removed
+      driversRemoved: drivers.removed,
+      threatsFound: malware.found,
+      threatsQuarantined: malware.quarantined,
+      privacyScore: privacy.score,
+      privacyIssues: privacy.issues,
+      startupHighImpact,
+      updatesAvailable
     }
 
-    const totalItems = files + regFixed + netCleaned + drivers.removed
-    if (totalItems > 0) {
+    const totalItems = files + regFixed + drivers.removed + malware.quarantined
+    if (totalItems > 0 || malware.found > 0) {
       await historyStore.addEntry({
         id: Date.now().toString(),
         type: 'cleaner',
         timestamp: new Date().toISOString(),
         duration: Date.now() - cleanStartRef.current,
-        totalItemsFound: totalItems,
+        totalItemsFound: totalItems + malware.found,
         totalItemsCleaned: totalItems,
         totalItemsSkipped: 0,
         totalSpaceSaved: space + drivers.space,
@@ -318,11 +387,11 @@ export function DashboardPage() {
           ...(regFixed > 0
             ? [{ name: 'Registry', itemsFound: regFixed, itemsCleaned: regFixed, spaceSaved: 0 }]
             : []),
-          ...(netCleaned > 0
-            ? [{ name: 'Network', itemsFound: netCleaned, itemsCleaned: netCleaned, spaceSaved: 0 }]
-            : []),
           ...(drivers.removed > 0
             ? [{ name: 'Stale Drivers', itemsFound: drivers.removed, itemsCleaned: drivers.removed, spaceSaved: drivers.space }]
+            : []),
+          ...(malware.quarantined > 0
+            ? [{ name: 'Malware', itemsFound: malware.found, itemsCleaned: malware.quarantined, spaceSaved: 0 }]
             : [])
         ],
         errorCount: 0
@@ -333,7 +402,7 @@ export function DashboardPage() {
     setResult(oneClickResult)
     setPhase('done')
     setPhaseLabel('')
-  }, [phase, runCleaners, runRegistry, runNetwork, runDrivers, historyStore, recomputeStats, features])
+  }, [phase, runCleaners, runRegistry, runDrivers, runMalwareScan, runPrivacyCheck, runStartupCheck, runSoftwareUpdateCheck, historyStore, recomputeStats, features])
 
   const isRunning = phase === 'scanning' || phase === 'cleaning'
   const activity = stats.recentActivity
@@ -451,10 +520,10 @@ export function DashboardPage() {
           <div className="flex-1 min-w-0">
             <p className="text-[14px] font-semibold text-zinc-200">Full Clean, Optimize & Protect</p>
             <p className="text-[12px]" style={{ color: '#52525e' }}>
-              {features.registry ? 'Junk files + registry + network + stale drivers' : 'Junk files + network cleanup'}
+              {features.registry ? 'Clean + registry + drivers + malware scan + privacy & update check' : 'Clean junk + malware scan + privacy & update check'}
             </p>
             <p className="text-[11px] mt-0.5" style={{ color: '#3f3f46' }}>
-              {features.debloater ? 'Everything except Debloater, Startup, and Driver Updates' : 'Everything except Startup'}
+              Cleans and quarantines automatically, then reports optimization opportunities
             </p>
           </div>
         </button>
@@ -511,17 +580,37 @@ export function DashboardPage() {
                     {result.registryFixed} registry entries fixed
                   </p>
                 )}
-                {result.networkCleaned > 0 && (
-                  <p className="text-[12px]" style={{ color: '#6e6e76' }}>
-                    {result.networkCleaned} network items cleaned
-                  </p>
-                )}
                 {result.driversRemoved > 0 && (
                   <p className="text-[12px]" style={{ color: '#6e6e76' }}>
                     {result.driversRemoved} stale drivers removed
                   </p>
                 )}
-                {result.spaceRecovered === 0 && result.filesCleaned === 0 && result.registryFixed === 0 && result.networkCleaned === 0 && result.driversRemoved === 0 && (
+                {result.threatsFound > 0 && (
+                  <p className="text-[12px]" style={{ color: result.threatsQuarantined > 0 ? '#22c55e' : '#ef4444' }}>
+                    {result.threatsQuarantined} threat{result.threatsQuarantined !== 1 ? 's' : ''} quarantined
+                  </p>
+                )}
+                {result.threatsFound === 0 && result.privacyScore > 0 && (
+                  <p className="text-[12px]" style={{ color: '#6e6e76' }}>
+                    No threats found
+                  </p>
+                )}
+                {result.privacyIssues > 0 && (
+                  <button onClick={() => navigate('/hardening')} className="text-[12px] hover:underline" style={{ color: '#3b82f6' }}>
+                    {result.privacyIssues} privacy improvement{result.privacyIssues !== 1 ? 's' : ''} available &rarr;
+                  </button>
+                )}
+                {result.startupHighImpact > 0 && (
+                  <button onClick={() => navigate('/startup')} className="text-[12px] hover:underline" style={{ color: '#3b82f6' }}>
+                    {result.startupHighImpact} high-impact startup item{result.startupHighImpact !== 1 ? 's' : ''} &rarr;
+                  </button>
+                )}
+                {result.updatesAvailable > 0 && (
+                  <button onClick={() => navigate('/updates')} className="text-[12px] hover:underline" style={{ color: '#3b82f6' }}>
+                    {result.updatesAvailable} software update{result.updatesAvailable !== 1 ? 's' : ''} available &rarr;
+                  </button>
+                )}
+                {result.spaceRecovered === 0 && result.filesCleaned === 0 && result.registryFixed === 0 && result.driversRemoved === 0 && result.threatsFound === 0 && result.privacyIssues === 0 && result.startupHighImpact === 0 && result.updatesAvailable === 0 && (
                   <p className="text-[12px]" style={{ color: '#6e6e76' }}>
                     System is already clean — nothing to do
                   </p>
@@ -609,8 +698,8 @@ export function DashboardPage() {
         onCancel={() => setShowFullConfirm(false)}
         title="Full Clean, Optimize & Protect"
         description={features.registry
-          ? 'This will clean junk files, fix registry issues, flush DNS and ARP caches, and remove stale driver packages. Network caches rebuild automatically, but this is a broad operation that touches multiple system areas.'
-          : 'This will clean junk files, flush DNS and ARP caches, and perform network cleanup. Caches rebuild automatically, but this is a broad operation that touches multiple system areas.'}
+          ? 'This will clean junk files, fix registry issues, remove stale drivers, and scan for malware (quarantining any threats). It will also check your privacy settings, startup items, and available software updates.'
+          : 'This will clean junk files and scan for malware (quarantining any threats). It will also check your privacy settings, startup items, and available software updates.'}
         confirmLabel="Start Full Clean"
         variant="warning"
       />
