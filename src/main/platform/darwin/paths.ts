@@ -117,6 +117,9 @@ export function createDarwinPaths(): PlatformPaths {
         // Target specific ~/Library subdirs rather than the entire ~/Library
         // (which contains thousands of legitimate files and would be extremely slow)
         join(LIBRARY, 'LaunchAgents'),
+        join(LIBRARY, 'LaunchDaemons'),
+        '/Library/LaunchAgents',
+        '/Library/LaunchDaemons',
         join(HOME, '.local', 'bin'),
       ]
     },
