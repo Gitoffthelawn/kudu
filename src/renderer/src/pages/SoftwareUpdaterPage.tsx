@@ -550,13 +550,13 @@ export function SoftwareUpdaterPage({ embedded }: { embedded?: boolean }) {
                       <span style={{ color: '#6e6e76' }} className="text-[12px]">
                         {e.name}: {e.reason}
                       </span>
-                      {isInstallerChange && (
+                      {isInstallerChange && packageManagerName && (
                         <div
                           className="mt-1.5 rounded-lg px-3 py-2 font-mono text-[11px] text-zinc-300 select-all cursor-text"
                           style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}
                         >
-                          winget uninstall {e.appId}<br />
-                          winget install {e.appId}
+                          {packageManagerName} uninstall {e.appId}<br />
+                          {packageManagerName} install {e.appId}
                         </div>
                       )}
                     </div>

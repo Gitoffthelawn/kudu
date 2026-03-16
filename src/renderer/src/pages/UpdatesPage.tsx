@@ -14,22 +14,29 @@ interface TabDef {
   description: string
 }
 
-const tabs: TabDef[] = [
-  { id: 'software', label: 'Software', icon: Download, description: 'Third-party apps via winget' },
-  { id: 'drivers', label: 'Drivers', icon: Cpu, description: 'Updates & stale cleanup' }
-]
+const PM_DESCRIPTIONS: Record<string, string> = {
+  win32: 'Third-party apps via winget',
+  darwin: 'Third-party apps via Homebrew',
+  linux: 'Third-party apps via package manager',
+}
+
+const driverTab: TabDef = { id: 'drivers', label: 'Drivers', icon: Cpu, description: 'Updates & stale cleanup' }
 
 export function UpdatesPage() {
-  const { features } = usePlatform()
+  const { platform, features } = usePlatform()
   const [activeTab, setActiveTab] = useState('software')
 
-  const visibleTabs = useMemo(() =>
-    tabs.filter((tab) => {
-      if (tab.id === 'drivers' && !features.drivers) return false
-      return true
-    }),
-    [features.drivers]
-  )
+  const visibleTabs = useMemo(() => {
+    const softwareTab: TabDef = {
+      id: 'software',
+      label: 'Software',
+      icon: Download,
+      description: PM_DESCRIPTIONS[platform] || PM_DESCRIPTIONS.linux,
+    }
+    const result: TabDef[] = [softwareTab]
+    if (features.drivers) result.push(driverTab)
+    return result
+  }, [platform, features.drivers])
 
   return (
     <div className="animate-fade-in">

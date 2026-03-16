@@ -296,10 +296,17 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
 
     store.setStatus('applying')
     try {
-      await window.kudu.privacyApply([settingId])
+      const result = await window.kudu.privacyApply([settingId])
       const updated = await window.kudu.privacyScan()
       usePrivacyStore.getState().setState(updated)
       usePrivacyStore.getState().setStatus('done')
+
+      if (result.failed > 0) {
+        const reason = result.errors[0]?.reason || 'Unknown error'
+        toast.error(`Failed to apply "${setting.label}"`, { description: reason })
+      } else {
+        toast.success(`${setting.label} enabled`)
+      }
     } catch {
       toast.error('Failed to apply privacy setting')
       usePrivacyStore.getState().setStatus('done')

@@ -187,7 +187,6 @@ function createWindow(): void {
     minWidth: 900,
     minHeight: 600,
     frame: false,
-    titleBarStyle: 'hidden',
     backgroundColor: '#09090b',
     icon,
     show: false,
