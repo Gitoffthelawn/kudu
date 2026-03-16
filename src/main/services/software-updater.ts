@@ -357,8 +357,8 @@ async function attemptElevatedUpgrade(appId: string): Promise<{ success: boolean
   }
 }
 
-/** Concurrency limit for parallel winget upgrades */
-const WINGET_UPDATE_CONCURRENCY = 4
+/** Concurrency limit for parallel winget upgrades — sequential to avoid winget lock contention */
+const WINGET_UPDATE_CONCURRENCY = 1
 
 /** Run a single app through the winget upgrade pipeline: normal → elevated → force */
 async function upgradeAppWinget(
