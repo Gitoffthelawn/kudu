@@ -272,6 +272,7 @@ const FAILURE_PATTERNS = [
   'no applicable update',
   'another version of this application',
   'installer aborted',
+  'install technology is different',
 ]
 
 const ELEVATION_HINTS = [
@@ -312,9 +313,10 @@ async function attemptWingetUpgrade(
   const wasSuccessful = SUCCESS_PATTERNS.some((p) => output.includes(p))
   const hasClearFailure = FAILURE_PATTERNS.some((p) => output.includes(p))
 
-  if (wasSuccessful || !hasClearFailure) {
+  if (wasSuccessful && !hasClearFailure) {
     return { success: true, output: upgradeStdout }
   }
+  // If no success pattern matched, treat as failure — don't assume success on ambiguous output
   return { success: false, output: upgradeStdout }
 }
 
@@ -377,6 +379,14 @@ async function upgradeAppWinget(
 
     if (looksLikeElevationIssue) {
       result = await attemptElevatedUpgrade(appId)
+    }
+  }
+
+  // If installer technology changed, skip retries — user must manually uninstall + reinstall
+  if (!result.success) {
+    const lowerOutput = cleanOutput(result.output).toLowerCase()
+    if (lowerOutput.includes('install technology is different')) {
+      return { success: false, error: 'Installer type changed — uninstall this app manually then install the new version' }
     }
   }
 
