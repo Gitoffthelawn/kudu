@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'fs/promises'
+import { readdir, readFile, unlink } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, basename, resolve, normalize } from 'path'
 import { homedir } from 'os'
@@ -134,6 +134,41 @@ export function createDarwinStartup(): PlatformStartup {
               '-e', `tell application "System Events" to delete login item "${safeName}"`,
             ], { timeout: 10_000 })
           }
+          return true
+        }
+        return false
+      } catch {
+        return false
+      }
+    },
+
+    async deleteItem(
+      name: string,
+      location: string,
+      source: StartupItem['source'],
+    ): Promise<boolean> {
+      try {
+        if (source === 'launch-agent-user' || source === 'launch-agent-global') {
+          const allowedDirs = [
+            join(HOME, 'Library', 'LaunchAgents'),
+            '/Library/LaunchAgents',
+          ]
+          const resolved = resolve(normalize(location))
+          if (!allowedDirs.some(dir => resolved.startsWith(dir + '/'))) {
+            return false
+          }
+          // Unload first, then delete the plist file
+          try {
+            await execFileAsync('/bin/launchctl', ['unload', location], { timeout: 10_000 })
+          } catch { /* may already be unloaded */ }
+          await unlink(location)
+          return true
+        }
+        if (source === 'login-item') {
+          const safeName = name.replace(/[\\"]/g, '')
+          await execFileAsync('/usr/bin/osascript', [
+            '-e', `tell application "System Events" to delete login item "${safeName}"`,
+          ], { timeout: 10_000 })
           return true
         }
         return false

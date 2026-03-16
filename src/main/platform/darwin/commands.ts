@@ -102,13 +102,15 @@ export function createDarwinCommands(): PlatformCommands {
         const apps: Array<{ _name: string; version: string; obtained_from: string; lastModified: string }> =
           data?.SPApplicationsDataType ?? []
 
-        return apps.map((a) => ({
-          name: a._name ?? '',
-          version: a.version ?? '',
-          publisher: a.obtained_from ?? '',
-          installDate: a.lastModified ?? '',
-          sizeKb: 0,
-        }))
+        return apps
+          .filter((a) => a.obtained_from !== 'apple')
+          .map((a) => ({
+            name: a._name ?? '',
+            version: a.version ?? '',
+            publisher: a.obtained_from ?? '',
+            installDate: a.lastModified ?? '',
+            sizeKb: 0,
+          }))
       } catch {
         return []
       }

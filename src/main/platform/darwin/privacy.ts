@@ -1,10 +1,17 @@
 import { execFile } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import { join } from 'path'
+import { tmpdir } from 'os'
+import { randomUUID } from 'crypto'
 import { promisify } from 'util'
 import { updateSshdConfig, updateSysctlConfig } from '../config-utils'
 import type { PlatformPrivacy, PrivacySettingDef } from '../types'
 
 const execFileAsync = promisify(execFile)
+
+function isRoot(): boolean {
+  return process.getuid?.() === 0
+}
 
 export function createDarwinPrivacy(): PlatformPrivacy {
   return {
@@ -19,6 +26,39 @@ export function createDarwinPrivacy(): PlatformPrivacy {
   }
 }
 
+// ─── Elevated execution helper ──────────────────────────────
+// When the Electron process is not root (common even with `sudo npm run dev`
+// because npm/electron-vite can drop privileges), this uses osascript to
+// show a native macOS password dialog — the same UX as System Settings.
+
+function shellEscape(arg: string): string {
+  return "'" + arg.replace(/'/g, "'\\''") + "'"
+}
+
+async function elevatedExec(cmd: string, args: string[]): Promise<string> {
+  if (isRoot()) {
+    const { stdout } = await execFileAsync(cmd, args, { timeout: 10_000 })
+    return stdout
+  }
+  const escaped = [cmd, ...args].map(shellEscape).join(' ')
+  const script = `do shell script ${JSON.stringify(escaped)} with administrator privileges`
+  const { stdout } = await execFileAsync('/usr/bin/osascript', ['-e', script], { timeout: 30_000 })
+  return stdout
+}
+
+async function elevatedWriteFile(filePath: string, content: string): Promise<void> {
+  if (isRoot()) {
+    await writeFile(filePath, content, 'utf8')
+    return
+  }
+  // Write to temp first (no root needed), then elevated mv to target
+  const tmp = join(tmpdir(), `kudu-${randomUUID()}.tmp`)
+  await writeFile(tmp, content, 'utf8')
+  await elevatedExec('/bin/mv', ['-f', tmp, filePath])
+}
+
+// ─── defaults helpers ───────────────────────────────────────
+
 async function defaultsRead(domain: string, key: string): Promise<string> {
   const { stdout } = await execFileAsync('/usr/bin/defaults', ['read', domain, key], { timeout: 5_000 })
   return stdout.trim()
@@ -28,6 +68,14 @@ async function defaultsWrite(domain: string, key: string, type: string, value: s
   await execFileAsync('/usr/bin/defaults', ['write', domain, key, `-${type}`, value], { timeout: 5_000 })
 }
 
+async function elevatedDefaultsWrite(domain: string, key: string, type: string, value: string): Promise<void> {
+  await elevatedExec('/usr/bin/defaults', ['write', domain, key, `-${type}`, value])
+}
+
+async function elevatedDefaultsDelete(domain: string, key: string): Promise<void> {
+  await elevatedExec('/usr/bin/defaults', ['delete', domain, key])
+}
+
 // ─── systemsetup helpers ────────────────────────────────────
 
 async function systemsetupGet(flag: string): Promise<string> {
@@ -35,8 +83,8 @@ async function systemsetupGet(flag: string): Promise<string> {
   return stdout.trim()
 }
 
-async function systemsetupSet(flag: string, value: string): Promise<void> {
-  await execFileAsync('/usr/sbin/systemsetup', [flag, value], { timeout: 5_000 })
+async function systemsetupSet(flag: string, ...args: string[]): Promise<void> {
+  await elevatedExec('/usr/sbin/systemsetup', [flag, ...args])
 }
 
 // ─── socketfilterfw (Application Firewall) helpers ──────────
@@ -49,7 +97,7 @@ async function socketfilterfwGet(flag: string): Promise<string> {
 }
 
 async function socketfilterfwSet(flag: string, value: string): Promise<void> {
-  await execFileAsync(SOCKETFILTERFW, [flag, value], { timeout: 5_000 })
+  await elevatedExec(SOCKETFILTERFW, [flag, value])
 }
 
 // ─── Sysctl helpers (macOS) ─────────────────────────────────
@@ -63,7 +111,7 @@ async function sysctlGet(param: string): Promise<string> {
 
 async function sysctlApply(param: string, value: string): Promise<void> {
   // Apply live first — fail fast if the kernel rejects the value
-  await execFileAsync('/usr/sbin/sysctl', ['-w', `${param}=${value}`], { timeout: 5_000 })
+  await elevatedExec('/usr/sbin/sysctl', ['-w', `${param}=${value}`])
 
   // Persist to /etc/sysctl.conf (macOS uses a single file, not .d/)
   let existing = ''
@@ -76,7 +124,7 @@ async function sysctlApply(param: string, value: string): Promise<void> {
     '# Delete this file and reboot to revert all changes',
   )
 
-  await writeFile(SYSCTL_CONF, updated, 'utf8')
+  await elevatedWriteFile(SYSCTL_CONF, updated)
 }
 
 // ─── SSH config helper (macOS) ──────────────────────────────
@@ -84,12 +132,12 @@ async function sysctlApply(param: string, value: string): Promise<void> {
 async function applySshdDirective(directive: string, value: string): Promise<void> {
   const content = await readFile('/etc/ssh/sshd_config', 'utf8')
   const updated = updateSshdConfig(content, directive, value)
-  await writeFile('/etc/ssh/sshd_config', updated, 'utf8')
+  await elevatedWriteFile('/etc/ssh/sshd_config', updated)
   // Reload sshd via launchctl
   try {
-    await execFileAsync('/bin/launchctl', ['kickstart', '-k', 'system/com.openssh.sshd'], { timeout: 10_000 })
+    await elevatedExec('/bin/launchctl', ['kickstart', '-k', 'system/com.openssh.sshd'])
   } catch {
-    await execFileAsync('/bin/launchctl', ['stop', 'com.openssh.sshd'], { timeout: 10_000 }).catch(() => {})
+    await elevatedExec('/bin/launchctl', ['stop', 'com.openssh.sshd']).catch(() => {})
   }
 }
 
@@ -107,7 +155,7 @@ const DARWIN_PRIVACY_SETTINGS: PrivacySettingDef[] = [
       } catch { return false }
     },
     async apply() {
-      await defaultsWrite('/Library/Application Support/CrashReporter/DiagnosticMessagesHistory', 'AutoSubmit', 'bool', 'false')
+      await elevatedDefaultsWrite('/Library/Application Support/CrashReporter/DiagnosticMessagesHistory', 'AutoSubmit', 'bool', 'false')
     },
   },
   {
@@ -228,7 +276,7 @@ const DARWIN_KERNEL_SETTINGS: PrivacySettingDef[] = [
       } catch { return false }
     },
     async apply() {
-      await execFileAsync('/usr/sbin/spctl', ['--master-enable'], { timeout: 5_000 })
+      await elevatedExec('/usr/sbin/spctl', ['--master-enable'])
     },
   },
   {
@@ -276,7 +324,7 @@ const DARWIN_KERNEL_SETTINGS: PrivacySettingDef[] = [
       } catch { return false }
     },
     async apply() {
-      await defaultsWrite('/Library/Preferences/com.apple.loginwindow', 'GuestEnabled', 'bool', 'false')
+      await elevatedDefaultsWrite('/Library/Preferences/com.apple.loginwindow', 'GuestEnabled', 'bool', 'false')
     },
   },
   {
@@ -296,9 +344,7 @@ const DARWIN_KERNEL_SETTINGS: PrivacySettingDef[] = [
       }
     },
     async apply() {
-      await execFileAsync('/usr/bin/defaults', [
-        'delete', '/Library/Preferences/com.apple.loginwindow', 'autoLoginUser',
-      ], { timeout: 5_000 }).catch(() => {})
+      await elevatedDefaultsDelete('/Library/Preferences/com.apple.loginwindow', 'autoLoginUser').catch(() => {})
     },
   },
 ]
@@ -390,7 +436,7 @@ const DARWIN_ACCESS_SETTINGS: PrivacySettingDef[] = [
       } catch { return false }
     },
     async apply() {
-      await execFileAsync('/usr/sbin/systemsetup', ['-f', '-setremotelogin', 'off'], { timeout: 5_000 })
+      await elevatedExec('/usr/sbin/systemsetup', ['-f', '-setremotelogin', 'off'])
     },
   },
   {
@@ -440,7 +486,7 @@ const DARWIN_ACCESS_SETTINGS: PrivacySettingDef[] = [
       } catch { return false }
     },
     async apply() {
-      await execFileAsync('/bin/launchctl', ['limit', 'core', '0', '0'], { timeout: 5_000 })
+      await elevatedExec('/bin/launchctl', ['limit', 'core', '0', '0'])
     },
   },
 ]
