@@ -66,6 +66,9 @@ fi
 
 # ── Install runtime dependencies ─────────────────────────────────
 log "Installing runtime dependencies..."
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+export NEEDRESTART_SUSPEND=1
 apt-get update -qq
 apt-get install -y -qq \
   libfuse2 \
