@@ -45,12 +45,16 @@ export function createDarwinSecurity(): PlatformSecurity {
 
     async collectFirewallStatus(): Promise<HealthReport['securityPosture']['firewall']> {
       try {
-        const { stdout } = await execFileAsync('/usr/bin/defaults', [
-          'read', '/Library/Preferences/com.apple.alf', 'globalstate',
-        ], { timeout: 10_000 })
-        const state = parseInt(stdout.trim(), 10)
-        // 0 = off, 1 = on (specific services), 2 = on (essential services only / block all)
-        const enabled = state >= 1
+        // Use socketfilterfw which is the authoritative source for firewall state.
+        // The defaults-read approach (/Library/Preferences/com.apple.alf globalstate)
+        // can fail on modern macOS (Sonoma+) due to plist access restrictions,
+        // causing false negatives where an enabled firewall is reported as disabled.
+        const { stdout } = await execFileAsync(
+          '/usr/libexec/ApplicationFirewall/socketfilterfw',
+          ['--getglobalstate'],
+          { timeout: 10_000 },
+        )
+        const enabled = /enabled/i.test(stdout)
         return {
           enabled,
           products: [{ name: 'macOS Application Firewall', enabled }],
