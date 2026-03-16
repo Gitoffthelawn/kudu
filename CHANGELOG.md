@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/AdventDevInc/kudu/compare/v1.5.1...v1.5.2) (2026-03-16)
+
+
+### Bug Fixes
+
+* run winget updates sequentially to avoid lock contention ([354d4b0](https://github.com/AdventDevInc/kudu/commit/354d4b0694a9f5c7dedbf8fcd6ee63f3b2ebe994))
+* set HOME=/root in systemd unit for correct config path ([3e993f6](https://github.com/AdventDevInc/kudu/commit/3e993f68510afb33faa96869428181a17e1ff197))
 ## [1.5.1](https://github.com/AdventDevInc/kudu/compare/v1.5.0...v1.5.1) (2026-03-15)
 
 
