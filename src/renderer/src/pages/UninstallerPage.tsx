@@ -11,6 +11,9 @@ import {
   ChevronDown,
   AlertTriangle,
   Clock,
+  CheckSquare,
+  Square,
+  MinusSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -78,7 +81,10 @@ export function UninstallerPage() {
   const sortDirection = useUninstallerStore((s) => s.sortDirection)
   const filterMode = useUninstallerStore((s) => s.filterMode)
 
+  const selectedIds = useUninstallerStore((s) => s.selectedIds)
+
   const [confirmProgram, setConfirmProgram] = useState<InstalledProgram | null>(null)
+  const [confirmBatch, setConfirmBatch] = useState(false)
   const [showSortMenu, setShowSortMenu] = useState(false)
   const sortMenuRef = useRef<HTMLDivElement>(null)
   const uninstallStartRef = useRef<number>(0)
@@ -186,6 +192,93 @@ export function UninstallerPage() {
       useUninstallerStore.getState().setUninstalling(false)
     }
   }, [confirmProgram, historyStore, recomputeStats])
+
+  // ─── Batch uninstall selected programs ─────────────────────
+  const handleBatchUninstall = useCallback(async () => {
+    setConfirmBatch(false)
+    const store = useUninstallerStore.getState()
+    const toUninstall = store.programs.filter((p) => store.selectedIds.has(p.id))
+    if (toUninstall.length === 0) return
+
+    store.setUninstalling(true)
+    store.setUninstallResult(null)
+    store.setError(null)
+    store.setProgress(null)
+    uninstallStartRef.current = Date.now()
+
+    let successCount = 0
+    let failCount = 0
+    let totalLeftoversCleaned = 0
+    let totalLeftoversSize = 0
+
+    for (const program of toUninstall) {
+      try {
+        const result = await window.kudu.uninstallerUninstall(program.id)
+        const s = useUninstallerStore.getState()
+
+        if (result.success) {
+          successCount++
+          s.removeProgram(program.id)
+          totalLeftoversCleaned += result.leftoversCleaned
+          totalLeftoversSize += result.leftoversSize
+
+          if (result.leftoversCleaned > 0) {
+            await historyStore.addEntry({
+              id: Date.now().toString(),
+              type: 'cleaner',
+              timestamp: new Date().toISOString(),
+              duration: Date.now() - uninstallStartRef.current,
+              totalItemsFound: result.leftoversFound,
+              totalItemsCleaned: result.leftoversCleaned,
+              totalItemsSkipped: result.leftoversFound - result.leftoversCleaned,
+              totalSpaceSaved: result.leftoversSize,
+              categories: [
+                {
+                  name: `Uninstall: ${result.programName}`,
+                  itemsFound: result.leftoversFound,
+                  itemsCleaned: result.leftoversCleaned,
+                  spaceSaved: result.leftoversSize,
+                },
+              ],
+              errorCount: 0,
+            })
+          }
+        } else {
+          failCount++
+        }
+      } catch {
+        failCount++
+      }
+    }
+
+    const s = useUninstallerStore.getState()
+    s.clearSelected()
+    s.setProgress(null)
+    s.setUninstalling(false)
+
+    if (failCount === 0) {
+      s.setUninstallResult({
+        success: true,
+        programName: `${successCount} program${successCount !== 1 ? 's' : ''}`,
+        exitCode: null,
+        leftoversFound: totalLeftoversCleaned,
+        leftoversCleaned: totalLeftoversCleaned,
+        leftoversSize: totalLeftoversSize,
+      })
+    } else {
+      s.setUninstallResult({
+        success: successCount > 0,
+        programName: `${successCount + failCount} program${successCount + failCount !== 1 ? 's' : ''}`,
+        exitCode: null,
+        error: `${failCount} failed, ${successCount} succeeded`,
+        leftoversFound: totalLeftoversCleaned,
+        leftoversCleaned: totalLeftoversCleaned,
+        leftoversSize: totalLeftoversSize,
+      })
+    }
+
+    if (successCount > 0) recomputeStats()
+  }, [historyStore, recomputeStats])
 
   // ─── Filtered & sorted list ───────────────────────────────
   const filteredPrograms = useMemo(() => {
@@ -354,6 +447,22 @@ export function UninstallerPage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Uninstall Selected */}
+        {hasLoaded && selectedIds.size > 0 && (
+          <button
+            onClick={() => setConfirmBatch(true)}
+            disabled={uninstalling}
+            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-medium text-red-400 transition-all disabled:opacity-30"
+            style={{
+              background: 'rgba(239,68,68,0.06)',
+              border: '1px solid rgba(239,68,68,0.15)',
+            }}
+          >
+            <Trash2 className="h-4 w-4" strokeWidth={1.8} />
+            Uninstall Selected ({selectedIds.size})
+          </button>
         )}
       </div>
 
@@ -555,6 +664,29 @@ export function UninstallerPage() {
       {hasLoaded && !loading && filteredPrograms.length > 0 && (
         <div className="mb-6">
           <div className="mb-3 flex items-center gap-2.5">
+            <button
+              onClick={() => {
+                const store = useUninstallerStore.getState()
+                const allFilteredIds = filteredPrograms.map((p) => p.id)
+                const allSelected = allFilteredIds.every((id) => selectedIds.has(id))
+                if (allSelected) {
+                  store.clearSelected()
+                } else {
+                  store.selectAll(allFilteredIds)
+                }
+              }}
+              disabled={uninstalling}
+              className="text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-30"
+              title={filteredPrograms.every((p) => selectedIds.has(p.id)) ? 'Deselect all' : 'Select all'}
+            >
+              {filteredPrograms.length > 0 && filteredPrograms.every((p) => selectedIds.has(p.id)) ? (
+                <CheckSquare className="h-4.5 w-4.5 text-amber-400" strokeWidth={1.8} />
+              ) : filteredPrograms.some((p) => selectedIds.has(p.id)) ? (
+                <MinusSquare className="h-4.5 w-4.5 text-amber-400" strokeWidth={1.8} />
+              ) : (
+                <Square className="h-4.5 w-4.5" strokeWidth={1.8} />
+              )}
+            </button>
             {filterMode === 'unused' ? (
               <AlertTriangle className="h-4.5 w-4.5 text-amber-400" strokeWidth={1.8} />
             ) : (
@@ -569,15 +701,29 @@ export function UninstallerPage() {
           <div className="grid grid-cols-1 gap-2">
             {filteredPrograms.map((prog) => {
               const unused = isUnused(prog)
+              const isSelected = selectedIds.has(prog.id)
               return (
                 <div
                   key={prog.id}
                   className="flex items-center gap-4 rounded-2xl px-5 py-4 transition-colors"
                   style={{
-                    background: unused ? 'rgba(245,158,11,0.03)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${unused ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.04)'}`,
+                    background: isSelected
+                      ? 'rgba(245,158,11,0.06)'
+                      : unused ? 'rgba(245,158,11,0.03)' : 'rgba(255,255,255,0.02)',
+                    border: `1px solid ${isSelected ? 'rgba(245,158,11,0.15)' : unused ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.04)'}`,
                   }}
                 >
+                  <button
+                    onClick={() => useUninstallerStore.getState().toggleSelected(prog.id)}
+                    disabled={uninstalling}
+                    className="shrink-0 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-30"
+                  >
+                    {isSelected ? (
+                      <CheckSquare className="h-5 w-5 text-amber-400" strokeWidth={1.8} />
+                    ) : (
+                      <Square className="h-5 w-5" strokeWidth={1.8} />
+                    )}
+                  </button>
                   <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                     style={{ background: unused ? 'rgba(245,158,11,0.1)' : 'rgba(139,92,246,0.1)' }}
@@ -652,7 +798,7 @@ export function UninstallerPage() {
         </div>
       )}
 
-      {/* Confirm dialog */}
+      {/* Confirm dialog — single */}
       <ConfirmDialog
         open={!!confirmProgram}
         onConfirm={handleUninstall}
@@ -660,6 +806,21 @@ export function UninstallerPage() {
         title={`Uninstall ${confirmProgram?.displayName ?? ''}?`}
         description={`This will run the program's native uninstaller. After completion, Kudu will scan for and clean leftover files automatically.`}
         confirmLabel="Uninstall"
+        variant="danger"
+      />
+
+      {/* Confirm dialog — batch */}
+      <ConfirmDialog
+        open={confirmBatch}
+        onConfirm={handleBatchUninstall}
+        onCancel={() => setConfirmBatch(false)}
+        title={`Uninstall ${selectedIds.size} program${selectedIds.size !== 1 ? 's' : ''}?`}
+        description={`This will run each program's native uninstaller one by one. After each, Kudu will scan for and clean leftover files automatically.`}
+        details={programs
+          .filter((p) => selectedIds.has(p.id))
+          .map((p) => p.displayName)
+          .join(', ')}
+        confirmLabel={`Uninstall ${selectedIds.size}`}
         variant="danger"
       />
     </div>

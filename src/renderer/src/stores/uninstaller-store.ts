@@ -16,6 +16,7 @@ interface UninstallerState {
   sortField: SortField
   sortDirection: 'asc' | 'desc'
   filterMode: FilterMode
+  selectedIds: Set<string>
 
   setPrograms: (programs: InstalledProgram[]) => void
   setLoading: (loading: boolean) => void
@@ -29,6 +30,9 @@ interface UninstallerState {
   setSortDirection: (dir: 'asc' | 'desc') => void
   setFilterMode: (mode: FilterMode) => void
   removeProgram: (id: string) => void
+  toggleSelected: (id: string) => void
+  selectAll: (ids: string[]) => void
+  clearSelected: () => void
   reset: () => void
 }
 
@@ -47,8 +51,9 @@ export const useUninstallerStore = create<UninstallerState>((set) => ({
   sortField: 'displayName',
   sortDirection: 'asc',
   filterMode: 'all',
+  selectedIds: new Set<string>(),
 
-  setPrograms: (programs) => set({ programs }),
+  setPrograms: (programs) => set({ programs, selectedIds: new Set<string>() }),
   setLoading: (loading) => set({ loading }),
   setUninstalling: (uninstalling) => set({ uninstalling }),
   setProgress: (progress) => set({ progress }),
@@ -60,7 +65,20 @@ export const useUninstallerStore = create<UninstallerState>((set) => ({
   setSortDirection: (sortDirection) => set({ sortDirection }),
   setFilterMode: (filterMode) => set({ filterMode }),
   removeProgram: (id) =>
-    set((state) => ({ programs: state.programs.filter((p) => p.id !== id) })),
+    set((state) => {
+      const selectedIds = new Set(state.selectedIds)
+      selectedIds.delete(id)
+      return { programs: state.programs.filter((p) => p.id !== id), selectedIds }
+    }),
+  toggleSelected: (id) =>
+    set((state) => {
+      const selectedIds = new Set(state.selectedIds)
+      if (selectedIds.has(id)) selectedIds.delete(id)
+      else selectedIds.add(id)
+      return { selectedIds }
+    }),
+  selectAll: (ids) => set({ selectedIds: new Set(ids) }),
+  clearSelected: () => set({ selectedIds: new Set<string>() }),
   reset: () =>
     set({
       programs: [],
@@ -74,5 +92,6 @@ export const useUninstallerStore = create<UninstallerState>((set) => ({
       sortField: 'displayName',
       sortDirection: 'asc',
       filterMode: 'all',
+      selectedIds: new Set<string>(),
     }),
 }))
