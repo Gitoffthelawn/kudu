@@ -174,7 +174,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 ExecStart=${APPIMAGE_PATH} --no-sandbox --ozone-platform=headless --daemon
-Restart=on-failure
+Restart=always
 RestartSec=10
 Environment=HOME=/root
 Environment=APPIMAGE=${APPIMAGE_PATH}
