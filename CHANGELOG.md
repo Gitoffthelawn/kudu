@@ -1,3 +1,20 @@
+# [1.6.0](https://github.com/AdventDevInc/kudu/compare/v1.5.2...v1.6.0) (2026-03-16)
+
+
+### Bug Fixes
+
+* **darwin:** use socketfilterfw for reliable firewall status reporting ([49b198c](https://github.com/AdventDevInc/kudu/commit/49b198c70fec1a21bae88f7f3e99562480564f38))
+* handle winget installer-type-changed errors correctly ([1fee6c6](https://github.com/AdventDevInc/kudu/commit/1fee6c602045396866b7041051528f4b54e2b6a5))
+* **renderer:** improve privacy feedback, cross-platform updater labels, and window frame ([09eba37](https://github.com/AdventDevInc/kudu/commit/09eba37f100d10287ff1acace44da2b3682b96e1))
+* suppress interactive prompts in install.sh for unattended installs ([b7b9056](https://github.com/AdventDevInc/kudu/commit/b7b9056d14aec21c7a9d572454ec1c409243ae46))
+
+
+### Features
+
+* **darwin:** add elevated execution, startup deletion, and filter Apple apps ([61bcb28](https://github.com/AdventDevInc/kudu/commit/61bcb28f9362eb2a56e16e569dfb5408c0062500))
+* **dashboard:** comprehensive one-click scan with malware, privacy, and update checks ([1ee3ff1](https://github.com/AdventDevInc/kudu/commit/1ee3ff1b45de082f128718caab2bc7deee56597f))
+* **malware:** add macOS malware signatures, code signing, and plist analysis ([20995fe](https://github.com/AdventDevInc/kudu/commit/20995fed324878811566c478089621dd32e8e638))
+* **uninstaller:** add batch selection and multi-uninstall ([249c21d](https://github.com/AdventDevInc/kudu/commit/249c21d01883ef165df10c8df8f544b44b4903e7))
 ## [1.5.2](https://github.com/AdventDevInc/kudu/compare/v1.5.1...v1.5.2) (2026-03-16)
 
 
