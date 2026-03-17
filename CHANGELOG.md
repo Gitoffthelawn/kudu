@@ -1,3 +1,16 @@
+# [1.7.0](https://github.com/AdventDevInc/kudu/compare/v1.6.0...v1.7.0) (2026-03-17)
+
+
+### Bug Fixes
+
+* disable macOS code signing to prevent Team ID mismatch crash ([ec923d3](https://github.com/AdventDevInc/kudu/commit/ec923d38d31b6902d4af39ffb005de6d9cc3a795))
+* improve long-running stability and reduce resource usage ([d3ab953](https://github.com/AdventDevInc/kudu/commit/d3ab953eba14ed83f342d784da340a6cdbc545b6))
+* use Restart=always in systemd service so daemon restarts after auto-update ([2b9eabe](https://github.com/AdventDevInc/kudu/commit/2b9eabe515981e710de362bfeb3427e5d20634a4))
+
+
+### Features
+
+* **cloud:** add SSH hardening checks to health reports ([639e4a7](https://github.com/AdventDevInc/kudu/commit/639e4a71a6e9f2933f2f1e0cfd756f49ee7018e4))
 # [1.6.0](https://github.com/AdventDevInc/kudu/compare/v1.5.2...v1.6.0) (2026-03-16)
 
 
