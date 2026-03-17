@@ -110,6 +110,7 @@ export interface PlatformSecurity {
   collectUpdateStatus(): Promise<HealthReport['securityPosture']['windowsUpdate']>
   collectScreenLockStatus(): Promise<HealthReport['securityPosture']['screenLock']>
   collectPasswordPolicy(): Promise<HealthReport['securityPosture']['passwordPolicy']>
+  collectSshHardening(): Promise<HealthReport['securityPosture']['sshHardening']>
 }
 
 // ─── System Commands ────────────────────────────────────────

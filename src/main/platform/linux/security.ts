@@ -1,6 +1,6 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
-import { readFile, stat } from 'fs/promises'
+import { readFile, stat, readdir } from 'fs/promises'
 import type { PlatformSecurity } from '../types'
 import type { HealthReport } from '../../services/cloud-agent-types'
 
@@ -284,6 +284,92 @@ export function createLinuxSecurity(): PlatformSecurity {
         lockoutDurationMin,
         lockoutObservationMin: 0,
         windowsHello: { enrolled: false, faceEnabled: false, fingerprintEnabled: false, pinEnabled: false },
+      }
+    },
+
+    async collectSshHardening(): Promise<HealthReport['securityPosture']['sshHardening']> {
+      // Detect if this is a server (no graphical target)
+      let isServer = false
+      try {
+        const { stdout } = await execFileAsync('systemctl', ['get-default'], { timeout: 5_000 })
+        isServer = stdout.trim() === 'multi-user.target'
+      } catch {
+        // Fallback: check for graphical session env
+        isServer = !process.env.XDG_SESSION_TYPE || process.env.XDG_SESSION_TYPE === 'tty'
+      }
+
+      // Check if sshd is installed
+      let sshdInstalled = false
+      try {
+        await stat('/usr/sbin/sshd')
+        sshdInstalled = true
+      } catch {
+        try {
+          await stat('/usr/bin/sshd')
+          sshdInstalled = true
+        } catch { /* not installed */ }
+      }
+
+      if (!sshdInstalled) {
+        return {
+          isServer,
+          sshdInstalled: false,
+          passwordAuthDisabled: false,
+          rootLoginDisabled: false,
+          pubkeyAuthEnabled: false,
+          emptyPasswordsDisabled: false,
+          protocol2Only: true,
+        }
+      }
+
+      // Parse sshd_config and drop-ins (drop-ins override the main file)
+      const config = new Map<string, string>()
+
+      async function parseSshdConfig(path: string): Promise<void> {
+        try {
+          const content = await readFile(path, 'utf-8')
+          for (const line of content.split('\n')) {
+            const trimmed = line.trim()
+            if (!trimmed || trimmed.startsWith('#')) continue
+            // Match directives with optional "Match" blocks — we only care about global scope
+            if (/^match\s/i.test(trimmed)) break // stop at first Match block
+            const match = trimmed.match(/^(\S+)\s+(.+)/)
+            if (match) {
+              config.set(match[1].toLowerCase(), match[2].trim())
+            }
+          }
+        } catch { /* file not readable */ }
+      }
+
+      // Main config first
+      await parseSshdConfig('/etc/ssh/sshd_config')
+
+      // Then drop-ins (alphabetical order, later files override)
+      try {
+        const dropInDir = '/etc/ssh/sshd_config.d'
+        const files = await readdir(dropInDir)
+        const confFiles = files.filter(f => f.endsWith('.conf')).sort()
+        for (const f of confFiles) {
+          await parseSshdConfig(`${dropInDir}/${f}`)
+        }
+      } catch { /* no drop-in directory */ }
+
+      const getVal = (key: string): string | undefined => config.get(key.toLowerCase())
+
+      const passwordAuth = getVal('passwordauthentication')
+      const rootLogin = getVal('permitrootlogin')
+      const pubkeyAuth = getVal('pubkeyauthentication')
+      const emptyPasswords = getVal('permitemptypasswords')
+      const protocol = getVal('protocol')
+
+      return {
+        isServer,
+        sshdInstalled: true,
+        passwordAuthDisabled: passwordAuth === 'no',
+        rootLoginDisabled: rootLogin === 'no' || rootLogin === 'prohibit-password',
+        pubkeyAuthEnabled: pubkeyAuth !== 'no', // defaults to yes
+        emptyPasswordsDisabled: emptyPasswords !== 'yes', // defaults to no
+        protocol2Only: !protocol || protocol === '2', // modern sshd only supports 2
       }
     },
   }

@@ -198,5 +198,14 @@ export interface HealthReport {
         pinEnabled: boolean              // Windows Hello PIN provider active
       }
     }
+    sshHardening: {
+      isServer: boolean                  // true if system appears to be a server (no GUI)
+      sshdInstalled: boolean             // whether sshd is present
+      passwordAuthDisabled: boolean      // PasswordAuthentication no
+      rootLoginDisabled: boolean         // PermitRootLogin no or prohibit-password
+      pubkeyAuthEnabled: boolean         // PubkeyAuthentication yes
+      emptyPasswordsDisabled: boolean    // PermitEmptyPasswords no
+      protocol2Only: boolean             // Protocol 2 (legacy check, modern sshd defaults to 2)
+    } | null                             // null when not applicable (e.g. Windows desktop)
   }
 }

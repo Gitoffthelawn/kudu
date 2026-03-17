@@ -231,5 +231,9 @@ export function createWin32Security(): PlatformSecurity {
         },
       }
     },
+
+    async collectSshHardening(): Promise<HealthReport['securityPosture']['sshHardening']> {
+      return null
+    },
   }
 }

@@ -188,5 +188,9 @@ export function createDarwinSecurity(): PlatformSecurity {
         }
       }
     },
+
+    async collectSshHardening(): Promise<HealthReport['securityPosture']['sshHardening']> {
+      return null
+    },
   }
 }
