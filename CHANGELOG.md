@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/adventdevinc/kudu/compare/v1.9.0...v1.10.0) (2026-03-17)
+
+
+### Bug Fixes
+
+* **macos:** fix tray icon, dock restore, and expand malware scanner coverage ([25e74d1](https://github.com/adventdevinc/kudu/commit/25e74d10f0f0a3252eaf9265cbda2cbcc745973b))
+* use path.win32.join for consistent backslash separators in win32 paths ([5d25238](https://github.com/adventdevinc/kudu/commit/5d25238644e8a449e10361aba1e18ee00174f4d0))
+
+
+### Features
+
+* enhance malware scanner with expanded detection and add tests ([4065011](https://github.com/adventdevinc/kudu/commit/406501127d73f3b7f6df64ce3b6db568cbfa7d8f))
 # [1.9.0](https://github.com/adventdevinc/kudu/compare/v1.8.1...v1.9.0) (2026-03-17)
 
 
