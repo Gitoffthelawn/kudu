@@ -159,7 +159,16 @@ export function createDarwinPaths(): PlatformPaths {
         join(LIBRARY, 'LaunchDaemons'),
         '/Library/LaunchAgents',
         '/Library/LaunchDaemons',
+        '/Library/StartupItems',
         join(HOME, '.local', 'bin'),
+        // Application Scripts — sandboxed apps can run scripts here
+        join(LIBRARY, 'Application Scripts'),
+        // Automator services/workflows can execute arbitrary code
+        join(LIBRARY, 'Services'),
+        join(LIBRARY, 'Workflows'),
+        // Common locations for user-installed binaries (malware drops here too)
+        '/usr/local/bin',
+        '/opt/local/bin',
       ]
     },
 

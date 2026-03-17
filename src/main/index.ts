@@ -65,6 +65,15 @@ function getIconPath(): string {
     : join(__dirname, `../../resources/icon.${ext}`)
 }
 
+function getTrayIconPath(): string {
+  // macOS menu-bar icons should be small PNGs marked as template images,
+  // not .icns files (which are for application icons).
+  const ext = process.platform === 'win32' ? 'ico' : 'png'
+  return app.isPackaged
+    ? join(process.resourcesPath, `icon.${ext}`)
+    : join(__dirname, `../../resources/icon.${ext}`)
+}
+
 const TASK_NAME = 'KuduStartup'
 
 async function applyAutoLaunchWin32(enabled: boolean): Promise<void> {
@@ -124,9 +133,14 @@ function applyAutoLaunch(enabled: boolean): void {
 function createTray(): void {
   if (tray) return
 
-  const icon = nativeImage.createFromPath(getIconPath())
+  const icon = nativeImage.createFromPath(getTrayIconPath())
   // Resize for tray (16x16 on most platforms)
   const trayIcon = icon.resize({ width: 16, height: 16 })
+  // macOS menu-bar icons must be template images so they adapt to
+  // light/dark mode and actually render in the menu bar.
+  if (process.platform === 'darwin') {
+    trayIcon.setTemplateImage(true)
+  }
 
   tray = new Tray(trayIcon)
   tray.setToolTip('Kudu')
@@ -320,7 +334,11 @@ app.whenReady().then(() => {
   })
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      // Window exists but may be hidden (minimize-to-tray) — restore it
+      mainWindow.show()
+      mainWindow.focus()
+    } else if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
     }
   })
