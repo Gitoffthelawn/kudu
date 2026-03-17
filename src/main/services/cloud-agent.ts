@@ -711,23 +711,7 @@ class CloudAgentService {
 
     const cmd = raw as CloudCommand
 
-    const allowedTypes = new Set([
-      'scan', 'clean', 'software-update-check', 'software-update-run',
-      'get-status', 'get-system-info', 'get-health-report',
-      'shutdown', 'restart', 'windows-update-check', 'windows-update-install',
-      'run-sfc', 'run-dism', 'get-network-config', 'get-event-log', 'get-installed-apps',
-      // Phase 1: Fleet essentials
-      'driver-update-scan', 'driver-update-install', 'driver-clean',
-      'startup-list', 'startup-toggle', 'disk-health',
-      // Phase 2: Compliance & security
-      'privacy-scan', 'privacy-apply', 'debloater-scan', 'debloater-remove',
-      'service-scan', 'service-apply',
-      // Phase 3: Maintenance
-      'malware-quarantine', 'malware-delete', 'registry-scan', 'registry-fix',
-      // Phase 4: Threat monitoring
-      'update-threat-blacklist', 'get-threat-status',
-    ])
-    if (!('type' in cmd) || !allowedTypes.has(cmd.type)) return
+    if (!('type' in cmd) || !CloudAgentService.ALLOWED_COMMAND_TYPES.has(cmd.type)) return
     if (!('requestId' in cmd) || typeof cmd.requestId !== 'string' || cmd.requestId.length > 200) return
 
     // Deduplicate — Pusher reconnects can re-deliver the same event.
@@ -740,13 +724,22 @@ class CloudAgentService {
       cloudLog('DEBUG', `Ignoring duplicate command requestId=${cmd.requestId}`)
       return
     }
-    this.processedRequestIds.set(cmd.requestId, now)
-    // Evict expired entries (older than TTL)
-    if (this.processedRequestIds.size > 200) {
+    // Evict expired entries before inserting to keep the map bounded
+    if (this.processedRequestIds.size >= 200) {
       for (const [id, ts] of this.processedRequestIds) {
         if (now - ts > REQUEST_ID_TTL_MS) this.processedRequestIds.delete(id)
       }
+      // If still at capacity after eviction, drop oldest entries
+      if (this.processedRequestIds.size >= 200) {
+        const excess = this.processedRequestIds.size - 199
+        const keys = this.processedRequestIds.keys()
+        for (let i = 0; i < excess; i++) {
+          const key = keys.next().value
+          if (key !== undefined) this.processedRequestIds.delete(key)
+        }
+      }
     }
+    this.processedRequestIds.set(cmd.requestId, now)
 
     this.lastCommandAt = new Date().toISOString()
 
@@ -958,6 +951,7 @@ class CloudAgentService {
           windowsUpdate: { recentPatches: [], lastPatchDate: null, daysSinceLastPatch: null },
           screenLock: { screenSaverEnabled: false, lockOnResume: false, timeoutSec: null, inactivityLockSec: null },
           passwordPolicy: { minLength: 0, maxAgeDays: 0, minAgeDays: 0, historyCount: 0, complexityRequired: false, lockoutThreshold: 0, lockoutDurationMin: 0, lockoutObservationMin: 0, windowsHello: { enrolled: false, faceEnabled: false, fingerprintEnabled: false, pinEnabled: false } },
+          sshHardening: null,
         },
       }
 
@@ -1023,13 +1017,14 @@ class CloudAgentService {
 
   private async collectSecurityPosture(): Promise<HealthReport['securityPosture']> {
     const security = getPlatform().security
-    const [av, fw, bl, wu, sl, pp] = await Promise.allSettled([
+    const [av, fw, bl, wu, sl, pp, ssh] = await Promise.allSettled([
       security.collectAntivirusStatus(),
       security.collectFirewallStatus(),
       security.collectDiskEncryptionStatus(),
       security.collectUpdateStatus(),
       security.collectScreenLockStatus(),
       security.collectPasswordPolicy(),
+      security.collectSshHardening(),
     ])
 
     return {
@@ -1039,6 +1034,7 @@ class CloudAgentService {
       windowsUpdate: wu.status === 'fulfilled' ? wu.value : { recentPatches: [], lastPatchDate: null, daysSinceLastPatch: null },
       screenLock: sl.status === 'fulfilled' ? sl.value : { screenSaverEnabled: false, lockOnResume: false, timeoutSec: null, inactivityLockSec: null },
       passwordPolicy: pp.status === 'fulfilled' ? pp.value : { minLength: 0, maxAgeDays: 0, minAgeDays: 0, historyCount: 0, complexityRequired: false, lockoutThreshold: 0, lockoutDurationMin: 0, lockoutObservationMin: 0, windowsHello: { enrolled: false, faceEnabled: false, fingerprintEnabled: false, pinEnabled: false } },
+      sshHardening: ssh.status === 'fulfilled' ? ssh.value : null,
     }
   }
 
@@ -1134,12 +1130,18 @@ class CloudAgentService {
     }
   }
 
+  private static readonly THREAT_PENDING_MAX = 500
+
   /** Queue a threat alert, rate-limited to avoid overwhelming the cloud */
   private queueThreatAlert(snapshot: ThreatSnapshot): void {
     // Merge new items into any pending batch
     if (this.threatAlertPending) {
-      this.threatAlertPending.flaggedConnections.push(...snapshot.flaggedConnections)
-      this.threatAlertPending.flaggedDns.push(...snapshot.flaggedDns)
+      if (this.threatAlertPending.flaggedConnections.length < CloudAgentService.THREAT_PENDING_MAX) {
+        this.threatAlertPending.flaggedConnections.push(...snapshot.flaggedConnections)
+      }
+      if (this.threatAlertPending.flaggedDns.length < CloudAgentService.THREAT_PENDING_MAX) {
+        this.threatAlertPending.flaggedDns.push(...snapshot.flaggedDns)
+      }
       this.threatAlertPending.blacklistVersion = snapshot.blacklistVersion
       this.threatAlertPending.lastConnectionScanAt = snapshot.lastConnectionScanAt
       this.threatAlertPending.lastDnsScanAt = snapshot.lastDnsScanAt
@@ -1238,6 +1240,19 @@ class CloudAgentService {
     }
     return null
   }
+
+  private static readonly ALLOWED_COMMAND_TYPES: ReadonlySet<string> = new Set([
+    'scan', 'clean', 'software-update-check', 'software-update-run',
+    'get-status', 'get-system-info', 'get-health-report',
+    'shutdown', 'restart', 'windows-update-check', 'windows-update-install',
+    'run-sfc', 'run-dism', 'get-network-config', 'get-event-log', 'get-installed-apps',
+    'driver-update-scan', 'driver-update-install', 'driver-clean',
+    'startup-list', 'startup-toggle', 'disk-health',
+    'privacy-scan', 'privacy-apply', 'debloater-scan', 'debloater-remove',
+    'service-scan', 'service-apply',
+    'malware-quarantine', 'malware-delete', 'registry-scan', 'registry-fix',
+    'update-threat-blacklist', 'get-threat-status',
+  ])
 
   /** Commands that only read data and can safely run in parallel */
   private static readonly PARALLEL_SAFE: ReadonlySet<string> = new Set([

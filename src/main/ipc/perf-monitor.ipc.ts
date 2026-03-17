@@ -33,16 +33,42 @@ const PROTECTED_PROCESS_NAMES = new Set([
   'xwayland',         // XWayland display server
 ])
 
-export function registerPerfMonitorIpc(): void {
+export function registerPerfMonitorIpc(getWindow: () => Electron.BrowserWindow | null): void {
   const service = new PerfMonitorService()
+
+  // Track whether the renderer explicitly requested monitoring so we can
+  // auto-pause when the window is hidden and resume when shown again.
+  let rendererRequestedMonitoring = false
+  let attachedWindowId: number | null = null
+
+  function attachWindowListeners(win: Electron.BrowserWindow): void {
+    if (win.id === attachedWindowId) return
+    attachedWindowId = win.id
+
+    win.on('hide', () => {
+      if (rendererRequestedMonitoring) service.stopMonitoring()
+    })
+    win.on('show', () => {
+      if (rendererRequestedMonitoring && !win.webContents.isDestroyed()) {
+        service.startMonitoring(win.webContents)
+      }
+    })
+  }
 
   ipcMain.handle(IPC.PERF_GET_SYSTEM_INFO, () => service.getSystemInfo())
 
   ipcMain.handle(IPC.PERF_START_MONITORING, (event) => {
+    rendererRequestedMonitoring = true
+
+    // Attach hide/show listeners to the current window if not already attached
+    const win = getWindow()
+    if (win) attachWindowListeners(win)
+
     return service.startMonitoring(event.sender)
   })
 
   ipcMain.handle(IPC.PERF_STOP_MONITORING, () => {
+    rendererRequestedMonitoring = false
     service.stopMonitoring()
   })
 

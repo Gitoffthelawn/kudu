@@ -20,6 +20,9 @@ export class PerfMonitorService {
   private sender: Electron.WebContents | null = null
   private cachedSystemInfo: PerfSystemInfo | null = null
   private startupExeMap: Map<string, string> = new Map()
+  // Guards to prevent overlapping async calls from piling up if si hangs
+  private snapshotRunning = false
+  private processesRunning = false
 
   async getSystemInfo(): Promise<PerfSystemInfo> {
     if (this.cachedSystemInfo) return this.cachedSystemInfo
@@ -71,8 +74,8 @@ export class PerfMonitorService {
     // Collect immediately
     this.collectSnapshot()
 
-    // Slow interval: process list every 5s
-    this.slowTimer = setInterval(() => this.collectProcesses(), 5000)
+    // Slow interval: process list every 10s (si.processes() is expensive)
+    this.slowTimer = setInterval(() => this.collectProcesses(), 10000)
     this.collectProcesses()
   }
 
@@ -202,6 +205,8 @@ export class PerfMonitorService {
       this.stopMonitoring()
       return
     }
+    if (this.snapshotRunning) return
+    this.snapshotRunning = true
 
     try {
       const [load, mem, disk, net] = await Promise.all([
@@ -239,6 +244,8 @@ export class PerfMonitorService {
       }
     } catch {
       // Silently skip failed ticks
+    } finally {
+      this.snapshotRunning = false
     }
   }
 
@@ -247,6 +254,8 @@ export class PerfMonitorService {
       this.stopMonitoring()
       return
     }
+    if (this.processesRunning) return
+    this.processesRunning = true
 
     try {
       const [data, mem] = await Promise.all([si.processes(), si.mem()])
@@ -287,6 +296,8 @@ export class PerfMonitorService {
       }
     } catch {
       // Silently skip failed ticks
+    } finally {
+      this.processesRunning = false
     }
   }
 }

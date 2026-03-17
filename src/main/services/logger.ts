@@ -15,6 +15,7 @@ const LOG_FILE_OLD = join(LOG_DIR, 'kudu.old.log')
 const CLOUD_LOG_FILE = join(LOG_DIR, 'cloud-agent.log')
 const CLOUD_LOG_FILE_OLD = join(LOG_DIR, 'cloud-agent.old.log')
 const MAX_LOG_SIZE = 5 * 1024 * 1024 // 5 MB
+const ROTATION_CHECK_INTERVAL_MS = 60_000 // only stat the file every 60s
 
 try {
   mkdirSync(LOG_DIR, { recursive: true })
@@ -22,7 +23,14 @@ try {
   // Ignore
 }
 
+const lastRotationCheck = new Map<string, number>()
+
 function rotateIfNeeded(file: string, oldFile: string): void {
+  const now = Date.now()
+  const lastCheck = lastRotationCheck.get(file) ?? 0
+  if (now - lastCheck < ROTATION_CHECK_INTERVAL_MS) return
+
+  lastRotationCheck.set(file, now)
   try {
     const stats = statSync(file)
     if (stats.size > MAX_LOG_SIZE) {

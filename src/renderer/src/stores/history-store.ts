@@ -41,7 +41,12 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   }
 }))
 
-// Auto-refresh when main process signals a new entry was added
-window.kudu.onHistoryChanged(() => {
-  useHistoryStore.getState().load()
-})
+// Auto-refresh when main process signals a new entry was added.
+// Guard against duplicate listeners on HMR reload.
+let _historyListenerRegistered = false
+if (!_historyListenerRegistered) {
+  _historyListenerRegistered = true
+  window.kudu.onHistoryChanged(() => {
+    useHistoryStore.getState().load()
+  })
+}

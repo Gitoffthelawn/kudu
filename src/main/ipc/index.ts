@@ -45,7 +45,7 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
   registerUninstallLeftoversIpc(getWindow)
   registerPrivacyShieldIpc(getWindow)
   registerDriverManagerIpc(getWindow)
-  registerPerfMonitorIpc()
+  registerPerfMonitorIpc(getWindow)
   registerProgramUninstallerIpc(getWindow)
   registerServiceManagerIpc(getWindow)
   registerSoftwareUpdaterIpc(getWindow)

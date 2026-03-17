@@ -6,6 +6,8 @@ import type { ThreatBlacklist, FlaggedConnection, FlaggedDnsEntry, ThreatSnapsho
 const CONNECTION_INTERVAL_MS = 30_000
 const DNS_INTERVAL_MS = 60_000
 const MAX_ACCUMULATED = 500
+const SEEN_TTL_MS = 4 * 60 * 60 * 1000 // 4 hours
+const SEEN_MAX_SIZE = 10_000
 
 // ─── CIDR Matching Helpers ──────────────────────────────────
 
@@ -117,6 +119,10 @@ class ThreatMonitorService {
   private connectionTimer: ReturnType<typeof setInterval> | null = null
   private dnsTimer: ReturnType<typeof setInterval> | null = null
 
+  // Guards to prevent overlapping scans (PowerShell can be slow)
+  private connectionScanRunning = false
+  private dnsScanRunning = false
+
   // Blacklist and precomputed lookup structures
   private blacklist: ThreatBlacklist | null = null
   private ipSet: Set<string> = new Set()
@@ -129,9 +135,9 @@ class ThreatMonitorService {
   private lastConnectionScanAt: string | null = null
   private lastDnsScanAt: string | null = null
 
-  // Dedup sets to avoid repeated alerts for the same connection/domain
-  private seenConnections: Set<string> = new Set()
-  private seenDomains: Set<string> = new Set()
+  // Dedup maps to avoid repeated alerts for the same connection/domain (with TTL)
+  private seenConnections: Map<string, number> = new Map()
+  private seenDomains: Map<string, number> = new Map()
 
   // Callback fired immediately when new threats are detected
   private onThreatDetected: ThreatCallback | null = null
@@ -237,10 +243,15 @@ class ThreatMonitorService {
   }
 
   private async scanConnections(): Promise<void> {
+    if (this.connectionScanRunning) return
+    this.connectionScanRunning = true
     try {
       const connections = await getPlatform().network.getEstablishedConnections()
       this.lastConnectionScanAt = new Date().toISOString()
       const newFlags: FlaggedConnection[] = []
+      const now = Date.now()
+
+      this.evictExpired(this.seenConnections)
 
       for (const conn of connections) {
         if (this.flaggedConnections.length + newFlags.length >= MAX_ACCUMULATED) break
@@ -250,7 +261,7 @@ class ThreatMonitorService {
 
         const match = this.matchIp(conn.remoteAddress)
         if (match) {
-          this.seenConnections.add(dedupKey)
+          this.seenConnections.set(dedupKey, now)
           newFlags.push({
             remoteAddress: conn.remoteAddress,
             remotePort: conn.remotePort,
@@ -268,14 +279,21 @@ class ThreatMonitorService {
       }
     } catch (err) {
       logError(`Threat monitor connection scan error: ${err instanceof Error ? err.message : err}`)
+    } finally {
+      this.connectionScanRunning = false
     }
   }
 
   private async scanDns(): Promise<void> {
+    if (this.dnsScanRunning) return
+    this.dnsScanRunning = true
     try {
       const entries = await getPlatform().network.getDnsCacheEntries()
       this.lastDnsScanAt = new Date().toISOString()
       const newFlags: FlaggedDnsEntry[] = []
+      const now = Date.now()
+
+      this.evictExpired(this.seenDomains)
 
       for (const entry of entries) {
         if (this.flaggedDns.length + newFlags.length >= MAX_ACCUMULATED) break
@@ -285,7 +303,7 @@ class ThreatMonitorService {
 
         // Check domain against domain blacklist
         if (this.domainSet.has(domain)) {
-          this.seenDomains.add(domain)
+          this.seenDomains.set(domain, now)
           newFlags.push({
             domain: entry.domain,
             resolvedAddress: entry.resolvedAddress,
@@ -299,7 +317,7 @@ class ThreatMonitorService {
         if (entry.resolvedAddress) {
           const match = this.matchIp(entry.resolvedAddress)
           if (match) {
-            this.seenDomains.add(domain)
+            this.seenDomains.set(domain, now)
             newFlags.push({
               domain: entry.domain,
               resolvedAddress: entry.resolvedAddress,
@@ -316,6 +334,8 @@ class ThreatMonitorService {
       }
     } catch (err) {
       logError(`Threat monitor DNS scan error: ${err instanceof Error ? err.message : err}`)
+    } finally {
+      this.dnsScanRunning = false
     }
   }
 
@@ -332,6 +352,19 @@ class ThreatMonitorService {
       })
     } catch {
       // Never let callback errors break the monitor
+    }
+  }
+
+  private evictExpired(map: Map<string, number>): void {
+    const now = Date.now()
+    const cutoff = now - SEEN_TTL_MS
+    // Always evict expired entries; also hard-cap to prevent runaway growth
+    if (map.size > SEEN_MAX_SIZE) {
+      map.clear()
+      return
+    }
+    for (const [key, ts] of map) {
+      if (ts < cutoff) map.delete(key)
     }
   }
 

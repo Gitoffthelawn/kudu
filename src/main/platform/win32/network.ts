@@ -10,25 +10,52 @@ export function createWin32Network(): PlatformNetwork {
   return {
     async getEstablishedConnections(): Promise<ActiveConnection[]> {
       try {
-        const { stdout } = await execFileAsync('powershell.exe', [
-          '-NoProfile', '-NonInteractive', '-Command',
-          'Get-NetTCPConnection -State Established | Select-Object RemoteAddress,RemotePort,OwningProcess | ConvertTo-Json -Compress',
+        // Use native netstat instead of PowerShell — starts instantly, uses ~1MB
+        // vs PowerShell's ~80MB and 2-5s startup. This runs every 30s.
+        const { stdout } = await execFileAsync('netstat', [
+          '-ano', '-p', 'tcp',
         ], { timeout: 15_000, windowsHide: true })
 
-        const trimmed = stdout.trim()
-        if (!trimmed) return []
+        const results: ActiveConnection[] = []
+        for (const line of stdout.split('\n')) {
+          // Lines look like: "  TCP    10.0.0.5:45678     93.184.216.34:443  ESTABLISHED     1234"
+          const trimmed = line.trim()
+          if (!trimmed.startsWith('TCP')) continue
+          if (!trimmed.includes('ESTABLISHED')) continue
 
-        const raw = JSON.parse(trimmed)
-        const items: Array<{ RemoteAddress: string; RemotePort: number; OwningProcess: number }> =
-          Array.isArray(raw) ? raw : [raw]
+          const cols = trimmed.split(/\s+/)
+          // cols: [TCP, localAddr, foreignAddr, ESTABLISHED, PID]
+          if (cols.length < 5) continue
 
-        return items
-          .filter((c) => !LOOPBACK.has(c.RemoteAddress))
-          .map((c) => ({
-            remoteAddress: c.RemoteAddress,
-            remotePort: c.RemotePort,
-            pid: c.OwningProcess ?? null,
-          }))
+          const foreign = cols[2]
+          const pidStr = cols[4]
+
+          // Parse foreign address — handle IPv6 bracket notation and plain IPv4
+          let remoteAddress: string
+          let remotePort: number
+
+          if (foreign.startsWith('[')) {
+            // IPv6: [addr]:port
+            const closeBracket = foreign.indexOf(']')
+            if (closeBracket === -1) continue
+            remoteAddress = foreign.slice(1, closeBracket)
+            remotePort = parseInt(foreign.slice(closeBracket + 2), 10)
+          } else {
+            // IPv4: addr:port
+            const lastColon = foreign.lastIndexOf(':')
+            if (lastColon === -1) continue
+            remoteAddress = foreign.slice(0, lastColon)
+            remotePort = parseInt(foreign.slice(lastColon + 1), 10)
+          }
+
+          if (isNaN(remotePort)) continue
+          if (LOOPBACK.has(remoteAddress)) continue
+
+          const pid = parseInt(pidStr, 10)
+          results.push({ remoteAddress, remotePort, pid: isNaN(pid) ? null : pid })
+        }
+
+        return results
       } catch {
         return []
       }
