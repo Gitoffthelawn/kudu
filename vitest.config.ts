@@ -7,7 +7,7 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
     reporters: ['verbose'],
-    pool: 'forks',
+    pool: 'threads',
   },
   resolve: {
     alias: {

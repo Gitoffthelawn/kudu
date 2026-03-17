@@ -65,14 +65,14 @@ export function initAutoUpdater(opts: InitOptions = {}): void {
     broadcast({ state: 'downloaded', version: info.version })
     if (daemonMode) {
       process.stdout.write(`[${new Date().toISOString()}] [updater] Installing v${info.version} and restarting...\n`)
-      autoUpdater.quitAndInstall(false, true)
+      autoUpdater.quitAndInstall(true, true)
       return
     }
     // GUI mode: auto-restart if the user opted in
     const current = getSettings()
     if (current.autoRestart) {
       console.log(`Auto-updater: auto-restart enabled, installing v${info.version} and restarting...`)
-      autoUpdater.quitAndInstall(false, true)
+      autoUpdater.quitAndInstall(true, true)
     }
   })
 
@@ -120,7 +120,7 @@ export function downloadUpdate(): Promise<void> {
 
 export function installUpdate(): void {
   if (!app.isPackaged) return
-  autoUpdater.quitAndInstall(false, true)
+  autoUpdater.quitAndInstall(true, true)
 }
 
 export function getUpdateStatus(): UpdateStatus {

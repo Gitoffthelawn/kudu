@@ -223,9 +223,31 @@ export interface MalwareThreat {
   selected: boolean
 }
 
+export type MalwareScanStep =
+  | 'init'
+  | 'discovering'
+  | 'signatures'
+  | 'heuristics'
+  | 'scripts'
+  | 'system'
+  | 'persistence'
+  | 'defender'
+  | 'complete'
+
+export interface MalwareCategoryProgress {
+  id: MalwareScanStep
+  label: string
+  status: 'pending' | 'running' | 'done' | 'skipped'
+  /** 0-100 within this category */
+  progress: number
+  threatsFound: number
+  itemsScanned: number
+  totalItems: number
+}
+
 export interface MalwareScanProgress {
   phase: 'scanning' | 'quarantining' | 'deleting'
-  step: 'init' | 'discovering' | 'signatures' | 'heuristics' | 'defender' | 'complete'
+  step: MalwareScanStep
   stepLabel: string
   currentPath: string
   progress: number
@@ -234,6 +256,8 @@ export interface MalwareScanProgress {
   totalFiles: number
   engine: string
   completedSteps: string[]
+  /** Per-category progress for the multi-phase UI */
+  categories: MalwareCategoryProgress[]
 }
 
 export interface MalwareScanResult {
