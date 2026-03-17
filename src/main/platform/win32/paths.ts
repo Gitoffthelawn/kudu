@@ -1,4 +1,5 @@
-import { join } from 'path'
+import path from 'path'
+const { join } = path.win32
 import { homedir } from 'os'
 import type { PlatformPaths, CleanTarget, BrowserPathConfig, AppCacheDef, UninstallLeftoverDir } from '../types'
 
