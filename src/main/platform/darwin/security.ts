@@ -7,6 +7,7 @@ const execFileAsync = promisify(execFile)
 
 export function createDarwinSecurity(): PlatformSecurity {
   return {
+    async isServer() { return false },
     async collectAntivirusStatus(): Promise<HealthReport['securityPosture']['antivirus']> {
       // macOS has XProtect built-in — try multiple known paths (varies by macOS version)
       const xprotectPaths = [

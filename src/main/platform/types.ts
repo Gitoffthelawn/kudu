@@ -104,6 +104,7 @@ export interface PlatformElevation {
 // ─── Security Posture ───────────────────────────────────────
 
 export interface PlatformSecurity {
+  isServer(): Promise<boolean>
   collectAntivirusStatus(): Promise<HealthReport['securityPosture']['antivirus']>
   collectFirewallStatus(): Promise<HealthReport['securityPosture']['firewall']>
   collectDiskEncryptionStatus(): Promise<HealthReport['securityPosture']['bitlocker']>

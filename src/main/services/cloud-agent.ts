@@ -188,6 +188,7 @@ class CloudAgentService {
         appVersion: app.getVersion(),
         hostname: hostname(),
         os: osInfo.distro,
+        isServer: await getPlatform().security.isServer(),
       })
 
       setSettings({ cloud: { ...settings.cloud, apiKey } })
@@ -262,6 +263,7 @@ class CloudAgentService {
         appVersion: app.getVersion(),
         hostname: hostname(),
         os: osInfo.distro,
+        isServer: await getPlatform().security.isServer(),
       })
       this.connect()
       this.reconnectAttempts = 0

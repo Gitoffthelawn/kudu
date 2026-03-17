@@ -14,12 +14,47 @@ async function isServerMode(): Promise<boolean> {
   if (cachedIsServer !== null && Date.now() - cachedIsServerAt < IS_SERVER_TTL_MS) return cachedIsServer
   try {
     const { stdout } = await execFileAsync('systemctl', ['get-default'], { timeout: 5_000 })
-    cachedIsServer = stdout.trim() === 'multi-user.target'
+    const target = stdout.trim()
+    if (target === 'multi-user.target') {
+      cachedIsServer = true
+    } else if (target === 'graphical.target') {
+      // graphical.target can be set even on headless servers (e.g. Ubuntu with
+      // desktop packages installed but no display server running).  Check if a
+      // graphical session is actually active via loginctl.
+      cachedIsServer = !(await hasGraphicalSession())
+    } else {
+      cachedIsServer = true // rescue, emergency, etc.
+    }
   } catch {
     cachedIsServer = !process.env.XDG_SESSION_TYPE || process.env.XDG_SESSION_TYPE === 'tty'
   }
   cachedIsServerAt = Date.now()
   return cachedIsServer
+}
+
+/** Return true if loginctl reports at least one x11 or wayland session. */
+async function hasGraphicalSession(): Promise<boolean> {
+  try {
+    const { stdout } = await execFileAsync(
+      'loginctl', ['list-sessions', '--no-legend', '--no-pager'],
+      { timeout: 5_000 },
+    )
+    // Each line is: SESSION UID USER SEAT TTY
+    // Fetch the Type property for each session id.
+    for (const line of stdout.trim().split('\n')) {
+      const sessionId = line.trim().split(/\s+/)[0]
+      if (!sessionId) continue
+      try {
+        const { stdout: typeLine } = await execFileAsync(
+          'loginctl', ['show-session', sessionId, '--property=Type', '--value'],
+          { timeout: 3_000 },
+        )
+        const t = typeLine.trim()
+        if (t === 'x11' || t === 'wayland') return true
+      } catch { /* skip individual session errors */ }
+    }
+  } catch { /* loginctl not available — fall through */ }
+  return false
 }
 
 /** Check multiple candidate paths and return the first that exists, or null. */
@@ -35,6 +70,7 @@ async function findBinary(candidates: string[]): Promise<string | null> {
 
 export function createLinuxSecurity(): PlatformSecurity {
   return {
+    isServer: isServerMode,
     async collectAntivirusStatus(): Promise<HealthReport['securityPosture']['antivirus']> {
       const products: HealthReport['securityPosture']['antivirus']['products'] = []
       let primary: string | null = null

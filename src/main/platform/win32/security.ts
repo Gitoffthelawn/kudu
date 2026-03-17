@@ -7,6 +7,7 @@ const execFileAsync = promisify(execFile)
 
 export function createWin32Security(): PlatformSecurity {
   return {
+    async isServer() { return false },
     async collectAntivirusStatus(): Promise<HealthReport['securityPosture']['antivirus']> {
       const { stdout } = await execFileAsync('powershell.exe', [
         '-NoProfile', '-NonInteractive', '-Command',
