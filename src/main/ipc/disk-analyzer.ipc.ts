@@ -2,7 +2,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import { readdir, stat } from 'fs/promises'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
-import { join } from 'path'
+import { join, basename, sep } from 'path'
 import { IPC } from '../../shared/channels'
 import { extname } from 'path'
 import type { DiskNode, DriveInfo, FileTypeInfo } from '../../shared/types'
@@ -21,7 +21,7 @@ async function analyzeDirectory(
   mainWindow: BrowserWindow | null
 ): Promise<DiskNode> {
   const node: DiskNode = {
-    name: dirPath.split('\\').pop() || dirPath,
+    name: basename(dirPath) || dirPath,
     path: dirPath,
     size: 0,
     children: []
@@ -134,27 +134,56 @@ async function quickSize(dirPath: string): Promise<number> {
 // ── Exported core logic ──
 
 export async function getDrives(): Promise<DriveInfo[]> {
-  try {
-    const { stdout } = await execFileAsync('powershell.exe', [
-      '-NoProfile',
-      '-Command',
-      `$fixed = (Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 }).DeviceID -replace ':',''; Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Used -ne $null -and $fixed -contains $_.Name } | ForEach-Object { "$($_.Name)|$($_.Description)|$($_.Used)|$($_.Free)" }`
-    ], { timeout: 10000 })
+  if (process.platform === 'win32') {
+    try {
+      const { stdout } = await execFileAsync('powershell.exe', [
+        '-NoProfile',
+        '-Command',
+        `$fixed = (Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 }).DeviceID -replace ':',''; Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Used -ne $null -and $fixed -contains $_.Name } | ForEach-Object { "$($_.Name)|$($_.Description)|$($_.Used)|$($_.Free)" }`
+      ], { timeout: 10000 })
 
-    const drives: DriveInfo[] = []
-    for (const line of stdout.trim().split('\n')) {
-      const [letter, label, used, free] = line.trim().split('|')
-      if (letter && used && free) {
-        const usedSpace = parseInt(used) || 0
-        const freeSpace = parseInt(free) || 0
-        drives.push({
-          letter: letter.trim(),
-          label: label?.trim() || letter.trim(),
-          totalSize: usedSpace + freeSpace,
-          freeSpace,
-          usedSpace
-        })
+      const drives: DriveInfo[] = []
+      for (const line of stdout.trim().split('\n')) {
+        const [letter, label, used, free] = line.trim().split('|')
+        if (letter && used && free) {
+          const usedSpace = parseInt(used) || 0
+          const freeSpace = parseInt(free) || 0
+          drives.push({
+            letter: letter.trim(),
+            label: label?.trim() || letter.trim(),
+            totalSize: usedSpace + freeSpace,
+            freeSpace,
+            usedSpace
+          })
+        }
       }
+      return drives
+    } catch {
+      return []
+    }
+  }
+
+  // macOS / Linux: parse `df` output for mounted filesystems
+  try {
+    const { stdout } = await execFileAsync('df', ['-Pk'], { timeout: 10000 })
+    const drives: DriveInfo[] = []
+    const lines = stdout.trim().split('\n').slice(1) // skip header
+    for (const line of lines) {
+      const parts = line.trim().split(/\s+/)
+      if (parts.length < 6) continue
+      const totalKb = parseInt(parts[1]) || 0
+      const usedKb = parseInt(parts[2]) || 0
+      const freeKb = parseInt(parts[3]) || 0
+      const mount = parts.slice(5).join(' ')
+      // Only include real filesystems (skip tmpfs, devfs, etc.)
+      if (!parts[0].startsWith('/dev/')) continue
+      drives.push({
+        letter: mount,
+        label: mount === '/' ? 'Root' : basename(mount),
+        totalSize: totalKb * 1024,
+        freeSpace: freeKb * 1024,
+        usedSpace: usedKb * 1024
+      })
     }
     return drives
   } catch {
@@ -162,19 +191,27 @@ export async function getDrives(): Promise<DriveInfo[]> {
   }
 }
 
-export async function analyzeDisk(driveLetter: string): Promise<DiskNode> {
-  if (typeof driveLetter !== 'string' || !/^[A-Za-z]$/.test(driveLetter)) {
-    return { name: '', path: '', size: 0, children: [] }
+/** Resolve a drive identifier to a root path (Windows letter or Unix mount path) */
+function resolveRootPath(drive: string): string | null {
+  if (typeof drive !== 'string' || !drive) return null
+  if (process.platform === 'win32') {
+    if (/^[A-Za-z]$/.test(drive)) return `${drive.toUpperCase()}:\\`
+    return null
   }
-  const rootPath = `${driveLetter.toUpperCase()}:\\`
+  // Unix: accept absolute paths (mount points returned by getDrives)
+  if (drive.startsWith(sep)) return drive
+  return null
+}
+
+export async function analyzeDisk(drive: string): Promise<DiskNode> {
+  const rootPath = resolveRootPath(drive)
+  if (!rootPath) return { name: '', path: '', size: 0, children: [] }
   return analyzeDirectory(rootPath, 0, null)
 }
 
-export async function getFileTypes(driveLetter: string): Promise<FileTypeInfo[]> {
-  if (typeof driveLetter !== 'string' || !/^[A-Za-z]$/.test(driveLetter)) {
-    return []
-  }
-  const rootPath = `${driveLetter.toUpperCase()}:\\`
+export async function getFileTypes(drive: string): Promise<FileTypeInfo[]> {
+  const rootPath = resolveRootPath(drive)
+  if (!rootPath) return []
   const extMap = new Map<string, { size: number; count: number }>()
   await collectFileTypes(rootPath, 0, extMap, null)
   const results: FileTypeInfo[] = []
@@ -190,11 +227,9 @@ export async function getFileTypes(driveLetter: string): Promise<FileTypeInfo[]>
 export function registerDiskAnalyzerIpc(getWindow: WindowGetter): void {
   ipcMain.handle(IPC.DISK_DRIVES, () => getDrives())
 
-  ipcMain.handle(IPC.DISK_FILE_TYPES, async (_event, driveLetter: string): Promise<FileTypeInfo[]> => {
-    if (typeof driveLetter !== 'string' || !/^[A-Za-z]$/.test(driveLetter)) {
-      return []
-    }
-    const rootPath = `${driveLetter.toUpperCase()}:\\`
+  ipcMain.handle(IPC.DISK_FILE_TYPES, async (_event, drive: string): Promise<FileTypeInfo[]> => {
+    const rootPath = resolveRootPath(drive)
+    if (!rootPath) return []
     const extMap = new Map<string, { size: number; count: number }>()
     await collectFileTypes(rootPath, 0, extMap, getWindow())
     const results: FileTypeInfo[] = []
@@ -205,11 +240,9 @@ export function registerDiskAnalyzerIpc(getWindow: WindowGetter): void {
     return results
   })
 
-  ipcMain.handle(IPC.DISK_ANALYZE, async (_event, driveLetter: string): Promise<DiskNode> => {
-    if (typeof driveLetter !== 'string' || !/^[A-Za-z]$/.test(driveLetter)) {
-      return { name: '', path: '', size: 0, children: [] }
-    }
-    const rootPath = `${driveLetter.toUpperCase()}:\\`
+  ipcMain.handle(IPC.DISK_ANALYZE, async (_event, drive: string): Promise<DiskNode> => {
+    const rootPath = resolveRootPath(drive)
+    if (!rootPath) return { name: '', path: '', size: 0, children: [] }
     return analyzeDirectory(rootPath, 0, getWindow())
   })
 }

@@ -21,18 +21,11 @@ import { ScanProgress } from '@/components/shared/ScanProgress'
 import { useHistoryStore } from '@/stores/history-store'
 import { useStatsStore } from '@/stores/stats-store'
 import { useDriverStore } from '@/stores/driver-store'
+import { formatBytes } from '@/lib/utils'
 import type {
   DriverScanProgress,
   DriverUpdateProgress
 } from '@shared/types'
-
-function formatSize(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  const units = ['B', 'KB', 'MB', 'GB']
-  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
-  const value = bytes / Math.pow(1024, i)
-  return `${value.toFixed(i > 1 ? 1 : 0)} ${units[i]}`
-}
 
 export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
   const packages = useDriverStore((s) => s.packages)
@@ -380,7 +373,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
           <CheckCircle2 className="h-5 w-5 text-green-500" strokeWidth={1.8} />
           <p className="text-[13px] text-zinc-200">
             Removed {cleanResult.removed} stale package{cleanResult.removed !== 1 ? 's' : ''}
-            {cleanResult.spaceRecovered > 0 && <span className="text-green-400"> — {formatSize(cleanResult.spaceRecovered)} recovered</span>}
+            {cleanResult.spaceRecovered > 0 && <span className="text-green-400"> — {formatBytes(cleanResult.spaceRecovered)} recovered</span>}
             {cleanResult.failed > 0 && <span className="text-red-400"> ({cleanResult.failed} failed)</span>}
           </p>
         </div>
@@ -497,7 +490,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
               </span>
               {totalStaleSize > 0 && (
                 <span className="rounded-md px-2 py-0.5 text-[10px] font-medium" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>
-                  {formatSize(totalStaleSize)}
+                  {formatBytes(totalStaleSize)}
                 </span>
               )}
             </div>
@@ -544,7 +537,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <span className="text-[12px] font-medium text-zinc-400">{formatSize(pkg.size)}</span>
+                  <span className="text-[12px] font-medium text-zinc-400">{formatBytes(pkg.size)}</span>
                   <div className="mt-0.5 text-[10px] font-mono" style={{ color: '#4e4e56' }}>{pkg.publishedName}</div>
                 </div>
               </div>

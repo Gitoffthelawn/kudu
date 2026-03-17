@@ -11,7 +11,6 @@ import type {
   ServiceScanResult,
   ServiceApplyResult,
   ServiceScanProgress,
-  MalwareThreat,
 } from '../../shared/types'
 import type { HealthReport } from '../services/cloud-agent-types'
 

@@ -2,7 +2,7 @@ import { BrowserWindow, Notification } from 'electron'
 import { IPC } from '../../shared/channels'
 import { getSettings } from './settings-store'
 import { getHistory } from './history-store'
-import { logInfo, logError } from './logger'
+import { logInfo } from './logger'
 import type { KuduSettings } from '../../shared/types'
 
 let schedulerTimer: ReturnType<typeof setInterval> | null = null
@@ -59,28 +59,30 @@ function isDue(settings: KuduSettings): boolean {
   const now = new Date()
   const lastScan = history.length > 0 ? new Date(history[0].timestamp) : null
 
-  // Calculate the target time for today (or the scheduled day)
+  // Use a ±2 minute window around the target time to avoid missing the scan
+  // when the 60s polling interval straddles the exact hour boundary
   const target = new Date()
   target.setHours(settings.schedule.hour, 0, 0, 0)
+  const withinWindow = Math.abs(now.getTime() - target.getTime()) <= 2 * 60_000
 
   switch (settings.schedule.frequency) {
     case 'daily':
-      // Due if: current hour matches AND we haven't scanned today
-      if (now.getHours() !== settings.schedule.hour) return false
+      // Due if: within window of scheduled hour AND we haven't scanned today
+      if (!withinWindow) return false
       if (lastScan && isSameDay(lastScan, now)) return false
       return true
 
     case 'weekly':
-      // Due if: correct day of week, correct hour, haven't scanned this week-slot
+      // Due if: correct day of week, within window, haven't scanned this week-slot
       if (now.getDay() !== settings.schedule.day) return false
-      if (now.getHours() !== settings.schedule.hour) return false
+      if (!withinWindow) return false
       if (lastScan && isSameDay(lastScan, now)) return false
       return true
 
     case 'monthly':
-      // Due if: correct day of month, correct hour, haven't scanned today
+      // Due if: correct day of month, within window, haven't scanned today
       if (now.getDate() !== settings.schedule.day) return false
-      if (now.getHours() !== settings.schedule.hour) return false
+      if (!withinWindow) return false
       if (lastScan && isSameDay(lastScan, now)) return false
       return true
   }

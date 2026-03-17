@@ -1,6 +1,6 @@
 appId: com.kudu.app
 productName: Kudu
-copyright: Copyright © 2024 Kudu Contributors
+copyright: Copyright © 2024-2026 Kudu Contributors
 
 directories:
   buildResources: resources

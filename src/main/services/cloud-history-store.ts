@@ -45,14 +45,26 @@ export function getCloudHistory(): CloudActionEntry[] {
   return []
 }
 
+// Simple mutex to prevent concurrent read-modify-write from clobbering data
+let writeLock: Promise<void> = Promise.resolve()
+
 export function addCloudHistoryEntry(entry: CloudActionEntry): void {
-  ensureDir()
-  const history = getCloudHistory()
-  history.unshift(entry)
-  if (history.length > MAX_ENTRIES) history.length = MAX_ENTRIES
-  writeFileSync(getFilePath(), JSON.stringify(history, null, 2), 'utf-8')
-  const win = BrowserWindow.getAllWindows()[0]
-  if (win && !win.isDestroyed()) win.webContents.send(IPC.CLOUD_HISTORY_CHANGED)
+  const prev = writeLock
+  let unlock: () => void
+  writeLock = new Promise<void>((r) => { unlock = r })
+  prev.then(() => {
+    try {
+      ensureDir()
+      const history = getCloudHistory()
+      history.unshift(entry)
+      if (history.length > MAX_ENTRIES) history.length = MAX_ENTRIES
+      writeFileSync(getFilePath(), JSON.stringify(history, null, 2), 'utf-8')
+      const win = BrowserWindow.getAllWindows()[0]
+      if (win && !win.isDestroyed()) win.webContents.send(IPC.CLOUD_HISTORY_CHANGED)
+    } finally {
+      unlock!()
+    }
+  })
 }
 
 export function clearCloudHistory(): void {

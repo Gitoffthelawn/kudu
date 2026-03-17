@@ -23,15 +23,8 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { useHistoryStore } from '@/stores/history-store'
 import { useStatsStore } from '@/stores/stats-store'
 import { useUninstallerStore, UNUSED_THRESHOLD_DAYS } from '@/stores/uninstaller-store'
+import { formatBytes } from '@/lib/utils'
 import type { InstalledProgram, UninstallProgress } from '@shared/types'
-
-function formatSize(bytes: number): string {
-  if (bytes <= 0) return 'Unknown'
-  const units = ['B', 'KB', 'MB', 'GB']
-  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
-  const value = bytes / Math.pow(1024, i)
-  return `${value.toFixed(i > 1 ? 1 : 0)} ${units[i]}`
-}
 
 function formatDate(raw: string): string {
   if (!raw || raw.length !== 8) return ''
@@ -484,7 +477,7 @@ export function UninstallerPage() {
               </p>
               <p className="text-[11px] mt-0.5" style={{ color: '#6e6e76' }}>
                 {unusedTotalSize > 0
-                  ? `Using ~${formatSize(unusedTotalSize)} of disk space. Click to view.`
+                  ? `Using ~${formatBytes(unusedTotalSize)} of disk space. Click to view.`
                   : 'Click to view unused programs.'}
               </p>
             </div>
@@ -593,7 +586,7 @@ export function UninstallerPage() {
                     {' '}
                     — {uninstallResult.leftoversCleaned} leftover
                     {uninstallResult.leftoversCleaned !== 1 ? 's' : ''} cleaned (
-                    {formatSize(uninstallResult.leftoversSize)} recovered)
+                    {formatBytes(uninstallResult.leftoversSize)} recovered)
                   </span>
                 )}
                 {uninstallResult.leftoversFound === 0 && (
@@ -778,7 +771,7 @@ export function UninstallerPage() {
                   <div className="shrink-0 flex items-center gap-4">
                     <div className="text-right">
                       <span className="text-[12px] font-medium text-zinc-400">
-                        {formatSize(prog.estimatedSize)}
+                        {formatBytes(prog.estimatedSize)}
                       </span>
                     </div>
                     <button

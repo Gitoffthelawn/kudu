@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import {
   Search,
   Sparkles,
@@ -54,7 +54,6 @@ export function NetworkCleanupPage() {
   const [showConfirm, setShowConfirm] = useState(false)
   const historyStore = useHistoryStore()
   const recomputeStats = useStatsStore((s) => s.recompute)
-  const scanStartRef = useRef<number>(0)
 
   const handleScan = useCallback(async () => {
     const store = useNetworkStore.getState()
@@ -62,9 +61,8 @@ export function NetworkCleanupPage() {
     store.setItems([])
     store.setSelectedIds(new Set())
     store.setCleanResult(null)
-    scanStartRef.current = Date.now()
     try {
-      const result = await window.usekudu.comworkScan()
+      const result = await window.kudu.networkScan()
       const s = useNetworkStore.getState()
       s.setItems(result)
       const preSelected = new Set(result.filter((i) => i.selected).map((i) => i.id))
@@ -83,7 +81,7 @@ export function NetworkCleanupPage() {
     const cleanStart = Date.now()
     try {
       const { selectedIds: currentSelectedIds, items: currentItems } = useNetworkStore.getState()
-      const result = await window.usekudu.comworkClean([...currentSelectedIds])
+      const result = await window.kudu.networkClean([...currentSelectedIds])
       const s = useNetworkStore.getState()
       s.setCleanResult(result)
       // Remove cleaned items from list

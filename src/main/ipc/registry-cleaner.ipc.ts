@@ -71,7 +71,6 @@ function splitTaskPath(fullPath: string): { path: string; name: string } | null 
 
 // Session-scoped scan results keyed by scan ID to prevent race conditions
 const scanSessions = new Map<string, Map<string, RegistryEntry>>()
-let activeScanId = ''
 
 // ── Exported core logic ──
 
@@ -981,10 +980,10 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
         const matchingLines = stdout.split(/\r?\n/).filter(l => l.includes(task.pattern))
         for (const line of matchingLines) {
           const cols = parseCSVLine(line)
-          if (cols && cols.length >= 1) {
-            const taskName = cols[0]
+          if (cols && cols.length >= 9) {
+            const taskName = cols[1]
             // Check if the executable actually exists — skip if the software is still installed
-            const taskToRun = cols.length >= 9 ? cols[8] : ''
+            const taskToRun = cols[8]
             if (taskToRun && existsSync(taskToRun.replace(/^"/, '').replace(/".*$/, ''))) continue
             entries.push({
               id: randomUUID(),
@@ -1018,7 +1017,10 @@ export async function fixRegistryEntries(
       mkdirSync(backupDir, { recursive: true })
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
       const backupPath = join(backupDir, `registry-backup-${timestamp}.reg`)
+      // Back up both HKLM and HKCU since fix operations modify both
       await execFileAsync('reg', ['export', 'HKLM\\SOFTWARE', backupPath, '/y'], { timeout: 30000 })
+      const hkcuBackupPath = join(backupDir, `registry-backup-HKCU-${timestamp}.reg`)
+      await execFileAsync('reg', ['export', 'HKCU\\SOFTWARE', hkcuBackupPath, '/y'], { timeout: 30000 }).catch(() => {})
     } catch {
       // Backup failed, but continue
     }
@@ -1111,7 +1113,6 @@ export function registerRegistryCleanerIpc(getWindow: WindowGetter): void {
     }
     const scanId = randomUUID()
     scanSessions.set(scanId, sessionMap)
-    activeScanId = scanId
 
     // Clean up old sessions (keep only last 3)
     const sessionKeys = [...scanSessions.keys()]
@@ -1126,11 +1127,13 @@ export function registerRegistryCleanerIpc(getWindow: WindowGetter): void {
     if (process.platform !== 'win32') return { fixed: 0, failed: 0, failures: [] }
     const valid = validateStringArray(entryIds)
     if (!valid) return { fixed: 0, failed: 0, failures: [] }
-    const session = scanSessions.get(activeScanId)
+    // Search all sessions for the requested entries (avoids race if a new scan started)
     const entriesToFix: RegistryEntry[] = []
     for (const id of valid) {
-      const entry = session?.get(id)
-      if (entry) entriesToFix.push(entry)
+      for (const session of scanSessions.values()) {
+        const entry = session.get(id)
+        if (entry) { entriesToFix.push(entry); break }
+      }
     }
 
     return fixRegistryEntries(entriesToFix, (current, total, currentEntry) => {

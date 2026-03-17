@@ -200,7 +200,6 @@ export async function cleanNetworkItems(items: NetworkItem[]): Promise<NetworkCl
 // ── IPC registration ──
 
 const scanSessions = new Map<string, Map<string, NetworkItem>>()
-let activeScanId = ''
 
 export function registerNetworkCleanupIpc(): void {
   ipcMain.handle(IPC.NETWORK_SCAN, async (): Promise<NetworkItem[]> => {
@@ -210,7 +209,6 @@ export function registerNetworkCleanupIpc(): void {
     const sessionMap = new Map<string, NetworkItem>()
     for (const item of items) sessionMap.set(item.id, item)
     scanSessions.set(scanId, sessionMap)
-    activeScanId = scanId
     const sessionKeys = [...scanSessions.keys()]
     while (sessionKeys.length > 3) scanSessions.delete(sessionKeys.shift()!)
 
@@ -220,11 +218,13 @@ export function registerNetworkCleanupIpc(): void {
   ipcMain.handle(IPC.NETWORK_CLEAN, async (_event, itemIds: string[]): Promise<NetworkCleanResult> => {
     const valid = validateStringArray(itemIds)
     if (!valid) return { cleaned: 0, failed: 0, details: [] }
-    const session = scanSessions.get(activeScanId)
+    // Search all sessions for the requested items (avoids race if a new scan started)
     const items: NetworkItem[] = []
     for (const id of valid) {
-      const item = session?.get(id)
-      if (item) items.push(item)
+      for (const session of scanSessions.values()) {
+        const item = session.get(id)
+        if (item) { items.push(item); break }
+      }
     }
     return cleanNetworkItems(items)
   })

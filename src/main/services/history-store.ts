@@ -45,14 +45,26 @@ export function getHistory(): ScanHistoryEntry[] {
   return []
 }
 
+// Simple mutex to prevent concurrent read-modify-write from clobbering data
+let writeLock: Promise<void> = Promise.resolve()
+
 export function addHistoryEntry(entry: ScanHistoryEntry): void {
-  ensureDir()
-  const history = getHistory()
-  history.unshift(entry)
-  if (history.length > MAX_HISTORY) history.length = MAX_HISTORY
-  writeFileSync(getHistoryPath(), JSON.stringify(history, null, 2), 'utf-8')
-  const win = BrowserWindow.getAllWindows()[0]
-  if (win && !win.isDestroyed()) win.webContents.send(IPC.HISTORY_CHANGED)
+  const prev = writeLock
+  let unlock: () => void
+  writeLock = new Promise<void>((r) => { unlock = r })
+  prev.then(() => {
+    try {
+      ensureDir()
+      const history = getHistory()
+      history.unshift(entry)
+      if (history.length > MAX_HISTORY) history.length = MAX_HISTORY
+      writeFileSync(getHistoryPath(), JSON.stringify(history, null, 2), 'utf-8')
+      const win = BrowserWindow.getAllWindows()[0]
+      if (win && !win.isDestroyed()) win.webContents.send(IPC.HISTORY_CHANGED)
+    } finally {
+      unlock!()
+    }
+  })
 }
 
 export function clearHistory(): void {

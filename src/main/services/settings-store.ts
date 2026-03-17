@@ -156,7 +156,7 @@ function readStore(): StoreData {
   } catch {
     // Corrupt file, use defaults
   }
-  return { ...defaults }
+  return JSON.parse(JSON.stringify(defaults))
 }
 
 function writeStore(data: StoreData): void {
@@ -201,18 +201,40 @@ export function getOnboardingComplete(): boolean {
 }
 
 export function setOnboardingComplete(value: boolean): void {
-  const data = readStore()
-  data.onboardingComplete = value
-  writeStore(data)
+  const prev = writeLock
+  let unlock: () => void
+  writeLock = new Promise<void>((r) => { unlock = r })
+  prev.then(() => {
+    try {
+      const data = readStore()
+      data.onboardingComplete = value
+      writeStore(data)
+    } finally {
+      unlock!()
+    }
+  })
 }
 
 /** Permanent machine identifier — generated once, persists across unlink/relink/updates */
 export function getMachineId(): string {
   const data = readStore()
   if (data.machineId) return data.machineId
-  // First call ever — generate and persist
-  data.machineId = randomUUID()
-  writeStore(data)
-  return data.machineId
+  // First call ever — generate and persist (uses lock to avoid concurrent writes)
+  const id = randomUUID()
+  const prev = writeLock
+  let unlock: () => void
+  writeLock = new Promise<void>((r) => { unlock = r })
+  prev.then(() => {
+    try {
+      const fresh = readStore()
+      if (!fresh.machineId) {
+        fresh.machineId = id
+        writeStore(fresh)
+      }
+    } finally {
+      unlock!()
+    }
+  })
+  return id
 }
 

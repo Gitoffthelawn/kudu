@@ -419,13 +419,13 @@ export async function toggleStartupItem(
           writeDisabledEntries(disabled)
         })
       } else {
-        // When re-enabling, use the stored command from the disabled entries file
+        // When re-enabling, ONLY use the stored command from the disabled entries file
         // to prevent a compromised renderer from writing arbitrary autorun commands
         const disabled = readDisabledEntries()
         const stored = disabled.find((e) => e.name === name && e.source === source)
-        const safeCommand = stored ? stored.command : command
-        // Reject if no stored entry exists and the command looks suspicious
-        if (!stored && !command) return false
+        // Reject if no stored entry exists — we cannot trust renderer-supplied commands
+        if (!stored) return false
+        const safeCommand = stored.command
 
         try {
           await execFileAsync('reg', [

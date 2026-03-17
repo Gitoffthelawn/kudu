@@ -106,13 +106,17 @@ export class PerfMonitorService {
       process.kill(pid)
       return { success: true }
     } catch {
-      // Fallback to taskkill
+      // Fallback to platform-specific kill command
       try {
-        await execFileAsync('taskkill', ['/F', '/PID', String(pid)])
+        if (process.platform === 'win32') {
+          await execFileAsync('taskkill', ['/F', '/PID', String(pid)])
+        } else {
+          await execFileAsync('kill', ['-9', String(pid)])
+        }
         return { success: true }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err)
-        const requiresAdmin = message.includes('Access') || message.includes('denied')
+        const requiresAdmin = message.includes('Access') || message.includes('denied') || message.includes('Operation not permitted')
         return {
           success: false,
           error: requiresAdmin

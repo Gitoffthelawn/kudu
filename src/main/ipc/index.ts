@@ -111,7 +111,8 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
       child.on('spawn', () => { child.unref(); app.exit(0) })
       child.on('error', () => { /* user declined — don't quit */ })
     } else if (process.platform === 'darwin') {
-      const script = `set appPath to "${exePath.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}" as POSIX file\ndo shell script quoted form of POSIX path of appPath with administrator privileges`
+      // Use quoted form of POSIX path to safely handle special characters in the path
+      const script = `do shell script quoted form of "${exePath.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}" with administrator privileges`
       const child = spawn('osascript', ['-e', script], {
         detached: true,
         stdio: 'ignore',
