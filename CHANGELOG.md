@@ -1,3 +1,14 @@
+# [1.9.0](https://github.com/adventdevinc/kudu/compare/v1.8.1...v1.9.0) (2026-03-17)
+
+
+### Bug Fixes
+
+* resolve bugs, race conditions, security issues, and dead code ([d5e3795](https://github.com/adventdevinc/kudu/commit/d5e37955cddf221e97c6db66232e41815f55ec55))
+
+
+### Features
+
+* expand cleaners with new targets, browsers, apps, and safety fixes ([497a561](https://github.com/adventdevinc/kudu/commit/497a56157c279f72edf78ee25c99b1acc2f3ea79))
 ## [1.8.1](https://github.com/AdventDevInc/kudu/compare/v1.8.0...v1.8.1) (2026-03-17)
 
 
