@@ -107,8 +107,8 @@ function triggerScheduledScan(mainWindow: BrowserWindow | null): void {
     mainWindow.webContents.send(IPC.SCHEDULE_SCAN_TRIGGER)
   }
 
-  // Show a system notification
-  if (Notification.isSupported()) {
+  // Show a system notification (skip in daemon/headless mode)
+  if (!process.argv.includes('--daemon') && Notification.isSupported()) {
     const notification = new Notification({
       title: 'Kudu - Scheduled Scan',
       body: 'Running a scheduled system scan...',
@@ -122,7 +122,7 @@ function triggerScheduledScan(mainWindow: BrowserWindow | null): void {
  * Send a notification when a scheduled scan completes.
  */
 export function notifyScheduledScanComplete(totalSize: number, itemCount: number): void {
-  if (!Notification.isSupported()) return
+  if (process.argv.includes('--daemon') || !Notification.isSupported()) return
   const settings = getSettings()
   if (!settings.showNotificationOnComplete) return
 

@@ -1074,9 +1074,10 @@ class CloudAgentService {
         win.webContents.send(IPC.THREAT_MONITOR_UPDATED, snapshot)
       }
 
-      // OS notification
+      // OS notification (skip in daemon/headless mode — no desktop to show it on)
       const currentSettings = getSettings()
-      if (currentSettings.showThreatNotifications && Notification.isSupported()) {
+      const isDaemon = process.argv.includes('--daemon')
+      if (!isDaemon && currentSettings.showThreatNotifications && Notification.isSupported()) {
         const connCount = snapshot.flaggedConnections.length
         const dnsCount = snapshot.flaggedDns.length
         const parts: string[] = []
