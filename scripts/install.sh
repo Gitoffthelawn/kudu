@@ -71,8 +71,7 @@ export NEEDRESTART_MODE=a
 export NEEDRESTART_SUSPEND=1
 apt-get update -qq
 # libasound2 was renamed to libasound2t64 in Ubuntu 24.04+
-if apt-cache policy libasound2t64 2>/dev/null | grep -q 'Candidate:' && \
-   ! apt-cache policy libasound2t64 2>/dev/null | grep -q 'Candidate: (none)'; then
+if dpkg -s libasound2t64 &>/dev/null || apt-get install -y -qq --dry-run libasound2t64 &>/dev/null; then
   ALSA_PKG=libasound2t64
 else
   ALSA_PKG=libasound2
