@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/AdventDevInc/kudu/compare/v1.8.0...v1.8.1) (2026-03-17)
+
+
+### Bug Fixes
+
+* **cloud:** improve Linux server detection and send isServer in registration ([b17c581](https://github.com/AdventDevInc/kudu/commit/b17c58188bd86a986df958515fc141234d6d0f74))
+* **cloud:** skip desktop notifications in daemon/headless mode ([31ebb14](https://github.com/AdventDevInc/kudu/commit/31ebb14c154b73f55472b1c9ef490e69d74b009a))
 # [1.8.0](https://github.com/AdventDevInc/kudu/compare/v1.7.0...v1.8.0) (2026-03-17)
 
 
