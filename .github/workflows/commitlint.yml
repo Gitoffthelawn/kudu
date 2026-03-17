@@ -6,6 +6,8 @@ on:
 
 jobs:
   commitlint:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
