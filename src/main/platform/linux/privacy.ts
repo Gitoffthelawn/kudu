@@ -233,35 +233,11 @@ const SYSCTL_KERNEL_SETTINGS: PrivacySettingDef[] = [
     'Prevent unprivileged users from loading BPF programs',
     'kernel',
   ),
-  sysctlSetting(
-    'sysctl-perf-paranoid', 'kernel.perf_event_paranoid', '3',
-    'Restrict Perf Events',
-    'Restrict performance monitoring events to root only',
-    'kernel',
-  ),
-  sysctlSetting(
-    'sysctl-sysrq', 'kernel.sysrq', '0',
-    'Disable Magic SysRq Key',
-    'Disable the SysRq key combination that allows low-level kernel commands',
-    'kernel',
-  ),
-  sysctlSetting(
-    'sysctl-unprivileged-userns', 'kernel.unprivileged_userns_clone', '0',
-    'Disable Unprivileged User Namespaces',
-    'Prevent unprivileged users from creating user namespaces (Debian/Ubuntu)',
-    'kernel',
-  ),
 ]
 
 // ─── Network Hardening (sysctl) ─────────────────────────────
 
 const SYSCTL_NETWORK_SETTINGS: PrivacySettingDef[] = [
-  sysctlSetting(
-    'sysctl-ip-forward', 'net.ipv4.ip_forward', '0',
-    'Disable IP Forwarding',
-    'Prevent the system from forwarding packets between network interfaces. Warning: do not enable on routers or VPN gateways',
-    'network',
-  ),
   sysctlSetting(
     'sysctl-tcp-syncookies', 'net.ipv4.tcp_syncookies', '1',
     'TCP SYN Cookie Protection',
@@ -302,12 +278,6 @@ const SYSCTL_NETWORK_SETTINGS: PrivacySettingDef[] = [
     'sysctl-ipv6-redirects', 'net.ipv6.conf.all.accept_redirects', '0',
     'Reject IPv6 ICMP Redirects',
     'Reject IPv6 ICMP redirect messages to prevent routing table manipulation',
-    'network',
-  ),
-  sysctlSetting(
-    'sysctl-ipv6-accept-ra', 'net.ipv6.conf.all.accept_ra', '0',
-    'Reject IPv6 Router Advertisements',
-    'Reject IPv6 router advertisements. Warning: may break IPv6 on SLAAC networks',
     'network',
   ),
 ]
