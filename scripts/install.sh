@@ -70,13 +70,20 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 export NEEDRESTART_SUSPEND=1
 apt-get update -qq
+# libasound2 was renamed to libasound2t64 in Ubuntu 24.04+
+if apt-cache show libasound2t64 &>/dev/null; then
+  ALSA_PKG=libasound2t64
+else
+  ALSA_PKG=libasound2
+fi
+
 apt-get install -y -qq \
   libfuse2 \
   libgtk-3-0 \
   libatk1.0-0 \
   libnss3 \
   libxss1 \
-  libasound2t64 \
+  "$ALSA_PKG" \
   libgbm1 \
   > /dev/null
 ok "Dependencies installed."
