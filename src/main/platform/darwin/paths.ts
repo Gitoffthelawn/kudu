@@ -18,10 +18,13 @@ export function createDarwinPaths(): PlatformPaths {
         { path: join(LIBRARY, 'Logs', 'DiagnosticReports'), subcategory: 'Crash Reports' },
         { path: join(CACHES, 'com.apple.QuickLook.thumbnailcache'), subcategory: 'Thumbnail Cache' },
         { path: '/Library/Caches/com.apple.ATS', subcategory: 'Font Cache', needsAdmin: true },
+        { path: join(LIBRARY, 'Saved Application State'), subcategory: 'Saved Application State' },
+        { path: join(LIBRARY, 'Developer', 'Xcode', 'DerivedData'), subcategory: 'Xcode DerivedData' },
+        { path: join(LIBRARY, 'Developer', 'CoreSimulator', 'Caches'), subcategory: 'CoreSimulator Caches' },
       ]
     },
 
-    singleFileCleanTargets(): string[] {
+    singleFileCleanTargets(): { path: string; subcategory: string }[] {
       // macOS doesn't have a single memory dump file like Windows
       return []
     },
@@ -75,10 +78,25 @@ export function createDarwinPaths(): PlatformPaths {
           gpuCache: 'GpuCache',
           serviceWorker: join('Service Worker', 'CacheStorage'),
         },
+        arc: {
+          base: join(APP_SUPPORT, 'Arc', 'User Data'),
+          cache: 'Cache',
+          codeCache: 'Code Cache',
+          gpuCache: 'GpuCache',
+          serviceWorker: join('Service Worker', 'CacheStorage'),
+        },
+        chromium: {
+          base: join(APP_SUPPORT, 'Chromium'),
+          cache: 'Cache',
+          codeCache: 'Code Cache',
+          gpuCache: 'GpuCache',
+          serviceWorker: join('Service Worker', 'CacheStorage'),
+        },
         firefox: {
           base: join(APP_SUPPORT, 'Firefox', 'Profiles'),
           cache: join(CACHES, 'Firefox', 'Profiles'),
         },
+        safari: { cache: join(CACHES, 'com.apple.Safari') },
       }
     },
 
@@ -93,18 +111,39 @@ export function createDarwinPaths(): PlatformPaths {
         { id: 'yarn', name: 'Yarn Cache', paths: [join(CACHES, 'Yarn')] },
         { id: 'pip', name: 'pip Cache', paths: [join(CACHES, 'pip')] },
         { id: 'homebrew', name: 'Homebrew Cache', paths: [join(CACHES, 'Homebrew')] },
+        { id: 'zoom', name: 'Zoom', paths: [join(APP_SUPPORT, 'zoom.us', 'data'), join(LIBRARY, 'Logs', 'zoom.us')] },
+        { id: 'telegram', name: 'Telegram', paths: [join(APP_SUPPORT, 'Telegram Desktop', 'tdata', 'user_data'), join(APP_SUPPORT, 'Telegram Desktop', 'tdata', 'emoji')] },
+        { id: 'obs', name: 'OBS Studio', paths: [join(APP_SUPPORT, 'obs-studio', 'logs'), join(APP_SUPPORT, 'obs-studio', 'profiler_data')] },
+        { id: 'jetbrains', name: 'JetBrains IDEs', paths: [join(CACHES, 'JetBrains')] },
+        { id: 'adobe', name: 'Adobe Creative Cloud', paths: [join(CACHES, 'Adobe'), join(APP_SUPPORT, 'Adobe', 'Common', 'Media Cache Files'), join(APP_SUPPORT, 'Adobe', 'Common', 'Media Cache')] },
+        { id: 'pnpm', name: 'pnpm Store', paths: [join(LIBRARY, 'pnpm', 'store')] },
+        { id: 'bun', name: 'Bun Cache', paths: [join(HOME, '.bun', 'install', 'cache')] },
+        { id: 'cargo', name: 'Cargo/Rust Cache', paths: [join(HOME, '.cargo', 'registry', 'cache'), join(HOME, '.cargo', 'registry', 'src')] },
+        { id: 'go', name: 'Go Module Cache', paths: [join(HOME, 'go', 'pkg', 'mod', 'cache')] },
+        { id: 'gradle', name: 'Gradle Cache', paths: [join(HOME, '.gradle', 'caches'), join(HOME, '.gradle', 'daemon')] },
+        { id: 'maven', name: 'Maven Cache', paths: [join(HOME, '.m2', 'repository')] },
+        { id: 'composer', name: 'Composer Cache', paths: [join(CACHES, 'composer')] },
+        { id: 'cursor', name: 'Cursor IDE', paths: [join(APP_SUPPORT, 'Cursor', 'Cache', 'Cache_Data'), join(APP_SUPPORT, 'Cursor', 'CachedData')] },
+        { id: 'signal', name: 'Signal Desktop', paths: [join(APP_SUPPORT, 'Signal', 'Cache', 'Cache_Data')] },
+        { id: 'postman', name: 'Postman', paths: [join(APP_SUPPORT, 'Postman', 'Cache', 'Cache_Data')] },
+        { id: 'figma', name: 'Figma', paths: [join(APP_SUPPORT, 'Figma', 'Cache', 'Cache_Data')] },
+        { id: 'github-desktop', name: 'GitHub Desktop', paths: [join(APP_SUPPORT, 'GitHub Desktop', 'Cache', 'Cache_Data')] },
+        { id: 'vlc', name: 'VLC', paths: [join(CACHES, 'org.videolan.vlc')] },
       ]
     },
 
     gamingPaths(): AppCacheDef[] {
       return [
         { id: 'steam', name: 'Steam', paths: [join(APP_SUPPORT, 'Steam', 'logs')] },
+        { id: 'epic', name: 'Epic Games Launcher', paths: [join(APP_SUPPORT, 'Epic', 'EpicGamesLauncher', 'Saved', 'webcache'), join(LIBRARY, 'Logs', 'EpicGamesLauncher')] },
+        { id: 'itch', name: 'itch.io', paths: [join(APP_SUPPORT, 'itch', 'Cache', 'Cache_Data'), join(APP_SUPPORT, 'itch', 'logs')] },
       ]
     },
 
     gpuCachePaths(): AppCacheDef[] {
       return [
         { id: 'metal-cache', name: 'Metal Shader Cache', paths: [join(CACHES, 'com.apple.metal')] },
+        { id: 'unity-cache', name: 'Unity Shader Cache', paths: [join(CACHES, 'com.unity3d.UnityEditor')] },
       ]
     },
 

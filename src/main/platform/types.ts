@@ -20,6 +20,8 @@ export interface CleanTarget {
   path: string
   subcategory: string
   needsAdmin?: boolean
+  /** If set, scan path/&ast;/childSubdir instead of path directly (e.g. 'cache' for Flatpak) */
+  childSubdir?: string
 }
 
 export interface BrowserPathConfig {
@@ -29,7 +31,10 @@ export interface BrowserPathConfig {
   opera: BrowserPaths
   operaGX: BrowserPaths
   vivaldi: BrowserPaths
+  arc: BrowserPaths
+  chromium: BrowserPaths
   firefox: { base: string; cache: string }
+  safari: { cache: string } | null
 }
 
 export interface BrowserPaths {
@@ -44,6 +49,8 @@ export interface AppCacheDef {
   id: string
   name: string
   paths: string[]
+  /** If set, scan paths/&ast;/childSubdir instead of paths directly (e.g. 'caches' for JetBrains on Windows) */
+  childSubdir?: string
 }
 
 export interface UninstallLeftoverDir {
@@ -57,7 +64,7 @@ export interface PlatformPaths {
   systemCleanTargets(): CleanTarget[]
 
   /** Single-file cleanup targets (e.g. full memory dump on Windows) */
-  singleFileCleanTargets(): string[]
+  singleFileCleanTargets(): { path: string; subcategory: string }[]
 
   /** Protected event log filenames that must never be deleted */
   protectedEventLogs(): string[]

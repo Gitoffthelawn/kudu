@@ -2,7 +2,7 @@ import { app } from 'electron'
 import { existsSync } from 'fs'
 import { readdir } from 'fs/promises'
 import { join } from 'path'
-import { scanDirectory, scanFile, scanMultipleDirectories, scanDirectoriesAsItems, cleanItems, getDirectorySize } from './services/file-utils'
+import { scanDirectory, scanFile, scanMultipleDirectories, scanDirectoriesAsItems, resolveChildSubdirs, cleanItems, getDirectorySize } from './services/file-utils'
 import { cacheItems } from './services/scan-cache'
 import { CleanerType } from '../shared/enums'
 import type { ScanResult, CleanResult } from '../shared/types'
@@ -51,7 +51,13 @@ async function scanSystem(): Promise<ScanResult[]> {
 
   for (const target of targets) {
     try {
-      const result = await scanDirectory(target.path, category, target.subcategory)
+      let result
+      if (target.childSubdir) {
+        const childPaths = await resolveChildSubdirs([target.path], target.childSubdir)
+        result = await scanMultipleDirectories(childPaths, category, target.subcategory)
+      } else {
+        result = await scanDirectory(target.path, category, target.subcategory)
+      }
       if (eventLogsTarget && target.path === eventLogsTarget.path) {
         result.items = result.items.filter((item) => {
           const fileName = item.path.split(/[\\/]/).pop()?.toLowerCase() || ''
@@ -63,9 +69,9 @@ async function scanSystem(): Promise<ScanResult[]> {
       if (result.items.length > 0) { cacheItems(result.items); results.push(result) }
     } catch { /* skip */ }
   }
-  for (const filePath of platform.paths.singleFileCleanTargets()) {
+  for (const target of platform.paths.singleFileCleanTargets()) {
     try {
-      const dumpResult = await scanFile(filePath, category, 'Full Memory Dump')
+      const dumpResult = await scanFile(target.path, category, target.subcategory)
       if (dumpResult.items.length > 0) { cacheItems(dumpResult.items); results.push(dumpResult) }
     } catch { /* skip */ }
   }
@@ -83,6 +89,8 @@ async function scanBrowserCli(): Promise<ScanResult[]> {
     { label: 'Vivaldi', ...browserPaths.vivaldi, hasProfiles: true },
     { label: 'Opera', ...browserPaths.opera, hasProfiles: false },
     { label: 'Opera GX', ...browserPaths.operaGX, hasProfiles: false },
+    { label: 'Arc', ...browserPaths.arc, hasProfiles: true },
+    { label: 'Chromium', ...browserPaths.chromium, hasProfiles: true },
   ]
   for (const browser of chromiumBrowsers) {
     if (!existsSync(browser.base)) continue
@@ -127,6 +135,11 @@ async function scanBrowserCli(): Promise<ScanResult[]> {
       }
     } catch { /* skip */ }
   }
+  // Safari (macOS only) — cache directory only, never cookies/history/bookmarks
+  if (browserPaths.safari && existsSync(browserPaths.safari.cache)) {
+    const result = await scanDirectory(browserPaths.safari.cache, category, 'Safari - Cache')
+    if (result.items.length > 0) { cacheItems(result.items); results.push(result) }
+  }
   return results
 }
 
@@ -135,7 +148,8 @@ async function scanApp(): Promise<ScanResult[]> {
   const category = CleanerType.App
   for (const appDef of getPlatform().paths.appPaths()) {
     try {
-      const result = await scanMultipleDirectories(appDef.paths, category, appDef.name)
+      const paths = await resolveChildSubdirs(appDef.paths, appDef.childSubdir)
+      const result = await scanMultipleDirectories(paths, category, appDef.name)
       if (result.items.length > 0) { cacheItems(result.items); results.push(result) }
     } catch { /* skip */ }
   }

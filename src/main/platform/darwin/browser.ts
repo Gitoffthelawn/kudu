@@ -16,6 +16,9 @@ export function createDarwinBrowser(): PlatformBrowser {
         'Vivaldi',
         'Opera',
         'firefox',
+        'Arc',
+        'Chromium',
+        'Safari',
       ]
 
       for (const browser of browsers) {

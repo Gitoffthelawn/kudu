@@ -61,15 +61,15 @@ describe('scan-cache', () => {
   })
 
   it('evicts cache when exceeding max size', () => {
-    // Fill cache with items up to the limit, then add more to trigger eviction
-    const batch1 = Array.from({ length: 10000 }, (_, i) => makeItem(`old-${i}`))
+    // Fill cache with items up to the limit (50,000), then add more to trigger eviction
+    const batch1 = Array.from({ length: 50000 }, (_, i) => makeItem(`old-${i}`))
     cacheItems(batch1)
     expect(getCachedItem('old-0')).toBeDefined()
 
-    // Adding 1 more item should trigger eviction (clear + re-add)
+    // Adding 1 more item should trigger eviction of the oldest entry
     const batch2 = [makeItem('new-item')]
     cacheItems(batch2)
-    // Old items should be gone after eviction
+    // Oldest item should be evicted to make room
     expect(getCachedItem('old-0')).toBeUndefined()
     expect(getCachedItem('new-item')).toBeDefined()
   })

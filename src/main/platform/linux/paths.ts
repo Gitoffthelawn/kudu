@@ -24,13 +24,18 @@ export function createLinuxPaths(): PlatformPaths {
         { path: '/var/cache/pacman/pkg', subcategory: 'Pacman Package Cache', needsAdmin: true },
         // Snap caches
         { path: '/var/lib/snapd/cache', subcategory: 'Snap Cache', needsAdmin: true },
-        // Flatpak caches
-        { path: join(HOME, '.var', 'app'), subcategory: 'Flatpak App Cache' },
+        // Flatpak caches — only the cache/ subdir of each app, not config or data
+        { path: join(HOME, '.var', 'app'), subcategory: 'Flatpak App Cache', childSubdir: 'cache' },
+        // Zypper package cache (openSUSE)
+        { path: '/var/cache/zypp/packages', subcategory: 'Zypper Package Cache', needsAdmin: true },
       ]
     },
 
-    singleFileCleanTargets(): string[] {
-      return []
+    singleFileCleanTargets(): { path: string; subcategory: string }[] {
+      return [
+        { path: join(HOME, '.xsession-errors'), subcategory: 'X Session Errors' },
+        { path: join(HOME, '.xsession-errors.old'), subcategory: 'X Session Errors' },
+      ]
     },
 
     protectedEventLogs(): string[] {
@@ -82,10 +87,25 @@ export function createLinuxPaths(): PlatformPaths {
           gpuCache: 'GpuCache',
           serviceWorker: join('Service Worker', 'CacheStorage'),
         },
+        arc: {
+          base: join(CONFIG, 'arc', 'User Data'),
+          cache: 'Cache',
+          codeCache: 'Code Cache',
+          gpuCache: 'GpuCache',
+          serviceWorker: join('Service Worker', 'CacheStorage'),
+        },
+        chromium: {
+          base: join(CONFIG, 'chromium'),
+          cache: 'Cache',
+          codeCache: 'Code Cache',
+          gpuCache: 'GpuCache',
+          serviceWorker: join('Service Worker', 'CacheStorage'),
+        },
         firefox: {
           base: join(HOME, '.mozilla', 'firefox'),
           cache: join(CACHE, 'mozilla', 'firefox'),
         },
+        safari: null,
       }
     },
 
@@ -99,6 +119,21 @@ export function createLinuxPaths(): PlatformPaths {
         { id: 'npm', name: 'npm Cache', paths: [join(HOME, '.npm', '_cacache')] },
         { id: 'yarn', name: 'Yarn Cache', paths: [join(CACHE, 'yarn')] },
         { id: 'pip', name: 'pip Cache', paths: [join(CACHE, 'pip')] },
+        { id: 'zoom', name: 'Zoom', paths: [join(HOME, '.zoom', 'data'), join(HOME, '.zoom', 'logs')] },
+        { id: 'telegram', name: 'Telegram', paths: [join(LOCAL_SHARE, 'TelegramDesktop', 'tdata', 'user_data'), join(LOCAL_SHARE, 'TelegramDesktop', 'tdata', 'emoji')] },
+        { id: 'obs', name: 'OBS Studio', paths: [join(CONFIG, 'obs-studio', 'logs'), join(CONFIG, 'obs-studio', 'profiler_data')] },
+        { id: 'jetbrains', name: 'JetBrains IDEs', paths: [join(CACHE, 'JetBrains')] },
+        { id: 'pnpm', name: 'pnpm Store', paths: [join(LOCAL_SHARE, 'pnpm', 'store')] },
+        { id: 'bun', name: 'Bun Cache', paths: [join(HOME, '.bun', 'install', 'cache')] },
+        { id: 'cargo', name: 'Cargo/Rust Cache', paths: [join(HOME, '.cargo', 'registry', 'cache'), join(HOME, '.cargo', 'registry', 'src')] },
+        { id: 'go', name: 'Go Module Cache', paths: [join(HOME, 'go', 'pkg', 'mod', 'cache')] },
+        { id: 'gradle', name: 'Gradle Cache', paths: [join(HOME, '.gradle', 'caches'), join(HOME, '.gradle', 'daemon')] },
+        { id: 'maven', name: 'Maven Cache', paths: [join(HOME, '.m2', 'repository')] },
+        { id: 'composer', name: 'Composer Cache', paths: [join(CACHE, 'composer')] },
+        { id: 'cursor', name: 'Cursor IDE', paths: [join(CONFIG, 'Cursor', 'Cache', 'Cache_Data'), join(CONFIG, 'Cursor', 'CachedData')] },
+        { id: 'signal', name: 'Signal Desktop', paths: [join(CONFIG, 'Signal', 'Cache', 'Cache_Data')] },
+        { id: 'postman', name: 'Postman', paths: [join(CONFIG, 'Postman', 'Cache', 'Cache_Data')] },
+        { id: 'vlc', name: 'VLC', paths: [join(CACHE, 'vlc')] },
       ]
     },
 
@@ -108,6 +143,7 @@ export function createLinuxPaths(): PlatformPaths {
           join(HOME, '.steam', 'steam', 'logs'),
           join(LOCAL_SHARE, 'Steam', 'logs'),
         ]},
+        { id: 'itch', name: 'itch.io', paths: [join(CONFIG, 'itch', 'Cache', 'Cache_Data'), join(CONFIG, 'itch', 'logs')] },
       ]
     },
 
@@ -115,6 +151,7 @@ export function createLinuxPaths(): PlatformPaths {
       return [
         { id: 'mesa-cache', name: 'Mesa Shader Cache', paths: [join(CACHE, 'mesa_shader_cache')] },
         { id: 'nvidia-cache', name: 'NVIDIA Shader Cache', paths: [join(CACHE, 'nvidia', 'GLCache')] },
+        { id: 'unity-cache', name: 'Unity Shader Cache', paths: [join(CACHE, 'unity3d')] },
       ]
     },
 

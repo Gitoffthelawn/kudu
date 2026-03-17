@@ -1,4 +1,5 @@
 import { rm, stat, readdir, open, writeFile } from 'fs/promises'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { randomUUID, randomBytes } from 'crypto'
 import type { ScanItem, ScanResult, CleanResult } from '../../shared/types'
@@ -141,7 +142,7 @@ export async function scanDirectory(
   const items: ScanItem[] = []
   let totalSize = 0
   const cutoff = Date.now() - skipRecentMinutes * 60 * 1000
-  const MAX_ITEMS = 200
+  const MAX_ITEMS = 5000
   const exclusions = getSettings().exclusions
 
   try {
@@ -287,6 +288,31 @@ export async function scanDirectoriesAsItems(
   }
 
   return { category, subcategory, group, items, totalSize, itemCount: items.length }
+}
+
+/**
+ * For paths with a childSubdir, expand paths/&ast;/childSubdir.
+ * e.g. given ['/home/.var/app'] with childSubdir='cache', returns
+ * ['/home/.var/app/com.spotify.Client/cache', '/home/.var/app/org.foo/cache', ...]
+ * If no childSubdir, returns the original paths unchanged.
+ */
+export async function resolveChildSubdirs(paths: string[], childSubdir?: string): Promise<string[]> {
+  if (!childSubdir) return paths
+
+  const resolved: string[] = []
+  for (const basePath of paths) {
+    try {
+      if (!existsSync(basePath)) continue
+      const children = await readdir(basePath, { withFileTypes: true })
+      for (const child of children) {
+        if (child.isDirectory()) {
+          const subPath = join(basePath, child.name, childSubdir)
+          if (existsSync(subPath)) resolved.push(subPath)
+        }
+      }
+    } catch { /* skip */ }
+  }
+  return resolved
 }
 
 export async function getDirectorySize(dirPath: string, maxDepth = 3): Promise<number> {

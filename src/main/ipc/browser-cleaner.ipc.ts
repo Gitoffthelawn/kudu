@@ -37,6 +37,8 @@ export function registerBrowserCleanerIpc(getWindow: WindowGetter): void {
       // Opera stores profiles differently — cache is directly under the base path
       { key: 'opera', label: 'Opera', ...browserPaths.opera, hasProfiles: false },
       { key: 'operaGX', label: 'Opera GX', ...browserPaths.operaGX, hasProfiles: false },
+      { key: 'arc', label: 'Arc', ...browserPaths.arc, hasProfiles: true },
+      { key: 'chromium', label: 'Chromium', ...browserPaths.chromium, hasProfiles: true },
     ]
 
     // Scan all Chromium-based browsers
@@ -94,6 +96,12 @@ export function registerBrowserCleanerIpc(getWindow: WindowGetter): void {
       } catch {
         // Skip
       }
+    }
+
+    // Safari (macOS only) — cache directory only, never cookies/history/bookmarks
+    if (browserPaths.safari && existsSync(browserPaths.safari.cache)) {
+      const result = await scanDirectory(browserPaths.safari.cache, category, 'Safari - Cache')
+      if (result.items.length > 0) { cacheItems(result.items); results.push(result) }
     }
 
     const win = getWindow()

@@ -41,11 +41,17 @@ export function createWin32Paths(): PlatformPaths {
         { path: join(WINDIR, 'System32', 'winevt', 'Logs'), subcategory: 'Event Log Archives', needsAdmin: true },
         { path: join(PROGRAMDATA, 'Microsoft', 'Windows Defender', 'Scans', 'History'), subcategory: 'Defender Scan History', needsAdmin: true },
         { path: 'C:\\Windows.old', subcategory: 'Previous Windows Installation', needsAdmin: true },
+        { path: join(LOCALAPPDATA, 'Microsoft', 'CLR_v4.0', 'UsageLogs'), subcategory: '.NET Usage Logs' },
+        { path: join(LOCALAPPDATA, 'Microsoft', 'CLR_v4.0_32', 'UsageLogs'), subcategory: '.NET Usage Logs (32-bit)' },
+        { path: join(LOCALAPPDATA, 'Microsoft', 'Terminal Server Client', 'Cache'), subcategory: 'RDP Bitmap Cache' },
+        { path: join(WINDIR, 'debug'), subcategory: 'Windows Debug Logs', needsAdmin: true },
+        { path: join(WINDIR, 'ServiceProfiles', 'NetworkService', 'AppData', 'Local', 'Temp'), subcategory: 'Network Service Temp', needsAdmin: true },
+        { path: join(LOCALAPPDATA, 'Microsoft', 'Windows', 'Caches'), subcategory: 'Windows Caches' },
       ]
     },
 
-    singleFileCleanTargets(): string[] {
-      return [join(WINDIR, 'MEMORY.DMP')]
+    singleFileCleanTargets(): { path: string; subcategory: string }[] {
+      return [{ path: join(WINDIR, 'MEMORY.DMP'), subcategory: 'Full Memory Dump' }]
     },
 
     protectedEventLogs(): string[] {
@@ -77,10 +83,13 @@ export function createWin32Paths(): PlatformPaths {
         opera: { base: join(APPDATA, 'Opera Software', 'Opera Stable'), ...CHROMIUM_CACHE_DIRS },
         operaGX: { base: join(APPDATA, 'Opera Software', 'Opera GX Stable'), ...CHROMIUM_CACHE_DIRS },
         vivaldi: { base: join(LOCALAPPDATA, 'Vivaldi', 'User Data'), ...CHROMIUM_CACHE_DIRS },
+        arc: { base: join(LOCALAPPDATA, 'Arc', 'User Data'), ...CHROMIUM_CACHE_DIRS },
+        chromium: { base: join(LOCALAPPDATA, 'Chromium', 'User Data'), ...CHROMIUM_CACHE_DIRS },
         firefox: {
           base: join(APPDATA, 'Mozilla', 'Firefox', 'Profiles'),
           cache: join(LOCALAPPDATA, 'Mozilla', 'Firefox', 'Profiles'),
         },
+        safari: null,
       }
     },
 
@@ -92,7 +101,7 @@ export function createWin32Paths(): PlatformPaths {
         { id: 'zoom', name: 'Zoom', paths: [join(APPDATA, 'Zoom', 'data'), join(APPDATA, 'Zoom', 'logs')] },
         { id: 'telegram', name: 'Telegram', paths: [join(APPDATA, 'Telegram Desktop', 'tdata', 'user_data'), join(APPDATA, 'Telegram Desktop', 'tdata', 'emoji')] },
         { id: 'vscode', name: 'VS Code', paths: [join(APPDATA, 'Code', 'Cache', 'Cache_Data'), join(APPDATA, 'Code', 'CachedData'), join(APPDATA, 'Code', 'CachedExtensions'), join(APPDATA, 'Code', 'logs')] },
-        { id: 'jetbrains', name: 'JetBrains IDEs', paths: [join(LOCALAPPDATA, 'JetBrains')] },
+        { id: 'jetbrains', name: 'JetBrains IDEs', paths: [join(LOCALAPPDATA, 'JetBrains')], childSubdir: 'caches' },
         { id: 'spotify', name: 'Spotify', paths: [join(LOCALAPPDATA, 'Spotify', 'Storage'), join(LOCALAPPDATA, 'Spotify', 'Data')] },
         { id: 'obs', name: 'OBS Studio', paths: [join(APPDATA, 'obs-studio', 'logs'), join(APPDATA, 'obs-studio', 'profiler_data')] },
         { id: 'adobe', name: 'Adobe Creative Cloud', paths: [join(LOCALAPPDATA, 'Adobe', 'AcroCef', 'Cache'), join(APPDATA, 'Adobe', 'Common', 'Media Cache Files'), join(APPDATA, 'Adobe', 'Common', 'Media Cache')] },
@@ -107,7 +116,13 @@ export function createWin32Paths(): PlatformPaths {
         { id: 'gradle', name: 'Gradle Cache', paths: [join(HOME, '.gradle', 'caches'), join(HOME, '.gradle', 'daemon')] },
         { id: 'maven', name: 'Maven Cache', paths: [join(HOME, '.m2', 'repository')] },
         { id: 'composer', name: 'Composer Cache', paths: [join(LOCALAPPDATA, 'Composer', 'cache')] },
-        { id: 'docker', name: 'Docker Desktop', paths: [join(LOCALAPPDATA, 'Docker', 'wsl', 'data'), join(APPDATA, 'Docker Desktop', 'cache')] },
+        { id: 'docker', name: 'Docker Desktop', paths: [join(APPDATA, 'Docker Desktop', 'cache')] },
+        { id: 'cursor', name: 'Cursor IDE', paths: [join(APPDATA, 'Cursor', 'Cache', 'Cache_Data'), join(APPDATA, 'Cursor', 'CachedData'), join(APPDATA, 'Cursor', 'CachedExtensions'), join(APPDATA, 'Cursor', 'logs')] },
+        { id: 'signal', name: 'Signal Desktop', paths: [join(APPDATA, 'Signal', 'Cache', 'Cache_Data'), join(APPDATA, 'Signal', 'GPUCache')] },
+        { id: 'postman', name: 'Postman', paths: [join(APPDATA, 'Postman', 'Cache', 'Cache_Data'), join(APPDATA, 'Postman', 'GPUCache')] },
+        { id: 'figma', name: 'Figma', paths: [join(APPDATA, 'Figma', 'Cache', 'Cache_Data'), join(APPDATA, 'Figma', 'GPUCache')] },
+        { id: 'github-desktop', name: 'GitHub Desktop', paths: [join(APPDATA, 'GitHub Desktop', 'Cache', 'Cache_Data'), join(APPDATA, 'GitHub Desktop', 'GPUCache')] },
+        { id: 'vlc', name: 'VLC', paths: [join(APPDATA, 'vlc', 'art_cache')] },
       ]
     },
 
@@ -121,6 +136,8 @@ export function createWin32Paths(): PlatformPaths {
         { id: 'battlenet', name: 'Battle.net', paths: [join(LOCALAPPDATA, 'Blizzard Entertainment', 'Battle.net', 'Logs'), join(APPDATA, 'Battle.net', 'Logs')] },
         { id: 'riot', name: 'Riot Games', paths: [join(LOCALAPPDATA, 'Riot Games', 'Riot Client', 'Logs')] },
         { id: 'xbox', name: 'Xbox App', paths: [join(LOCALAPPDATA, 'Packages', 'Microsoft.GamingApp_8wekyb3d8bbwe', 'LocalCache'), join(LOCALAPPDATA, 'Packages', 'Microsoft.XboxApp_8wekyb3d8bbwe', 'LocalCache')] },
+        { id: 'rockstar', name: 'Rockstar Games Launcher', paths: [join(LOCALAPPDATA, 'Rockstar Games', 'Launcher', 'cache'), join(LOCALAPPDATA, 'Rockstar Games', 'Launcher', 'logs')] },
+        { id: 'itch', name: 'itch.io', paths: [join(APPDATA, 'itch', 'Cache', 'Cache_Data'), join(APPDATA, 'itch', 'logs')] },
       ]
     },
 
@@ -128,6 +145,8 @@ export function createWin32Paths(): PlatformPaths {
       return [
         { id: 'nvidia', name: 'NVIDIA Shader Cache', paths: [join(LOCALAPPDATA, 'NVIDIA', 'GLCache'), join(LOCALAPPDATA, 'NVIDIA', 'DXCache'), join(LOCALAPPDATA, 'NVIDIA Corporation', 'NV_Cache'), join(PROGRAMDATA, 'NVIDIA Corporation', 'NV_Cache')] },
         { id: 'amd', name: 'AMD Shader Cache', paths: [join(LOCALAPPDATA, 'AMD', 'DxCache'), join(LOCALAPPDATA, 'AMD', 'GLCache'), join(LOCALAPPDATA, 'AMD', 'VkCache')] },
+        { id: 'intel', name: 'Intel Shader Cache', paths: [join(LOCALAPPDATA, 'Intel', 'ShaderCache')] },
+        { id: 'unity-cache', name: 'Unity Shader Cache', paths: [join(LOCALAPPDATA, 'Unity', 'cache')] },
       ]
     },
 

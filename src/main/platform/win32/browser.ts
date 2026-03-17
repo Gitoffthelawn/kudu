@@ -9,7 +9,7 @@ export function createWin32Browser(): PlatformBrowser {
     async closeBrowsers(): Promise<void> {
       const browserProcesses = [
         'chrome.exe', 'msedge.exe', 'brave.exe', 'vivaldi.exe',
-        'opera.exe', 'firefox.exe',
+        'opera.exe', 'firefox.exe', 'arc.exe', 'chromium.exe',
       ]
       for (const proc of browserProcesses) {
         try {

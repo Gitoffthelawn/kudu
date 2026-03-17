@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import { IPC } from '../../shared/channels'
 import { getPlatform } from '../platform'
-import { scanDirectory, scanFile, cleanItems } from '../services/file-utils'
+import { scanDirectory, scanFile, scanMultipleDirectories, resolveChildSubdirs, cleanItems } from '../services/file-utils'
 import { cacheItems } from '../services/scan-cache'
 import { isAdmin } from '../services/elevation'
 import type { ScanResult, CleanResult } from '../../shared/types'
@@ -34,7 +34,15 @@ export function registerSystemCleanerIpc(getWindow: WindowGetter): void {
       }
 
       try {
-        const result = await scanDirectory(target.path, category, target.subcategory)
+        // For targets with childSubdir, scan path/*/childSubdir instead of path directly
+        // e.g. Flatpak: scan ~/.var/app/*/cache instead of ~/.var/app
+        let result: ScanResult
+        if (target.childSubdir) {
+          const childPaths = await resolveChildSubdirs([target.path], target.childSubdir)
+          result = await scanMultipleDirectories(childPaths, category, target.subcategory)
+        } else {
+          result = await scanDirectory(target.path, category, target.subcategory)
+        }
 
         // Exclude protected event logs so boot trace data survives cleaning
         if (eventLogsTarget && target.path === eventLogsTarget.path) {
@@ -65,10 +73,10 @@ export function registerSystemCleanerIpc(getWindow: WindowGetter): void {
       }
     }
 
-    // Scan single-file targets (e.g. full memory dump)
-    for (const filePath of platform.paths.singleFileCleanTargets()) {
+    // Scan single-file targets (e.g. full memory dump, xsession errors)
+    for (const target of platform.paths.singleFileCleanTargets()) {
       try {
-        const dumpResult = await scanFile(filePath, category, 'Full Memory Dump')
+        const dumpResult = await scanFile(target.path, category, target.subcategory)
         if (dumpResult.items.length > 0) {
           cacheItems(dumpResult.items)
           results.push(dumpResult)

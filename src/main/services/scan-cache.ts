@@ -5,7 +5,7 @@ import type { ScanItem } from '../../shared/types'
  * item paths by ID. Each scan replaces the previous cache for that category.
  */
 const itemCache = new Map<string, ScanItem>()
-const MAX_CACHE_SIZE = 10000
+const MAX_CACHE_SIZE = 50000
 
 export function cacheItems(items: ScanItem[]): void {
   // Evict oldest entries if cache is getting too large

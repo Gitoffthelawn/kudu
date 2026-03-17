@@ -10,7 +10,7 @@ import { promisify } from 'util'
 import { lookup } from 'dns/promises'
 import Pusher from 'pusher-js'
 import { getSettings, setSettings, getMachineId } from './settings-store'
-import { scanDirectory, scanMultipleDirectories, scanDirectoriesAsItems, cleanItems } from './file-utils'
+import { scanDirectory, scanMultipleDirectories, scanDirectoriesAsItems, resolveChildSubdirs, cleanItems } from './file-utils'
 import { cacheItems } from './scan-cache'
 import { getPlatform } from '../platform'
 import { CleanerType } from '../../shared/enums'
@@ -1560,10 +1560,16 @@ class CloudAgentService {
     switch (scanType) {
       case 'system': {
         const results: ScanResult[] = []
-        const targets = getPlatform().paths.systemCleanTargets().map(t => ({ path: t.path, sub: t.subcategory }))
+        const targets = getPlatform().paths.systemCleanTargets()
         for (const t of targets) {
           try {
-            const r = await scanDirectory(t.path, CleanerType.System, t.sub)
+            let r
+            if (t.childSubdir) {
+              const childPaths = await resolveChildSubdirs([t.path], t.childSubdir)
+              r = await scanMultipleDirectories(childPaths, CleanerType.System, t.subcategory)
+            } else {
+              r = await scanDirectory(t.path, CleanerType.System, t.subcategory)
+            }
             if (r.items.length > 0) { cacheItems(r.items); results.push(r) }
           } catch { /* skip */ }
         }
@@ -1595,6 +1601,8 @@ class CloudAgentService {
           { label: 'Vivaldi', ...browserPaths.vivaldi, hasProfiles: true },
           { label: 'Opera', ...browserPaths.opera, hasProfiles: false },
           { label: 'Opera GX', ...browserPaths.operaGX, hasProfiles: false },
+          { label: 'Arc', ...browserPaths.arc, hasProfiles: true },
+          { label: 'Chromium', ...browserPaths.chromium, hasProfiles: true },
         ]
 
         for (const browser of chromiumBrowsers) {
@@ -1647,6 +1655,14 @@ class CloudAgentService {
           } catch { /* skip */ }
         }
 
+        // Safari (macOS only) — cache directory only, never cookies/history/bookmarks
+        if (browserPaths.safari && existsSync(browserPaths.safari.cache)) {
+          try {
+            const r = await scanDirectory(browserPaths.safari.cache, browserCategory, 'Safari - Cache')
+            if (r.items.length > 0) { cacheItems(r.items); browserResults.push(r) }
+          } catch { /* skip */ }
+        }
+
         await this.postCommandResult(requestId, true, {
           scanType,
           results: browserResults.map((r) => ({
@@ -1667,7 +1683,8 @@ class CloudAgentService {
         const appCategory = CleanerType.App
         for (const appDef of getPlatform().paths.appPaths()) {
           try {
-            const r = await scanMultipleDirectories(appDef.paths, appCategory, appDef.name)
+            const appPaths = await resolveChildSubdirs(appDef.paths, appDef.childSubdir)
+            const r = await scanMultipleDirectories(appPaths, appCategory, appDef.name)
             if (r.items.length > 0) { cacheItems(r.items); appResults.push(r) }
           } catch { /* skip */ }
         }
