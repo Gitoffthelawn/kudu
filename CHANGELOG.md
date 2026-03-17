@@ -1,3 +1,14 @@
+# [1.8.0](https://github.com/AdventDevInc/kudu/compare/v1.7.0...v1.8.0) (2026-03-17)
+
+
+### Bug Fixes
+
+* **privacy:** remove unsafe sysctl hardening settings ([9f669b0](https://github.com/AdventDevInc/kudu/commit/9f669b0305e3a35ca55455e14a96d6fc198208e6))
+
+
+### Features
+
+* **cloud:** add server-only security checks to health reports ([5875d06](https://github.com/AdventDevInc/kudu/commit/5875d066a43006beec0b1465704b41cd885a910c))
 # [1.7.0](https://github.com/AdventDevInc/kudu/compare/v1.6.0...v1.7.0) (2026-03-17)
 
 
