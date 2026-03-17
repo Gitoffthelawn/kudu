@@ -1,160 +1,104 @@
-# Kudu
-
 <p align="center">
   <a href="https://usekudu.com"><img src="logo.png" alt="Kudu" width="128" /></a>
 </p>
 
+<h1 align="center">Kudu</h1>
+
 <p align="center">
-  A modern, open-source system cleaner for Windows, MacOS, and Linux.
+  <b>Free, open-source system cleaner & security scanner for Windows, macOS, and Linux.</b><br/>
+  Reclaim disk space. Remove malware. Take back your privacy. All in one app.
 </p>
 
 <p align="center">
+  <a href="https://github.com/adventdevinc/kudu/stargazers"><img src="https://img.shields.io/github/stars/adventdevinc/kudu?style=flat-square&label=Stars" alt="Stars" /></a>
   <a href="https://github.com/adventdevinc/kudu/releases"><img src="https://img.shields.io/github/v/release/adventdevinc/kudu?style=flat-square" alt="Release" /></a>
+  <a href="https://github.com/adventdevinc/kudu/releases"><img src="https://img.shields.io/github/downloads/adventdevinc/kudu/total?style=flat-square&label=Downloads" alt="Downloads" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/adventdevinc/kudu?style=flat-square" alt="License" /></a>
-  <a href="https://github.com/adventdevinc/kudu/actions"><img src="https://img.shields.io/github/actions/workflow/status/adventdevinc/kudu/release.yml?style=flat-square&label=build" alt="Build" /></a>
-  <a href="https://github.com/adventdevinc/kudu/releases"><img src="https://img.shields.io/github/downloads/adventdevinc/kudu/total?style=flat-square&label=downloads" alt="Downloads" /></a>
+  <a href="https://github.com/adventdevinc/kudu/actions"><img src="https://img.shields.io/github/actions/workflow/status/adventdevinc/kudu/release.yml?style=flat-square&label=Build" alt="Build" /></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=flat-square" alt="Platform" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/adventdevinc/kudu/releases"><b>Download</b></a> &nbsp;&middot;&nbsp;
+  <a href="https://usekudu.com"><b>Website</b></a> &nbsp;&middot;&nbsp;
+  <a href="CLI.md"><b>CLI Docs</b></a>
 </p>
 
 ---
 
 <p align="center">
-  <img src="https://usekudu.com/img/screenshots/kudu-app-home.png" alt="Kudu Dashboard" width="800" />
+  <img src="resources/kudu-animated.gif" alt="Kudu Demo" width="800" />
 </p>
-
-## Features
-
-### Cleaning & Optimization
-- **System Cleaner** — Remove temp files, logs, caches, and other system junk
-- **Browser Cleaner** — Clear browser caches across all major browsers (never touches cookies, history, or sessions)
-- **App Cleaner** — Clean up leftover data from installed applications
-- **Gaming Cleaner** — Free space from game launchers and cached game data
-- **Recycle Bin** — Scan and empty the recycle bin
-- **Registry Cleaner** — Detect and fix broken or orphaned registry entries, scheduled tasks, and security issues
-- **Startup Manager** — Control which programs launch at startup with boot impact analysis
-- **Network Cleanup** — Clean DNS cache, Wi-Fi profiles, ARP cache, and network history
-- **Disk Analyzer** — Interactive treemap visualization of disk usage across all drives
-- **Debloater** — Remove pre-installed Windows bloatware by category
-- **Driver Manager** — Scan and remove stale driver packages, check for driver updates via Windows Update
-- **Uninstall Leftovers** — Detect and clean orphaned files from uninstalled programs
-- **Program Uninstaller** — List all installed programs, uninstall with automatic leftover cleanup
-- **Service Manager** — Scan, classify, and optimize Windows services with a built-in safety knowledge base
-- **Software Updater** — Check for outdated applications via winget and bulk-update them
-
-### Security & Privacy
-- **Malware Scanner** — Multi-engine threat detection with signature matching, heuristic analysis, and Windows Defender integration
-- **Privacy Shield** — Control 30+ Windows privacy settings including telemetry, advertising ID, Cortana, and tracking
-
-### Monitoring & Tools
-- **Performance Monitor** — Real-time CPU, memory, disk, and network monitoring with per-core stats, process manager, and disk health via S.M.A.R.T.
-- **System Restore Points** — Create Windows restore points before cleaning operations
-- **Secure Delete** — Overwrite files with random data before deletion for sensitive data
-- **Cleaning History** — Track past cleaning sessions and space recovered
-- **Scheduled Scans** — Set up automatic scans on a daily, weekly, or monthly schedule
-- **One-Click Clean** — Scan and clean junk files, registry, network, and stale drivers with a single click
-- **CLI Mode** — Run scans from the command line without the GUI for scripting and automation
-
-## CLI Mode
-
-Kudu can run entirely from the command line — no GUI window is opened. This is useful for scripting, IT admin workflows, and scheduled tasks beyond the built-in scheduler.
-
-### Usage
-
-```
-kudu --cli [options] [categories...]
-```
-
-### Categories
-
-| Flag | Description |
-|------|-------------|
-| `--system` | System temp files, caches, logs, crash dumps |
-| `--browser` | Browser caches (Chrome, Edge, Brave, Firefox, etc.) |
-| `--app` | Application caches (Discord, VS Code, npm, etc.) |
-| `--gaming` | Game launcher caches, GPU shader caches, redistributables |
-| `--recycle-bin` | Windows Recycle Bin |
-| `--all` | All categories (default when none specified) |
-
-### Options
-
-| Flag | Description |
-|------|-------------|
-| `--clean` | Delete found items after scanning (without this flag, scan-only) |
-| `--json` | Output results as JSON instead of human-readable text |
-| `-h`, `--help` | Show help message |
-| `-v`, `--version` | Show version |
-
-### Examples
-
-```bash
-# Scan everything (dry run — nothing is deleted)
-kudu --cli
-
-# Scan and clean system junk only
-kudu --cli --system --clean
-
-# Scan system and browser caches
-kudu --cli --system --browser
-
-# Scan everything and clean, output as JSON (for scripting)
-kudu --cli --all --clean --json
-
-# Use in a scheduled task (Task Scheduler, cron, etc.)
-kudu --cli --all --clean
-```
-
-### JSON Output
-
-When `--json` is passed, output is a single JSON object:
-
-```json
-{
-  "scan": {
-    "categories": ["system", "browser"],
-    "results": [
-      {
-        "category": "system",
-        "subcategory": "User Temp Files",
-        "itemCount": 42,
-        "totalSize": 104857600,
-        "items": [{ "path": "...", "size": 1024, "lastModified": 1700000000000 }]
-      }
-    ],
-    "totalItems": 42,
-    "totalSize": 104857600
-  },
-  "clean": {
-    "totalCleaned": 104857600,
-    "filesDeleted": 40,
-    "filesSkipped": 2,
-    "errors": []
-  }
-}
-```
-
-The `clean` key is only present when `--clean` is used.
-
-### Exit Codes
-
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | Errors occurred during scan or clean |
 
 ## Download
 
-Get the latest installer from the [Releases](https://github.com/adventdevinc/kudu/releases) page.
+Get the latest installer for your platform from [GitHub Releases](https://github.com/adventdevinc/kudu/releases):
+
+| Platform | Format |
+|----------|--------|
+| Windows | `.exe` installer |
+| macOS | `.dmg` (Intel & Apple Silicon) |
+| Linux | `.AppImage` or `.deb` |
+
+## Why Kudu?
+
+Most system cleaners are closed-source, ad-filled, and want your money. Some are barely disguised malware themselves.
+
+Kudu is **100% free, open-source, and transparent**. No ads, no upsells, no telemetry. You can read every line of code, audit every scan, and verify every delete. Built by developers who were tired of recommending CCleaner with a straight face.
+
+## What It Does
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### Cleaning & Optimization
+- **System Cleaner** — temp files, logs, caches, crash dumps
+- **Browser Cleaner** — caches across all major browsers
+- **App Cleaner** — leftover app data
+- **Gaming Cleaner** — game launcher & shader caches
+- **Registry Cleaner** — broken/orphaned entries
+- **Startup Manager** — boot impact analysis
+- **Network Cleanup** — DNS, Wi-Fi profiles, ARP cache
+- **Disk Analyzer** — interactive treemap of disk usage
+- **Debloater** — remove Windows bloatware
+- **Driver Manager** — stale driver cleanup
+- **Program Uninstaller** — uninstall + leftover cleanup
+- **Service Manager** — optimize Windows services
+- **Software Updater** — bulk-update via winget
+
+</td>
+<td width="33%" valign="top">
+
+### Security & Privacy
+- **Malware Scanner** — signature matching, heuristic analysis, Defender integration
+- **Privacy Shield** — control 30+ Windows privacy settings (telemetry, ad ID, Cortana, tracking)
+- **Secure Delete** — overwrite files with random data before deletion
+
+</td>
+<td width="33%" valign="top">
+
+### Monitoring & Tools
+- **Performance Monitor** — real-time CPU, memory, disk, network, per-core stats, S.M.A.R.T.
+- **System Restore Points** — create restore points before cleaning
+- **Cleaning History** — track past sessions & space recovered
+- **Scheduled Scans** — daily, weekly, or monthly
+- **One-Click Clean** — scan & clean everything in one click
+- **[CLI Mode](CLI.md)** — scriptable, no GUI required
+
+</td>
+</tr>
+</table>
 
 ## Disclaimer
 
-Kudu is intended for **advanced users** who understand system maintenance and the implications of removing files, registry entries, and other system data. By using this software, you acknowledge that:
+Kudu is intended for **advanced users** who understand system maintenance. You are responsible for reviewing items before removal. We accept no liability for data loss or system instability. Create backups before cleaning — especially for registry and debloat operations. This software is provided **"as is"** without warranty.
 
-- **You are solely responsible** for reviewing all items before removal. Always inspect scan results carefully before cleaning.
-- **We accept no responsibility or liability** for any data loss, system instability, or other damage resulting from the use of this software.
-- **Create backups** before performing any cleaning operations, especially registry cleaning and debloating.
-- This software is provided **"as is"**, without warranty of any kind, express or implied.
+## Contributing
 
-Use at your own risk.
+Contributions are welcome! Feel free to open issues, submit PRs, or suggest features.
+
+If you find Kudu useful, consider giving it a star — it helps others discover the project.
 
 ## License
 

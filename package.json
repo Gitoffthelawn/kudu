@@ -31,6 +31,14 @@
     "email": "kudu@users.noreply.github.com"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adventdevinc/kudu.git"
+  },
+  "homepage": "https://usekudu.com",
+  "bugs": {
+    "url": "https://github.com/adventdevinc/kudu/issues"
+  },
   "devDependencies": {
     "@commitlint/cli": "^20.4.4",
     "@commitlint/config-conventional": "^20.4.4",
