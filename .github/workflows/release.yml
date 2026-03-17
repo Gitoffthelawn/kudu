@@ -215,3 +215,21 @@ jobs:
           gh release edit "v$version" --repo AdventDevInc/kudu --notes "${existing}
 
           ${vt_report}"
+
+  publish-winget:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Get version from tag
+        id: version
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Update winget manifest
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $url = "https://github.com/AdventDevInc/kudu/releases/download/v$version/Kudu-Setup-$version.exe"
+          Invoke-WebRequest -Uri "https://aka.ms/wingetcreate/latest" -OutFile wingetcreate.exe
+          .\wingetcreate.exe update AdventDevelopmentInc.Kudu --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version $version
