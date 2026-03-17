@@ -952,6 +952,10 @@ class CloudAgentService {
           screenLock: { screenSaverEnabled: false, lockOnResume: false, timeoutSec: null, inactivityLockSec: null },
           passwordPolicy: { minLength: 0, maxAgeDays: 0, minAgeDays: 0, historyCount: 0, complexityRequired: false, lockoutThreshold: 0, lockoutDurationMin: 0, lockoutObservationMin: 0, windowsHello: { enrolled: false, faceEnabled: false, fingerprintEnabled: false, pinEnabled: false } },
           sshHardening: null,
+          fail2ban: null,
+          listeningPorts: null,
+          auditd: null,
+          suidSgidBinaries: null,
         },
       }
 
@@ -1017,7 +1021,7 @@ class CloudAgentService {
 
   private async collectSecurityPosture(): Promise<HealthReport['securityPosture']> {
     const security = getPlatform().security
-    const [av, fw, bl, wu, sl, pp, ssh] = await Promise.allSettled([
+    const [av, fw, bl, wu, sl, pp, ssh, f2b, ports, audit, suid] = await Promise.allSettled([
       security.collectAntivirusStatus(),
       security.collectFirewallStatus(),
       security.collectDiskEncryptionStatus(),
@@ -1025,6 +1029,10 @@ class CloudAgentService {
       security.collectScreenLockStatus(),
       security.collectPasswordPolicy(),
       security.collectSshHardening(),
+      security.collectFail2ban(),
+      security.collectListeningPorts(),
+      security.collectAuditd(),
+      security.collectSuidSgidBinaries(),
     ])
 
     return {
@@ -1035,6 +1043,10 @@ class CloudAgentService {
       screenLock: sl.status === 'fulfilled' ? sl.value : { screenSaverEnabled: false, lockOnResume: false, timeoutSec: null, inactivityLockSec: null },
       passwordPolicy: pp.status === 'fulfilled' ? pp.value : { minLength: 0, maxAgeDays: 0, minAgeDays: 0, historyCount: 0, complexityRequired: false, lockoutThreshold: 0, lockoutDurationMin: 0, lockoutObservationMin: 0, windowsHello: { enrolled: false, faceEnabled: false, fingerprintEnabled: false, pinEnabled: false } },
       sshHardening: ssh.status === 'fulfilled' ? ssh.value : null,
+      fail2ban: f2b.status === 'fulfilled' ? f2b.value : null,
+      listeningPorts: ports.status === 'fulfilled' ? ports.value : null,
+      auditd: audit.status === 'fulfilled' ? audit.value : null,
+      suidSgidBinaries: suid.status === 'fulfilled' ? suid.value : null,
     }
   }
 

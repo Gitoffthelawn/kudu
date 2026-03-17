@@ -111,6 +111,10 @@ export interface PlatformSecurity {
   collectScreenLockStatus(): Promise<HealthReport['securityPosture']['screenLock']>
   collectPasswordPolicy(): Promise<HealthReport['securityPosture']['passwordPolicy']>
   collectSshHardening(): Promise<HealthReport['securityPosture']['sshHardening']>
+  collectFail2ban(): Promise<HealthReport['securityPosture']['fail2ban']>
+  collectListeningPorts(): Promise<HealthReport['securityPosture']['listeningPorts']>
+  collectAuditd(): Promise<HealthReport['securityPosture']['auditd']>
+  collectSuidSgidBinaries(): Promise<HealthReport['securityPosture']['suidSgidBinaries']>
 }
 
 // ─── System Commands ────────────────────────────────────────

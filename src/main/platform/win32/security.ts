@@ -235,5 +235,21 @@ export function createWin32Security(): PlatformSecurity {
     async collectSshHardening(): Promise<HealthReport['securityPosture']['sshHardening']> {
       return null
     },
+
+    async collectFail2ban(): Promise<HealthReport['securityPosture']['fail2ban']> {
+      return null
+    },
+
+    async collectListeningPorts(): Promise<HealthReport['securityPosture']['listeningPorts']> {
+      return null
+    },
+
+    async collectAuditd(): Promise<HealthReport['securityPosture']['auditd']> {
+      return null
+    },
+
+    async collectSuidSgidBinaries(): Promise<HealthReport['securityPosture']['suidSgidBinaries']> {
+      return null
+    },
   }
 }

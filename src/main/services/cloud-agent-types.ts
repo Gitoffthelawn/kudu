@@ -207,5 +207,34 @@ export interface HealthReport {
       emptyPasswordsDisabled: boolean    // PermitEmptyPasswords no
       protocol2Only: boolean             // Protocol 2 (legacy check, modern sshd defaults to 2)
     } | null                             // null when not applicable (e.g. Windows desktop)
+
+    // ─── Server-only checks (null on desktops / non-Linux) ───
+    fail2ban: {
+      installed: boolean
+      active: boolean                    // systemd service is running
+      jails: string[]                    // active jail names (e.g. ["sshd", "apache-auth"])
+      totalBannedIps: number             // sum of currently banned IPs across all jails
+    } | null
+
+    listeningPorts: Array<{
+      address: string                    // bind address (e.g. "0.0.0.0", "::", "127.0.0.1")
+      port: number
+      protocol: 'tcp' | 'udp'
+      pid: number | null
+      process: string | null             // process name (e.g. "sshd", "nginx")
+    }> | null
+
+    auditd: {
+      installed: boolean
+      active: boolean                    // systemd service is running
+      ruleCount: number                  // number of active audit rules
+    } | null
+
+    suidSgidBinaries: Array<{
+      path: string
+      suid: boolean
+      sgid: boolean
+      owner: string                      // file owner (e.g. "root")
+    }> | null
   }
 }

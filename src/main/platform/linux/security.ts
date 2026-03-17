@@ -6,6 +6,33 @@ import type { HealthReport } from '../../services/cloud-agent-types'
 
 const execFileAsync = promisify(execFile)
 
+let cachedIsServer: boolean | null = null
+let cachedIsServerAt = 0
+const IS_SERVER_TTL_MS = 24 * 60 * 60_000 // re-check daily
+
+async function isServerMode(): Promise<boolean> {
+  if (cachedIsServer !== null && Date.now() - cachedIsServerAt < IS_SERVER_TTL_MS) return cachedIsServer
+  try {
+    const { stdout } = await execFileAsync('systemctl', ['get-default'], { timeout: 5_000 })
+    cachedIsServer = stdout.trim() === 'multi-user.target'
+  } catch {
+    cachedIsServer = !process.env.XDG_SESSION_TYPE || process.env.XDG_SESSION_TYPE === 'tty'
+  }
+  cachedIsServerAt = Date.now()
+  return cachedIsServer
+}
+
+/** Check multiple candidate paths and return the first that exists, or null. */
+async function findBinary(candidates: string[]): Promise<string | null> {
+  for (const p of candidates) {
+    try {
+      await stat(p)
+      return p
+    } catch { /* not at this path */ }
+  }
+  return null
+}
+
 export function createLinuxSecurity(): PlatformSecurity {
   return {
     async collectAntivirusStatus(): Promise<HealthReport['securityPosture']['antivirus']> {
@@ -288,15 +315,7 @@ export function createLinuxSecurity(): PlatformSecurity {
     },
 
     async collectSshHardening(): Promise<HealthReport['securityPosture']['sshHardening']> {
-      // Detect if this is a server (no graphical target)
-      let isServer = false
-      try {
-        const { stdout } = await execFileAsync('systemctl', ['get-default'], { timeout: 5_000 })
-        isServer = stdout.trim() === 'multi-user.target'
-      } catch {
-        // Fallback: check for graphical session env
-        isServer = !process.env.XDG_SESSION_TYPE || process.env.XDG_SESSION_TYPE === 'tty'
-      }
+      const isServer = await isServerMode()
 
       // Check if sshd is installed
       let sshdInstalled = false
@@ -371,6 +390,242 @@ export function createLinuxSecurity(): PlatformSecurity {
         emptyPasswordsDisabled: emptyPasswords !== 'yes', // defaults to no
         protocol2Only: !protocol || protocol === '2', // modern sshd only supports 2
       }
+    },
+
+    async collectFail2ban(): Promise<HealthReport['securityPosture']['fail2ban']> {
+      if (!(await isServerMode())) return null
+
+      const f2bPath = await findBinary(['/usr/bin/fail2ban-client', '/usr/local/bin/fail2ban-client'])
+      if (!f2bPath) {
+        return { installed: false, active: false, jails: [], totalBannedIps: 0 }
+      }
+
+      // Check if service is active
+      let active = false
+      try {
+        const { stdout } = await execFileAsync('systemctl', ['is-active', 'fail2ban'], { timeout: 5_000 })
+        active = stdout.trim() === 'active'
+      } catch { /* not running */ }
+
+      if (!active) {
+        return { installed: true, active: false, jails: [], totalBannedIps: 0 }
+      }
+
+      // Get jail list and banned counts
+      const jails: string[] = []
+      let totalBannedIps = 0
+      try {
+        const { stdout } = await execFileAsync(f2bPath, ['status'], { timeout: 10_000 })
+        const jailMatch = stdout.match(/Jail list:\s*(.+)/i)
+        if (jailMatch) {
+          const names = jailMatch[1].split(',').map(s => s.trim()).filter(Boolean)
+          jails.push(...names)
+        }
+
+        // Get banned count per jail (parallel)
+        const jailResults = await Promise.allSettled(
+          jails.map(jail =>
+            execFileAsync(f2bPath, ['status', jail], { timeout: 5_000 })
+          ),
+        )
+        for (const r of jailResults) {
+          if (r.status !== 'fulfilled') continue
+          const bannedMatch = r.value.stdout.match(/Currently banned:\s*(\d+)/i)
+          if (bannedMatch) totalBannedIps += parseInt(bannedMatch[1], 10)
+        }
+      } catch { /* couldn't query jails */ }
+
+      return { installed: true, active: true, jails, totalBannedIps }
+    },
+
+    async collectListeningPorts(): Promise<HealthReport['securityPosture']['listeningPorts']> {
+      if (!(await isServerMode())) return null
+
+      const result: NonNullable<HealthReport['securityPosture']['listeningPorts']> = []
+
+      try {
+        // ss -tlnp for TCP, ss -ulnp for UDP
+        const [tcp, udp] = await Promise.allSettled([
+          execFileAsync('ss', ['-tlnp'], { timeout: 10_000 }),
+          execFileAsync('ss', ['-ulnp'], { timeout: 10_000 }),
+        ])
+
+        function parseLocalAddr(raw: string): { address: string; port: number } | null {
+          // Formats: "0.0.0.0:22", "[::1]:22", ":::22" (IPv6 wildcard), "*:22"
+          // Bracket-enclosed IPv6
+          const bracketMatch = raw.match(/^\[(.+)\]:(\d+)$/)
+          if (bracketMatch) return { address: bracketMatch[1], port: parseInt(bracketMatch[2], 10) }
+          // IPv6 wildcard ":::port" — address is "::", port after last colon
+          const ipv6Wild = raw.match(/^:::(\d+)$/)
+          if (ipv6Wild) return { address: '::', port: parseInt(ipv6Wild[1], 10) }
+          // IPv4 or "*:port" — split on last colon
+          const lastColon = raw.lastIndexOf(':')
+          if (lastColon === -1) return null
+          const port = parseInt(raw.slice(lastColon + 1), 10)
+          if (isNaN(port)) return null
+          return { address: raw.slice(0, lastColon), port }
+        }
+
+        function parseSsOutput(output: string, protocol: 'tcp' | 'udp'): void {
+          const lines = output.split('\n').slice(1) // skip header
+          for (const line of lines) {
+            if (!line.trim()) continue
+            // Fields: State Recv-Q Send-Q Local-Address:Port Peer-Address:Port Process
+            const parts = line.trim().split(/\s+/)
+            // Local address is at index 3 for both TCP and UDP
+            const localAddr = parts[3]
+            if (!localAddr) continue
+            const parsed = parseLocalAddr(localAddr)
+            if (!parsed) continue
+
+            // Parse process info — may span multiple whitespace-split parts
+            let pid: number | null = null
+            let process: string | null = null
+            const fullLine = line.trim()
+            const usersIdx = fullLine.indexOf('users:')
+            if (usersIdx !== -1) {
+              const usersStr = fullLine.slice(usersIdx)
+              const pidMatch = usersStr.match(/pid=(\d+)/)
+              const nameMatch = usersStr.match(/\("([^"]+)"/)
+              if (pidMatch) pid = parseInt(pidMatch[1], 10)
+              if (nameMatch) process = nameMatch[1]
+            }
+
+            result.push({ address: parsed.address, port: parsed.port, protocol, pid, process })
+          }
+        }
+
+        if (tcp.status === 'fulfilled') parseSsOutput(tcp.value.stdout, 'tcp')
+        if (udp.status === 'fulfilled') parseSsOutput(udp.value.stdout, 'udp')
+      } catch { /* ss not available */ }
+
+      return result
+    },
+
+    async collectAuditd(): Promise<HealthReport['securityPosture']['auditd']> {
+      if (!(await isServerMode())) return null
+
+      const auditdPath = await findBinary(['/usr/sbin/auditd', '/sbin/auditd'])
+      if (!auditdPath) {
+        return { installed: false, active: false, ruleCount: 0 }
+      }
+
+      let active = false
+      try {
+        const { stdout } = await execFileAsync('systemctl', ['is-active', 'auditd'], { timeout: 5_000 })
+        active = stdout.trim() === 'active'
+      } catch { /* not running */ }
+
+      let ruleCount = 0
+      if (active) {
+        // auditctl lives alongside auditd in the same directory
+        const auditctlPath = await findBinary(['/usr/sbin/auditctl', '/sbin/auditctl'])
+        if (auditctlPath) {
+          try {
+            const { stdout } = await execFileAsync(auditctlPath, ['-l'], { timeout: 10_000 })
+            // Each non-empty line is a rule; "No rules" means 0
+            const lines = stdout.split('\n').filter(l => l.trim() && !l.includes('No rules'))
+            ruleCount = lines.length
+          } catch { /* couldn't query rules */ }
+        }
+      }
+
+      return { installed: true, active, ruleCount }
+    },
+
+    async collectSuidSgidBinaries(): Promise<HealthReport['securityPosture']['suidSgidBinaries']> {
+      if (!(await isServerMode())) return null
+
+      const MAX_RESULTS = 200
+
+      // Known system binaries where suid/sgid is expected (both /usr and legacy paths)
+      const knownSuidNames = [
+        'sudo', 'su', 'passwd', 'chsh', 'chfn', 'newgrp', 'gpasswd',
+        'mount', 'umount', 'pkexec', 'crontab', 'at', 'ssh-agent',
+        'fusermount', 'fusermount3', 'wall', 'write', 'expiry', 'chage',
+      ]
+      const knownSuidPaths = new Set([
+        // Generate both /usr/bin/ and /bin/ variants for merged/non-merged usr
+        ...knownSuidNames.flatMap(n => [`/usr/bin/${n}`, `/bin/${n}`]),
+        '/usr/sbin/unix_chkpwd', '/sbin/unix_chkpwd',
+        '/usr/sbin/pam_timestamp_check', '/sbin/pam_timestamp_check',
+        '/usr/lib/dbus-1.0/dbus-daemon-launch-helper',
+        '/usr/lib/openssh/ssh-keysign',
+        '/usr/libexec/openssh/ssh-keysign',
+      ])
+
+      const result: NonNullable<HealthReport['securityPosture']['suidSgidBinaries']> = []
+      const seen = new Set<string>()
+
+      // Two parallel scans:
+      // 1) System binary dirs — flat scan, where legitimate suid lives (filter known-safe)
+      // 2) Attacker hiding spots — deeper scan, any suid here is suspicious
+      const suidPerm = ['(', '-perm', '-4000', '-o', '-perm', '-2000', ')']
+      const [binScan, hidingScan] = await Promise.allSettled([
+        execFileAsync('find', [
+          '/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin',
+          '/bin', '/sbin',
+          '-xdev', '-maxdepth', '1',
+          '-type', 'f',
+          ...suidPerm,
+        ], { timeout: 15_000 }),
+        execFileAsync('find', [
+          '/tmp', '/var/tmp', '/dev/shm',
+          '/opt', '/home',
+          '/var/www', '/srv',
+          '-xdev', '-maxdepth', '3',
+          '-type', 'f',
+          ...suidPerm,
+        ], { timeout: 15_000 }),
+      ])
+
+      // find exits non-zero if any listed dir doesn't exist, but still writes
+      // valid results to stdout. Extract stdout from both fulfilled and rejected results.
+      function extractFindOutput(r: PromiseSettledResult<{ stdout: string }>): string[] {
+        if (r.status === 'fulfilled') return r.value.stdout.split('\n').filter(Boolean)
+        const err = r.reason as { stdout?: string } | undefined
+        if (err?.stdout) return err.stdout.split('\n').filter(Boolean)
+        return []
+      }
+
+      const allPaths: string[] = [
+        ...extractFindOutput(binScan),
+        ...extractFindOutput(hidingScan),
+      ]
+
+      for (const filePath of allPaths) {
+        if (result.length >= MAX_RESULTS) break
+
+        // Resolve real path first for dedup and allowlist checks on merged-usr systems
+        let resolved = filePath
+        try {
+          const { stdout: realPath } = await execFileAsync('realpath', [filePath], { timeout: 2_000 })
+          resolved = realPath.trim()
+        } catch { /* use original path */ }
+
+        if (seen.has(resolved)) continue
+        seen.add(resolved)
+        if (knownSuidPaths.has(filePath) || knownSuidPaths.has(resolved)) continue
+
+        try {
+          const fileStat = await stat(filePath)
+          const mode = fileStat.mode
+          const suid = (mode & 0o4000) !== 0
+          const sgid = (mode & 0o2000) !== 0
+          if (!suid && !sgid) continue
+
+          // Get owner name via stat -c '%U' (works with UIDs, unlike id -nu)
+          let owner = String(fileStat.uid)
+          try {
+            const { stdout: statOut } = await execFileAsync('/usr/bin/stat', ['-c', '%U', filePath], { timeout: 2_000 })
+            owner = statOut.trim()
+          } catch { /* use numeric uid */ }
+
+          result.push({ path: filePath, suid, sgid, owner })
+        } catch { /* can't stat, skip */ }
+      }
+
+      return result
     },
   }
 }
