@@ -1,5 +1,9 @@
 name: License Check
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   push:
     branches: [main]
