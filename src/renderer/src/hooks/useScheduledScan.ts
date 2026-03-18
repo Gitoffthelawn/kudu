@@ -35,7 +35,8 @@ export function useScheduledScan(): void {
           { label: 'Browsers', fn: () => window.kudu.browserScan() },
           { label: 'Applications', fn: () => window.kudu.appScan() },
           { label: 'Gaming', fn: () => window.kudu.gamingScan() },
-          { label: 'Recycle Bin', fn: () => window.kudu.recycleBinScan() }
+          { label: 'Recycle Bin', fn: () => window.kudu.recycleBinScan() },
+          { label: 'Databases', fn: () => window.kudu.databaseScan() }
         ]
 
         const categoryResults: Record<string, { found: number; size: number }> = {}

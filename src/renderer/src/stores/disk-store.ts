@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { DiskNode, DriveInfo, FileTypeInfo } from '@shared/types'
+import type { DiskNode, DriveInfo, FileTypeInfo, DiskRepairProgress, DiskRepairResult } from '@shared/types'
 
 interface DiskState {
   drives: DriveInfo[]
@@ -11,6 +11,12 @@ interface DiskState {
   fileTypes: FileTypeInfo[]
   fileTypesLoading: boolean
 
+  // Disk repair state
+  repairRunning: boolean
+  repairProgress: DiskRepairProgress | null
+  sfcResult: DiskRepairResult | null
+  dismResult: DiskRepairResult | null
+
   setDrives: (drives: DriveInfo[]) => void
   setSelectedDrive: (drive: string) => void
   setData: (data: DiskNode | null) => void
@@ -21,6 +27,10 @@ interface DiskState {
   setError: (error: string | null) => void
   setFileTypes: (fileTypes: FileTypeInfo[]) => void
   setFileTypesLoading: (loading: boolean) => void
+  setRepairRunning: (running: boolean) => void
+  setRepairProgress: (progress: DiskRepairProgress | null) => void
+  setSfcResult: (result: DiskRepairResult | null) => void
+  setDismResult: (result: DiskRepairResult | null) => void
   reset: () => void
 }
 
@@ -33,6 +43,10 @@ export const useDiskStore = create<DiskState>((set) => ({
   error: null,
   fileTypes: [],
   fileTypesLoading: false,
+  repairRunning: false,
+  repairProgress: null,
+  sfcResult: null,
+  dismResult: null,
 
   setDrives: (drives) => set({ drives }),
   setSelectedDrive: (selectedDrive) => set({ selectedDrive }),
@@ -46,6 +60,10 @@ export const useDiskStore = create<DiskState>((set) => ({
   setError: (error) => set({ error }),
   setFileTypes: (fileTypes) => set({ fileTypes }),
   setFileTypesLoading: (fileTypesLoading) => set({ fileTypesLoading }),
+  setRepairRunning: (repairRunning) => set({ repairRunning }),
+  setRepairProgress: (repairProgress) => set({ repairProgress }),
+  setSfcResult: (sfcResult) => set({ sfcResult }),
+  setDismResult: (dismResult) => set({ dismResult }),
   reset: () =>
     set({
       data: null,
@@ -53,6 +71,10 @@ export const useDiskStore = create<DiskState>((set) => ({
       breadcrumb: [],
       error: null,
       fileTypes: [],
-      fileTypesLoading: false
+      fileTypesLoading: false,
+      repairRunning: false,
+      repairProgress: null,
+      sfcResult: null,
+      dismResult: null,
     })
 }))

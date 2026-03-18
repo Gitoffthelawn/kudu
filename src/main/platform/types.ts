@@ -98,6 +98,22 @@ export interface PlatformPaths {
 
   /** Trash / Recycle Bin path (for CLI scan/clean) */
   trashPath(): string | null
+
+  /** SQLite database targets for vacuum optimization */
+  databaseOptimizeTargets(): DatabaseTarget[]
+}
+
+export interface DatabaseTarget {
+  /** Display label (e.g. "Chrome", "Firefox", "Discord") */
+  label: string
+  /** Base directory containing the databases */
+  basePath: string
+  /** Specific database filenames to look for (e.g. "History", "places.sqlite") */
+  dbFiles: string[]
+  /** If true, scan all profile subdirectories under basePath */
+  multiProfile?: boolean
+  /** Glob pattern for profile subdirectories (default: "Profile *" and "Default") */
+  profilePattern?: string[]
 }
 
 // ─── Elevation ──────────────────────────────────────────────

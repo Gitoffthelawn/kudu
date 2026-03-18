@@ -197,124 +197,27 @@ export function SettingsPage() {
         </Row>
       </Section>
 
-      <Section title="Cleaning Preferences">
-        <Row label="Secure delete (slower)" desc="Overwrite files before deletion for sensitive data (slower)">
-          <Toggle checked={settings.cleaner.secureDelete} onChange={(v) => save({ cleaner: { ...settings.cleaner, secureDelete: v } })} />
-        </Row>
-        <Row label="Close browsers before clean" desc="Automatically close browsers to unlock cache files">
-          <Toggle checked={settings.cleaner.closeBrowsersBeforeClean} onChange={(v) => save({ cleaner: { ...settings.cleaner, closeBrowsersBeforeClean: v } })} />
-        </Row>
-        {features.restorePoint && (
-          <Row label="Create restore point" desc="Create a system restore point before cleaning (requires admin)">
-            <Toggle checked={settings.cleaner.createRestorePoint} onChange={(v) => save({ cleaner: { ...settings.cleaner, createRestorePoint: v } })} />
-          </Row>
-        )}
-        <Row label="Skip recent files" desc="Don't delete files modified within this time" last>
-          <select value={settings.cleaner.skipRecentMinutes}
-            onChange={(e) => save({ cleaner: { ...settings.cleaner, skipRecentMinutes: Number(e.target.value) } })}
-            className={selectStyle} style={selectBorder}>
-            <option value={30}>30 minutes</option>
-            <option value={60}>1 hour</option>
-            <option value={120}>2 hours</option>
-            <option value={1440}>24 hours</option>
-          </select>
-        </Row>
-      </Section>
-
-      <Section title="Exclusions">
-        <div className="space-y-2 pb-3">
-          {settings.exclusions.length === 0 && (
-            <p className="text-[13px]" style={{ color: '#4e4e56' }}>No exclusions configured</p>
-          )}
-          {settings.exclusions.map((exc, i) => (
-            <div key={i} className="flex items-center justify-between rounded-xl px-4 py-2.5"
-              style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="flex items-center gap-2.5">
-                <FolderOpen className="h-3.5 w-3.5" style={{ color: '#4e4e56' }} strokeWidth={1.8} />
-                <span className="font-mono text-[12px] text-zinc-400">{exc}</span>
-              </div>
-              <button onClick={() => save({ exclusions: settings.exclusions.filter((_, j) => j !== i) })}
-                className="rounded-lg p-1.5 transition-colors" style={{ color: '#4e4e56' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
-          <div className="flex items-center gap-2.5">
-            <input type="text" value={newExclusion} onChange={(e) => setNewExclusion(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addExclusion()}
-              placeholder={platform === 'win32' ? 'C:\\path\\to\\exclude or *.ext' : '/path/to/exclude or *.ext'}
-              className="flex-1 rounded-xl px-4 py-2.5 text-[13px] text-zinc-300 outline-none placeholder:text-zinc-700"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }} />
-            <button onClick={addExclusion}
-              className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-medium text-zinc-400 transition-colors"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <Plus className="h-3.5 w-3.5" /> Add
-            </button>
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Scheduled Scans">
-        <Row label="Enable scheduled scans" desc="Automatically scan on a schedule">
-          <Toggle checked={settings.schedule.enabled} onChange={(v) => saveSchedule({ ...settings.schedule, enabled: v })} />
-        </Row>
-        {settings.schedule.enabled && (
-          <>
-            <Row label="Frequency" desc="How often to scan">
-              <select value={settings.schedule.frequency}
-                onChange={(e) => saveSchedule({ ...settings.schedule, frequency: e.target.value as 'daily' | 'weekly' | 'monthly' })}
-                className={selectStyle} style={selectBorder}>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </Row>
-            {settings.schedule.frequency === 'weekly' && (
-              <Row label="Day of week" desc="Which day to scan">
-                <select value={settings.schedule.day}
-                  onChange={(e) => saveSchedule({ ...settings.schedule, day: Number(e.target.value) })}
-                  className={selectStyle} style={selectBorder}>
-                  {DAY_NAMES.map((name, i) => <option key={i} value={i}>{name}</option>)}
-                </select>
-              </Row>
-            )}
-            {settings.schedule.frequency === 'monthly' && (
-              <Row label="Day of month" desc="Which day to scan">
-                <select value={settings.schedule.day}
-                  onChange={(e) => saveSchedule({ ...settings.schedule, day: Number(e.target.value) })}
-                  className={selectStyle} style={selectBorder}>
-                  {Array.from({ length: 28 }, (_, i) => (
-                    <option key={i + 1} value={i + 1}>{ordinal(i + 1)}</option>
-                  ))}
-                </select>
-              </Row>
-            )}
-            <Row label="Time" desc="Time of day to scan" last={!nextScan}>
-              <select value={settings.schedule.hour}
-                onChange={(e) => saveSchedule({ ...settings.schedule, hour: Number(e.target.value) })}
-                className={selectStyle} style={selectBorder}>
-                {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>)}
-              </select>
-            </Row>
-            {nextScan && (
-              <div className="flex items-center gap-2.5 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                <Clock className="h-3.5 w-3.5 shrink-0" style={{ color: '#f59e0b' }} strokeWidth={1.8} />
-                <span className="text-[12px]" style={{ color: '#8e8e96' }}>
-                  Next scan: {formatNextScan(nextScan)}
-                </span>
-              </div>
-            )}
-          </>
-        )}
-      </Section>
-
       <Section title="Cloud Dashboard">
         {!isLinked ? (
           <div className="space-y-4 py-1">
+            <div className="rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+              <p className="text-[13px] font-medium text-zinc-200">
+                Free for up to 5 devices
+              </p>
+              <p className="mt-1.5 text-[12px] leading-relaxed" style={{ color: '#8e8e96' }}>
+                Monitor threats across all your systems, manage centralized cleaning profiles, trigger remote scans, and get real-time health telemetry — all from one dashboard.
+              </p>
+              <button
+                onClick={() => window.open('https://cloud.usekudu.com', '_blank')}
+                className="mt-3 flex items-center gap-2 rounded-xl px-4 py-2.5 text-[12px] font-medium transition-colors"
+                style={{ background: '#f59e0b', color: '#09090b' }}
+              >
+                <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
+                Sign up free
+              </button>
+            </div>
             <p className="text-[13px] text-zinc-400">
-              Connect this device to your Kudu Cloud dashboard for remote monitoring, system health telemetry, and the ability to trigger scans and updates remotely.
+              Already have an account? Paste your API key below to link this device.
             </p>
             <div className="space-y-2.5">
               <input
@@ -347,7 +250,7 @@ export function SettingsPage() {
               </div>
             </div>
             <p className="text-[11px]" style={{ color: '#4e4e56' }}>
-              Data shared: CPU &amp; memory usage, disk space, network stats, uptime, and periodic health reports ({features.registry ? 'registry, drivers, ' : ''}updates, privacy, malware). No file paths or personal data.
+              Only CPU &amp; memory usage, disk space, network stats, uptime, and periodic health reports ({features.registry ? 'registry, drivers, ' : ''}updates, privacy, malware). No file paths or personal data.
             </p>
           </div>
         ) : (
@@ -463,6 +366,119 @@ export function SettingsPage() {
                 {cloudUnlinking ? 'Unlinking...' : 'Unlink Device'}
               </button>
             </div>
+          </>
+        )}
+      </Section>
+
+      <Section title="Cleaning Preferences">
+        <Row label="Secure delete (slower)" desc="Overwrite files before deletion for sensitive data (slower)">
+          <Toggle checked={settings.cleaner.secureDelete} onChange={(v) => save({ cleaner: { ...settings.cleaner, secureDelete: v } })} />
+        </Row>
+        <Row label="Close browsers before clean" desc="Automatically close browsers to unlock cache files">
+          <Toggle checked={settings.cleaner.closeBrowsersBeforeClean} onChange={(v) => save({ cleaner: { ...settings.cleaner, closeBrowsersBeforeClean: v } })} />
+        </Row>
+        {features.restorePoint && (
+          <Row label="Create restore point" desc="Create a system restore point before cleaning (requires admin)">
+            <Toggle checked={settings.cleaner.createRestorePoint} onChange={(v) => save({ cleaner: { ...settings.cleaner, createRestorePoint: v } })} />
+          </Row>
+        )}
+        <Row label="Skip recent files" desc="Don't delete files modified within this time" last>
+          <select value={settings.cleaner.skipRecentMinutes}
+            onChange={(e) => save({ cleaner: { ...settings.cleaner, skipRecentMinutes: Number(e.target.value) } })}
+            className={selectStyle} style={selectBorder}>
+            <option value={30}>30 minutes</option>
+            <option value={60}>1 hour</option>
+            <option value={120}>2 hours</option>
+            <option value={1440}>24 hours</option>
+          </select>
+        </Row>
+      </Section>
+
+      <Section title="Exclusions">
+        <div className="space-y-2 pb-3">
+          {settings.exclusions.length === 0 && (
+            <p className="text-[13px]" style={{ color: '#4e4e56' }}>No exclusions configured</p>
+          )}
+          {settings.exclusions.map((exc, i) => (
+            <div key={i} className="flex items-center justify-between rounded-xl px-4 py-2.5"
+              style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className="flex items-center gap-2.5">
+                <FolderOpen className="h-3.5 w-3.5" style={{ color: '#4e4e56' }} strokeWidth={1.8} />
+                <span className="font-mono text-[12px] text-zinc-400">{exc}</span>
+              </div>
+              <button onClick={() => save({ exclusions: settings.exclusions.filter((_, j) => j !== i) })}
+                className="rounded-lg p-1.5 transition-colors" style={{ color: '#4e4e56' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <div className="flex items-center gap-2.5">
+            <input type="text" value={newExclusion} onChange={(e) => setNewExclusion(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addExclusion()}
+              placeholder={platform === 'win32' ? 'C:\\path\\to\\exclude or *.ext' : '/path/to/exclude or *.ext'}
+              className="flex-1 rounded-xl px-4 py-2.5 text-[13px] text-zinc-300 outline-none placeholder:text-zinc-700"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }} />
+            <button onClick={addExclusion}
+              className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-medium text-zinc-400 transition-colors"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <Plus className="h-3.5 w-3.5" /> Add
+            </button>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Scheduled Scans">
+        <Row label="Enable scheduled scans" desc="Automatically scan on a schedule">
+          <Toggle checked={settings.schedule.enabled} onChange={(v) => saveSchedule({ ...settings.schedule, enabled: v })} />
+        </Row>
+        {settings.schedule.enabled && (
+          <>
+            <Row label="Frequency" desc="How often to scan">
+              <select value={settings.schedule.frequency}
+                onChange={(e) => saveSchedule({ ...settings.schedule, frequency: e.target.value as 'daily' | 'weekly' | 'monthly' })}
+                className={selectStyle} style={selectBorder}>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </Row>
+            {settings.schedule.frequency === 'weekly' && (
+              <Row label="Day of week" desc="Which day to scan">
+                <select value={settings.schedule.day}
+                  onChange={(e) => saveSchedule({ ...settings.schedule, day: Number(e.target.value) })}
+                  className={selectStyle} style={selectBorder}>
+                  {DAY_NAMES.map((name, i) => <option key={i} value={i}>{name}</option>)}
+                </select>
+              </Row>
+            )}
+            {settings.schedule.frequency === 'monthly' && (
+              <Row label="Day of month" desc="Which day to scan">
+                <select value={settings.schedule.day}
+                  onChange={(e) => saveSchedule({ ...settings.schedule, day: Number(e.target.value) })}
+                  className={selectStyle} style={selectBorder}>
+                  {Array.from({ length: 28 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>{ordinal(i + 1)}</option>
+                  ))}
+                </select>
+              </Row>
+            )}
+            <Row label="Time" desc="Time of day to scan" last={!nextScan}>
+              <select value={settings.schedule.hour}
+                onChange={(e) => saveSchedule({ ...settings.schedule, hour: Number(e.target.value) })}
+                className={selectStyle} style={selectBorder}>
+                {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>)}
+              </select>
+            </Row>
+            {nextScan && (
+              <div className="flex items-center gap-2.5 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                <Clock className="h-3.5 w-3.5 shrink-0" style={{ color: '#f59e0b' }} strokeWidth={1.8} />
+                <span className="text-[12px]" style={{ color: '#8e8e96' }}>
+                  Next scan: {formatNextScan(nextScan)}
+                </span>
+              </div>
+            )}
           </>
         )}
       </Section>

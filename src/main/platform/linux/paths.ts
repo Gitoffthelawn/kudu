@@ -1,6 +1,6 @@
 import { homedir, tmpdir } from 'os'
 import { join } from 'path'
-import type { PlatformPaths, CleanTarget, BrowserPathConfig, AppCacheDef, UninstallLeftoverDir } from '../types'
+import type { PlatformPaths, CleanTarget, BrowserPathConfig, AppCacheDef, UninstallLeftoverDir, DatabaseTarget } from '../types'
 
 const HOME = homedir()
 const CONFIG = join(HOME, '.config')
@@ -119,7 +119,7 @@ export function createLinuxPaths(): PlatformPaths {
         { id: 'npm', name: 'npm Cache', paths: [join(HOME, '.npm', '_cacache')] },
         { id: 'yarn', name: 'Yarn Cache', paths: [join(CACHE, 'yarn')] },
         { id: 'pip', name: 'pip Cache', paths: [join(CACHE, 'pip')] },
-        { id: 'zoom', name: 'Zoom', paths: [join(HOME, '.zoom', 'data'), join(HOME, '.zoom', 'logs')] },
+        { id: 'zoom', name: 'Zoom', paths: [join(HOME, '.zoom', 'data', 'Cache'), join(HOME, '.zoom', 'data', 'GPUCache'), join(HOME, '.zoom', 'data', 'logs'), join(HOME, '.zoom', 'logs')] },
         { id: 'telegram', name: 'Telegram', paths: [join(LOCAL_SHARE, 'TelegramDesktop', 'tdata', 'user_data'), join(LOCAL_SHARE, 'TelegramDesktop', 'tdata', 'emoji')] },
         { id: 'obs', name: 'OBS Studio', paths: [join(CONFIG, 'obs-studio', 'logs'), join(CONFIG, 'obs-studio', 'profiler_data')] },
         { id: 'jetbrains', name: 'JetBrains IDEs', paths: [join(CACHE, 'JetBrains')] },
@@ -134,6 +134,20 @@ export function createLinuxPaths(): PlatformPaths {
         { id: 'signal', name: 'Signal Desktop', paths: [join(CONFIG, 'Signal', 'Cache', 'Cache_Data')] },
         { id: 'postman', name: 'Postman', paths: [join(CONFIG, 'Postman', 'Cache', 'Cache_Data')] },
         { id: 'vlc', name: 'VLC', paths: [join(CACHE, 'vlc')] },
+        // Apps added from BleachBit comparison — cache/temp/logs only, never user data
+        { id: 'thunderbird', name: 'Thunderbird', paths: [join(CACHE, 'thunderbird')], childSubdir: 'cache2' },
+        { id: 'gimp', name: 'GIMP', paths: [join(CACHE, 'gimp')] },
+        { id: 'blender', name: 'Blender', paths: [join(CACHE, 'blender')] },
+        { id: 'libreoffice', name: 'LibreOffice', paths: [join(CACHE, 'libreoffice')] },
+        { id: 'teamviewer', name: 'TeamViewer', paths: [join(HOME, '.teamviewer', 'logs'), join(CACHE, 'TeamViewer')] },
+        { id: 'inkscape', name: 'Inkscape', paths: [join(CACHE, 'inkscape')] },
+        { id: 'krita', name: 'Krita', paths: [join(CACHE, 'krita')] },
+        { id: 'filezilla', name: 'FileZilla', paths: [join(CACHE, 'filezilla')] },
+        { id: 'pidgin', name: 'Pidgin', paths: [join(HOME, '.purple', 'icons')] },
+        { id: 'transmission', name: 'Transmission', paths: [join(CACHE, 'transmission')] },
+        { id: 'audacious', name: 'Audacious', paths: [join(CACHE, 'audacious')] },
+        { id: 'rhythmbox', name: 'Rhythmbox', paths: [join(CACHE, 'rhythmbox')] },
+        { id: 'wine', name: 'Wine', paths: [join(HOME, '.wine', 'drive_c', 'windows', 'temp')] },
       ]
     },
 
@@ -192,6 +206,31 @@ export function createLinuxPaths(): PlatformPaths {
 
     trashPath(): string | null {
       return join(LOCAL_SHARE, 'Trash', 'files')
+    },
+
+    databaseOptimizeTargets(): DatabaseTarget[] {
+      const chromiumDbFiles = ['History', 'Cookies', join('Network', 'Cookies'), 'Favicons', 'Top Sites', 'Web Data', 'Shortcuts', 'Login Data']
+      const firefoxDbFiles = ['places.sqlite', 'cookies.sqlite', 'favicons.sqlite', 'formhistory.sqlite', 'webappsstore.sqlite', 'content-prefs.sqlite']
+
+      return [
+        // Chromium-based browsers
+        { label: 'Google Chrome', basePath: join(CONFIG, 'google-chrome'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Microsoft Edge', basePath: join(CONFIG, 'microsoft-edge'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Brave', basePath: join(CONFIG, 'BraveSoftware', 'Brave-Browser'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Vivaldi', basePath: join(CONFIG, 'vivaldi'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Opera', basePath: join(CONFIG, 'opera'), dbFiles: chromiumDbFiles },
+        { label: 'Chromium', basePath: join(CONFIG, 'chromium'), dbFiles: chromiumDbFiles, multiProfile: true },
+        // Firefox
+        { label: 'Firefox', basePath: join(HOME, '.mozilla', 'firefox'), dbFiles: firefoxDbFiles, multiProfile: true, profilePattern: ['*.default*', '*.dev-edition*'] },
+        // Electron / Chromium-based apps
+        { label: 'Discord', basePath: join(CONFIG, 'discord'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'Slack', basePath: join(CONFIG, 'Slack'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'Microsoft Teams', basePath: join(CONFIG, 'Microsoft', 'Microsoft Teams'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'VS Code', basePath: join(CONFIG, 'Code'), dbFiles: [join('Network', 'Cookies'), join('User', 'globalStorage', 'state.vscdb')] },
+        { label: 'Cursor IDE', basePath: join(CONFIG, 'Cursor'), dbFiles: [join('Network', 'Cookies'), join('User', 'globalStorage', 'state.vscdb')] },
+        // Thunderbird
+        { label: 'Thunderbird', basePath: join(HOME, '.thunderbird'), dbFiles: ['global-messages-db.sqlite', 'places.sqlite', 'cookies.sqlite'], multiProfile: true, profilePattern: ['*.default*'] },
+      ]
     },
   }
 }

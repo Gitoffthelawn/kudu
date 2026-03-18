@@ -15,6 +15,10 @@ export const IPC = {
   GAMING_SCAN: 'cleaner:gaming:scan',
   GAMING_CLEAN: 'cleaner:gaming:clean',
 
+  // Database optimizer
+  DATABASE_SCAN: 'cleaner:database:scan',
+  DATABASE_CLEAN: 'cleaner:database:clean',
+
   // Recycle bin
   RECYCLE_BIN_SCAN: 'cleaner:recyclebin:scan',
   RECYCLE_BIN_CLEAN: 'cleaner:recyclebin:clean',
@@ -22,6 +26,10 @@ export const IPC = {
   // Uninstall leftovers
   UNINSTALL_LEFTOVERS_SCAN: 'cleaner:uninstall-leftovers:scan',
   UNINSTALL_LEFTOVERS_CLEAN: 'cleaner:uninstall-leftovers:clean',
+
+  // Shortcut cleaner
+  SHORTCUT_SCAN: 'cleaner:shortcut:scan',
+  SHORTCUT_CLEAN: 'cleaner:shortcut:clean',
 
   // Registry
   REGISTRY_SCAN: 'cleaner:registry:scan',
@@ -42,6 +50,11 @@ export const IPC = {
   DISK_ANALYZE: 'disk:analyze',
   DISK_DRIVES: 'disk:drives',
   DISK_FILE_TYPES: 'disk:file-types',
+
+  // Disk repair (SFC/DISM)
+  DISK_REPAIR_SFC: 'disk:repair:sfc',
+  DISK_REPAIR_DISM: 'disk:repair:dism',
+  DISK_REPAIR_PROGRESS: 'disk:repair:progress',
 
   // Network cleanup
   NETWORK_SCAN: 'cleaner:network:scan',

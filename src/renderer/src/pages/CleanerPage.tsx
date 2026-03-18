@@ -5,13 +5,16 @@ import {
   AppWindow,
   Gamepad2,
   Trash2,
+  Link2Off,
+  Database,
   Search,
   Sparkles,
   CheckCircle2,
   ChevronRight,
   Folder,
   AlertTriangle,
-  ShieldAlert
+  ShieldAlert,
+  Loader2
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ScanProgress } from '@/components/shared/ScanProgress'
@@ -39,7 +42,9 @@ const categories: CategoryDef[] = [
   { type: CleanerType.Browser, label: 'Browsers', icon: Globe, description: 'Browser caches only' },
   { type: CleanerType.App, label: 'Applications', icon: AppWindow, description: 'App caches and dev tools' },
   { type: CleanerType.Gaming, label: 'Gaming', icon: Gamepad2, description: 'Launcher caches, redistributables' },
-  { type: CleanerType.RecycleBin, label: 'Recycle Bin', icon: Trash2, description: 'Deleted files' }
+  { type: CleanerType.RecycleBin, label: 'Recycle Bin', icon: Trash2, description: 'Deleted files' },
+  { type: CleanerType.Shortcut, label: 'Shortcuts', icon: Link2Off, description: 'Broken shortcuts and dead links' },
+  { type: CleanerType.Database, label: 'Databases', icon: Database, description: 'Vacuum SQLite databases' }
 ]
 
 export function CleanerPage() {
@@ -51,10 +56,20 @@ export function CleanerPage() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
   const cleanStartRef = useRef<number>(0)
+  const [scanningCategory, setScanningCategory] = useState<CleanerType | null>(null)
+
+  const scanIndexRef = useRef(0)
 
   useEffect(() => {
     if (!window.kudu?.onScanProgress) return
-    return window.kudu.onScanProgress((data) => store.setProgress(data))
+    return window.kudu.onScanProgress((data) => {
+      // Each cleaner reports 0-100% independently. Scale to overall progress
+      // based on which category we're currently scanning.
+      const total = categories.length
+      const base = (scanIndexRef.current / total) * 100
+      const slice = (data.progress / total)
+      store.setProgress({ ...data, progress: base + slice })
+    })
   }, [])
 
   const [failedCategories, setFailedCategories] = useState<string[]>([])
@@ -78,9 +93,14 @@ export function CleanerPage() {
         [CleanerType.Browser]: () => window.kudu.browserScan(),
         [CleanerType.App]: () => window.kudu.appScan(),
         [CleanerType.Gaming]: () => window.kudu.gamingScan(),
-        [CleanerType.RecycleBin]: () => window.kudu.recycleBinScan()
+        [CleanerType.RecycleBin]: () => window.kudu.recycleBinScan(),
+        [CleanerType.Shortcut]: () => window.kudu.shortcutScan(),
+        [CleanerType.Database]: () => window.kudu.databaseScan()
       }
-      for (const cat of categories) {
+      for (let ci = 0; ci < categories.length; ci++) {
+        const cat = categories[ci]
+        scanIndexRef.current = ci
+        setScanningCategory(cat.type)
         try {
           const scanFn = scanFns[cat.type]
           if (!scanFn) continue
@@ -97,8 +117,10 @@ export function CleanerPage() {
       }
       if (failed.length > 0) setFailedCategories(failed)
       if (skippedForElevation.length > 0) setElevationSkipped(skippedForElevation)
+      setScanningCategory(null)
       store.setStatus(ScanStatus.Complete)
     } catch {
+      setScanningCategory(null)
       store.setStatus(ScanStatus.Error)
     }
     store.setProgress(null)
@@ -131,7 +153,9 @@ export function CleanerPage() {
         [CleanerType.Browser]: (ids) => window.kudu.browserClean(ids),
         [CleanerType.App]: (ids) => window.kudu.appClean(ids),
         [CleanerType.Gaming]: (ids) => window.kudu.gamingClean(ids),
-        [CleanerType.RecycleBin]: () => window.kudu.recycleBinClean()
+        [CleanerType.RecycleBin]: () => window.kudu.recycleBinClean(),
+        [CleanerType.Shortcut]: (ids) => window.kudu.shortcutClean(ids),
+        [CleanerType.Database]: (ids) => window.kudu.databaseClean(ids)
       }
       let totalCleaned = 0, totalFiles = 0, totalSkipped = 0, anyNeedsElevation = false
       const allErrors: { path: string; reason: string }[] = []
@@ -263,7 +287,11 @@ export function CleanerPage() {
                 {isActive && (
                   <div className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full" style={{ background: '#f59e0b' }} />
                 )}
-                <cat.icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.8} />
+                {scanningCategory === cat.type ? (
+                  <Loader2 className="h-[17px] w-[17px] shrink-0 animate-spin text-amber-400" strokeWidth={1.8} />
+                ) : (
+                  <cat.icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.8} />
+                )}
                 <div className="flex-1 min-w-0">
                   <span className="text-[13px] font-medium">{cat.label}</span>
                   <p className="text-[11px]" style={{ color: '#4e4e56' }}>{cat.description}</p>

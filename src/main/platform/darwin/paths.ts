@@ -1,6 +1,6 @@
 import { homedir, tmpdir } from 'os'
 import { join } from 'path'
-import type { PlatformPaths, CleanTarget, BrowserPathConfig, AppCacheDef, UninstallLeftoverDir } from '../types'
+import type { PlatformPaths, CleanTarget, BrowserPathConfig, AppCacheDef, UninstallLeftoverDir, DatabaseTarget } from '../types'
 
 const HOME = homedir()
 const LIBRARY = join(HOME, 'Library')
@@ -111,7 +111,7 @@ export function createDarwinPaths(): PlatformPaths {
         { id: 'yarn', name: 'Yarn Cache', paths: [join(CACHES, 'Yarn')] },
         { id: 'pip', name: 'pip Cache', paths: [join(CACHES, 'pip')] },
         { id: 'homebrew', name: 'Homebrew Cache', paths: [join(CACHES, 'Homebrew')] },
-        { id: 'zoom', name: 'Zoom', paths: [join(APP_SUPPORT, 'zoom.us', 'data'), join(LIBRARY, 'Logs', 'zoom.us')] },
+        { id: 'zoom', name: 'Zoom', paths: [join(APP_SUPPORT, 'zoom.us', 'data', 'Cache'), join(APP_SUPPORT, 'zoom.us', 'data', 'GPUCache'), join(APP_SUPPORT, 'zoom.us', 'data', 'logs'), join(LIBRARY, 'Logs', 'zoom.us')] },
         { id: 'telegram', name: 'Telegram', paths: [join(APP_SUPPORT, 'Telegram Desktop', 'tdata', 'user_data'), join(APP_SUPPORT, 'Telegram Desktop', 'tdata', 'emoji')] },
         { id: 'obs', name: 'OBS Studio', paths: [join(APP_SUPPORT, 'obs-studio', 'logs'), join(APP_SUPPORT, 'obs-studio', 'profiler_data')] },
         { id: 'jetbrains', name: 'JetBrains IDEs', paths: [join(CACHES, 'JetBrains')] },
@@ -129,6 +129,17 @@ export function createDarwinPaths(): PlatformPaths {
         { id: 'figma', name: 'Figma', paths: [join(APP_SUPPORT, 'Figma', 'Cache', 'Cache_Data')] },
         { id: 'github-desktop', name: 'GitHub Desktop', paths: [join(APP_SUPPORT, 'GitHub Desktop', 'Cache', 'Cache_Data')] },
         { id: 'vlc', name: 'VLC', paths: [join(CACHES, 'org.videolan.vlc')] },
+        // Apps added from BleachBit comparison — cache/temp/logs only, never user data
+        { id: 'thunderbird', name: 'Thunderbird', paths: [join(CACHES, 'Thunderbird', 'Profiles')], childSubdir: 'cache2' },
+        { id: 'gimp', name: 'GIMP', paths: [join(CACHES, 'org.gimp.gimp-2.10'), join(CACHES, 'org.gimp.gimp-2.99'), join(CACHES, 'org.gimp.gimp-3.0')] },
+        { id: 'blender', name: 'Blender', paths: [join(APP_SUPPORT, 'Blender')], childSubdir: 'cache' },
+        { id: 'libreoffice', name: 'LibreOffice', paths: [join(CACHES, 'LibreOffice')] },
+        { id: 'teamviewer', name: 'TeamViewer', paths: [join(CACHES, 'com.teamviewer.TeamViewer'), join(LIBRARY, 'Logs', 'TeamViewer')] },
+        { id: 'google-earth', name: 'Google Earth', paths: [join(CACHES, 'com.google.GoogleEarthPro'), join(CACHES, 'com.google.GoogleEarth')] },
+        { id: 'inkscape', name: 'Inkscape', paths: [join(CACHES, 'org.inkscape.Inkscape')] },
+        { id: 'krita', name: 'Krita', paths: [join(CACHES, 'krita')] },
+        { id: 'filezilla', name: 'FileZilla', paths: [join(CACHES, 'FileZilla')] },
+        { id: 'transmission', name: 'Transmission', paths: [join(CACHES, 'org.m0k.transmission')] },
       ]
     },
 
@@ -203,6 +214,36 @@ export function createDarwinPaths(): PlatformPaths {
 
     trashPath(): string | null {
       return join(HOME, '.Trash')
+    },
+
+    databaseOptimizeTargets(): DatabaseTarget[] {
+      const chromiumDbFiles = ['History', 'Cookies', join('Network', 'Cookies'), 'Favicons', 'Top Sites', 'Web Data', 'Shortcuts', 'Login Data']
+      const firefoxDbFiles = ['places.sqlite', 'cookies.sqlite', 'favicons.sqlite', 'formhistory.sqlite', 'webappsstore.sqlite', 'content-prefs.sqlite']
+
+      return [
+        // Chromium-based browsers
+        { label: 'Google Chrome', basePath: join(APP_SUPPORT, 'Google', 'Chrome'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Microsoft Edge', basePath: join(APP_SUPPORT, 'Microsoft Edge'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Brave', basePath: join(APP_SUPPORT, 'BraveSoftware', 'Brave-Browser'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Vivaldi', basePath: join(APP_SUPPORT, 'Vivaldi'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Opera', basePath: join(APP_SUPPORT, 'com.operasoftware.Opera'), dbFiles: chromiumDbFiles },
+        { label: 'Opera GX', basePath: join(APP_SUPPORT, 'com.operasoftware.OperaGX'), dbFiles: chromiumDbFiles },
+        { label: 'Arc', basePath: join(APP_SUPPORT, 'Arc', 'User Data'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Chromium', basePath: join(APP_SUPPORT, 'Chromium'), dbFiles: chromiumDbFiles, multiProfile: true },
+        // Firefox
+        { label: 'Firefox', basePath: join(APP_SUPPORT, 'Firefox', 'Profiles'), dbFiles: firefoxDbFiles, multiProfile: true, profilePattern: ['*.default*', '*.dev-edition*'] },
+        // Electron / Chromium-based apps
+        { label: 'Discord', basePath: join(APP_SUPPORT, 'discord'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'Slack', basePath: join(APP_SUPPORT, 'Slack'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'Microsoft Teams', basePath: join(APP_SUPPORT, 'Microsoft Teams'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'VS Code', basePath: join(APP_SUPPORT, 'Code'), dbFiles: [join('Network', 'Cookies'), join('User', 'globalStorage', 'state.vscdb')] },
+        { label: 'Cursor IDE', basePath: join(APP_SUPPORT, 'Cursor'), dbFiles: [join('Network', 'Cookies'), join('User', 'globalStorage', 'state.vscdb')] },
+        { label: 'Figma', basePath: join(APP_SUPPORT, 'Figma'), dbFiles: [join('Network', 'Cookies')] },
+        // Safari
+        { label: 'Safari', basePath: join(LIBRARY, 'Safari'), dbFiles: ['History.db', 'CloudTabs.db'] },
+        // Thunderbird
+        { label: 'Thunderbird', basePath: join(APP_SUPPORT, 'Thunderbird', 'Profiles'), dbFiles: ['global-messages-db.sqlite', 'places.sqlite', 'cookies.sqlite'], multiProfile: true, profilePattern: ['*.default*'] },
+      ]
     },
   }
 }

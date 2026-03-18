@@ -19,6 +19,8 @@ import { registerPerfMonitorIpc } from './perf-monitor.ipc'
 import { registerProgramUninstallerIpc } from './program-uninstaller.ipc'
 import { registerServiceManagerIpc } from './service-manager.ipc'
 import { registerSoftwareUpdaterIpc } from './software-updater.ipc'
+import { registerShortcutCleanerIpc } from './shortcut-cleaner.ipc'
+import { registerDatabaseOptimizerIpc } from './database-optimizer.ipc'
 import { registerCloudAgentIpc } from './cloud-agent.ipc'
 import { getSettings, setSettings, getOnboardingComplete, setOnboardingComplete } from '../services/settings-store'
 import { isAdmin } from '../services/elevation'
@@ -36,6 +38,8 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
   registerAppCleanerIpc(getWindow)
   registerGamingCleanerIpc(getWindow)
   registerRecycleBinIpc()
+  registerShortcutCleanerIpc(getWindow)
+  registerDatabaseOptimizerIpc(getWindow)
   registerRegistryCleanerIpc(getWindow)
   registerStartupManagerIpc()
   registerDebloaterIpc(getWindow)

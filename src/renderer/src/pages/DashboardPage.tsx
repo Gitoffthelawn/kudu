@@ -3,7 +3,6 @@ import {
   HardDrive,
   Sparkles,
   FileStack,
-  Clock,
   Search,
   Database,
   BarChart3,
@@ -16,7 +15,9 @@ import {
   Cpu,
   Check,
   Download,
-  Server
+  Server,
+  Cloud,
+  CloudOff
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -26,6 +27,7 @@ import { StatCard } from '@/components/shared/StatCard'
 import { HealthScore } from '@/components/shared/HealthScore'
 import { cn, formatBytes, formatDate, formatNumber } from '@/lib/utils'
 import { useStatsStore } from '@/stores/stats-store'
+import { useSettingsStore } from '@/stores/settings-store'
 import { useHistoryStore } from '@/stores/history-store'
 import { useScanStore } from '@/stores/scan-store'
 import { useUpdaterStore } from '@/stores/updater-store'
@@ -56,12 +58,14 @@ const CLEANER_SCAN_FNS: { type: CleanerType; scan: () => Promise<ScanResult[]>; 
   { type: CleanerType.App, scan: () => window.kudu.appScan(), clean: (ids) => window.kudu.appClean(ids) },
   { type: CleanerType.Gaming, scan: () => window.kudu.gamingScan(), clean: (ids) => window.kudu.gamingClean(ids) },
   { type: CleanerType.RecycleBin, scan: () => window.kudu.recycleBinScan(), clean: () => window.kudu.recycleBinClean() },
+  { type: CleanerType.Database, scan: () => window.kudu.databaseScan(), clean: (ids) => window.kudu.databaseClean(ids) },
 ]
 
 export function DashboardPage() {
   const { features } = usePlatform()
   const stats = useStatsStore((s) => s.stats)
   const recomputeStats = useStatsStore((s) => s.recompute)
+  const isCloudLinked = !!useSettingsStore((s) => s.settings.cloud.apiKey)
   const historyStore = useHistoryStore()
   const scanStore = useScanStore()
   const updaterHasChecked = useUpdaterStore((s) => s.hasChecked)
@@ -464,12 +468,42 @@ export function DashboardPage() {
           value={stats.totalFilesCleaned}
           variant="success"
         />
-        <StatCard
-          icon={Clock}
-          label="Last Scan"
-          value={0}
-          displayValue={stats.lastScanDate ? formatDate(stats.lastScanDate) : 'Never'}
-        />
+        {/* Status block */}
+        <div
+          className="flex flex-col justify-center rounded-2xl px-5 py-4"
+          style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
+        >
+          <h3 className="mb-3 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+            Status
+          </h3>
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px]" style={{ color: '#6e6e76' }}>Last Scan</span>
+              <span className="text-[12px] font-medium text-zinc-300">
+                {stats.lastScanDate ? formatDate(stats.lastScanDate) : 'Never'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[12px]" style={{ color: '#6e6e76' }}>Total Scans</span>
+              <span className="text-[12px] font-medium text-zinc-300">
+                {formatNumber(stats.totalScans)}
+              </span>
+            </div>
+            <button
+              onClick={() => navigate('/settings')}
+              className="flex w-full items-center justify-between rounded-lg px-0 py-0 transition-colors group"
+            >
+              <span className="text-[12px]" style={{ color: '#6e6e76' }}>Cloud</span>
+              <span className="flex items-center gap-1.5 text-[12px] font-medium group-hover:underline" style={{ color: isCloudLinked ? '#22c55e' : '#52525e' }}>
+                {isCloudLinked ? (
+                  <><Cloud className="h-3 w-3" strokeWidth={2} /> Connected</>
+                ) : (
+                  <><CloudOff className="h-3 w-3" strokeWidth={2} /> Not connected</>
+                )}
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* One-click actions row */}

@@ -5,6 +5,8 @@ import type {
   ScanResult,
   CleanResult,
   ProgressData,
+  DiskRepairProgress,
+  DiskRepairResult,
   RegistryEntry,
   StartupItem,
   StartupBootTrace,
@@ -77,6 +79,11 @@ const api = {
   gamingClean: (itemIds: string[]): Promise<CleanResult> =>
     ipcRenderer.invoke(IPC.GAMING_CLEAN, itemIds),
 
+  // Database optimizer
+  databaseScan: (): Promise<ScanResult[]> => ipcRenderer.invoke(IPC.DATABASE_SCAN),
+  databaseClean: (itemIds: string[]): Promise<CleanResult> =>
+    ipcRenderer.invoke(IPC.DATABASE_CLEAN, itemIds),
+
   // Uninstall leftovers
   uninstallLeftoversScan: (): Promise<ScanResult[]> => ipcRenderer.invoke(IPC.UNINSTALL_LEFTOVERS_SCAN),
   uninstallLeftoversClean: (itemIds: string[]): Promise<CleanResult> =>
@@ -85,6 +92,11 @@ const api = {
   // Recycle bin
   recycleBinScan: (): Promise<ScanResult[]> => ipcRenderer.invoke(IPC.RECYCLE_BIN_SCAN),
   recycleBinClean: (): Promise<CleanResult> => ipcRenderer.invoke(IPC.RECYCLE_BIN_CLEAN),
+
+  // Shortcut cleaner
+  shortcutScan: (): Promise<ScanResult[]> => ipcRenderer.invoke(IPC.SHORTCUT_SCAN),
+  shortcutClean: (itemIds: string[]): Promise<CleanResult> =>
+    ipcRenderer.invoke(IPC.SHORTCUT_CLEAN, itemIds),
 
   // Registry
   registryScan: (): Promise<RegistryEntry[]> => ipcRenderer.invoke(IPC.REGISTRY_SCAN),
@@ -120,6 +132,17 @@ const api = {
   diskDrives: (): Promise<DriveInfo[]> => ipcRenderer.invoke(IPC.DISK_DRIVES),
   diskFileTypes: (driveLetter: string): Promise<FileTypeInfo[]> =>
     ipcRenderer.invoke(IPC.DISK_FILE_TYPES, driveLetter),
+
+  // Disk repair
+  diskRepairSfc: (drive: string): Promise<DiskRepairResult> =>
+    ipcRenderer.invoke(IPC.DISK_REPAIR_SFC, drive),
+  diskRepairDism: (): Promise<DiskRepairResult> =>
+    ipcRenderer.invoke(IPC.DISK_REPAIR_DISM),
+  onDiskRepairProgress: (callback: (data: DiskRepairProgress) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: DiskRepairProgress) => callback(data)
+    ipcRenderer.on(IPC.DISK_REPAIR_PROGRESS, handler)
+    return () => { ipcRenderer.removeListener(IPC.DISK_REPAIR_PROGRESS, handler) }
+  },
 
   // Onboarding
   onboardingGet: (): Promise<boolean> => ipcRenderer.invoke(IPC.ONBOARDING_GET),

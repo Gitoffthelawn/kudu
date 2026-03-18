@@ -202,6 +202,83 @@ async function scanRecycleBin(): Promise<ScanResult[]> {
   } catch { return [] }
 }
 
+async function scanDatabaseCli(): Promise<ScanResult[]> {
+  const results: ScanResult[] = []
+  const category = CleanerType.Database
+  const targets = getPlatform().paths.databaseOptimizeTargets()
+  const { statSync, existsSync: fileExists, readdirSync, openSync, readSync, closeSync } = await import('fs')
+  const path = await import('path')
+
+  function isSqliteFile(filePath: string): boolean {
+    let fd: number | undefined
+    try {
+      fd = openSync(filePath, 'r')
+      const buf = Buffer.alloc(16)
+      readSync(fd, buf, 0, 16, 0)
+      return buf.toString('utf8', 0, 16) === 'SQLite format 3\0'
+    } catch { return false }
+    finally { if (fd !== undefined) closeSync(fd) }
+  }
+
+  for (const target of targets) {
+    try {
+      if (!fileExists(target.basePath)) continue
+      const items: ScanResult['items'] = []
+
+      let profileDirs = [target.basePath]
+      if (target.multiProfile) {
+        try {
+          const entries = readdirSync(target.basePath, { withFileTypes: true })
+          const dirs: string[] = []
+          if (target.profilePattern) {
+            for (const entry of entries) {
+              if (!entry.isDirectory()) continue
+              for (const pattern of target.profilePattern) {
+                const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')
+                if (new RegExp('^' + escaped + '$').test(entry.name)) { dirs.push(path.join(target.basePath, entry.name)); break }
+              }
+            }
+          } else {
+            for (const entry of entries) {
+              if (!entry.isDirectory()) continue
+              if (entry.name === 'Default' || /^Profile \d+$/.test(entry.name)) {
+                dirs.push(path.join(target.basePath, entry.name))
+              }
+            }
+          }
+          if (dirs.length > 0) profileDirs = dirs
+        } catch { /* use basePath */ }
+      }
+
+      for (const profileDir of profileDirs) {
+        for (const dbFile of target.dbFiles) {
+          const dbPath = path.join(profileDir, dbFile)
+          if (!fileExists(dbPath) || !isSqliteFile(dbPath)) continue
+          const fileStat = statSync(dbPath)
+          if (fileStat.size === 0) continue
+
+          let walSize = 0
+          try { walSize = statSync(dbPath + '-wal').size } catch { /* no WAL */ }
+          const wastedBytes = walSize + Math.floor(fileStat.size * 0.1)
+          if (wastedBytes < 4096) continue
+
+          items.push({
+              id: randomUUID(), path: dbPath, size: wastedBytes,
+              category, subcategory: target.label,
+              lastModified: fileStat.mtimeMs, selected: true,
+            })
+        }
+      }
+
+      if (items.length > 0) {
+        cacheItems(items)
+        results.push({ category, subcategory: target.label, items, totalSize: items.reduce((s, i) => s + i.size, 0), itemCount: items.length })
+      }
+    } catch { /* skip */ }
+  }
+  return results
+}
+
 async function cleanRecycleBin(sizeBytes: number = 0): Promise<CleanResult> {
   // On macOS/Linux, trash items are real files cleaned via cleanItems() in the main flow.
   // This function is only called for Windows COM-based recycle bin.
@@ -218,6 +295,47 @@ async function cleanRecycleBin(sizeBytes: number = 0): Promise<CleanResult> {
   } catch (err: any) {
     return { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [{ path: 'Recycle Bin', reason: err.message }], needsElevation: false }
   }
+}
+
+async function cleanDatabasesCli(itemIds: string[]): Promise<CleanResult> {
+  const { getCachedItem } = await import('./services/scan-cache')
+  const { statSync } = await import('fs')
+  const Database = (await import('better-sqlite3')).default
+  let totalCleaned = 0, filesDeleted = 0, filesSkipped = 0
+  const errors: CleanResult['errors'] = []
+
+  for (const id of itemIds) {
+    const item = getCachedItem(id)
+    if (!item) continue
+    try {
+      const sizeBefore = statSync(item.path).size
+      let walSizeBefore = 0
+      try { walSizeBefore = statSync(item.path + '-wal').size } catch { /* no WAL */ }
+      const db = new Database(item.path, { fileMustExist: true })
+      try {
+        const journalMode = (db.pragma('journal_mode', { simple: true }) as string).toLowerCase()
+        db.exec('VACUUM')
+        if (journalMode === 'wal') db.pragma('journal_mode = WAL')
+      } finally { db.close() }
+      const sizeAfter = statSync(item.path).size
+      let walSizeAfter = 0
+      try { walSizeAfter = statSync(item.path + '-wal').size } catch { /* no WAL */ }
+      const reclaimed = (sizeBefore + walSizeBefore) - (sizeAfter + walSizeAfter)
+      if (reclaimed > 0) totalCleaned += reclaimed
+      filesDeleted++
+    } catch (err: unknown) {
+      filesSkipped++
+      const code = (err as { code?: string }).code
+      if (code === 'SQLITE_BUSY' || code === 'SQLITE_LOCKED' || code === 'EBUSY') {
+        errors.push({ path: item.path, reason: 'in-use' })
+      } else if (code === 'EPERM' || code === 'EACCES') {
+        errors.push({ path: item.path, reason: 'permission-denied' })
+      } else {
+        errors.push({ path: item.path, reason: (err as Error).message || 'unknown error' })
+      }
+    }
+  }
+  return { totalCleaned, filesDeleted, filesSkipped, errors, needsElevation: errors.some((e) => e.reason === 'permission-denied') }
 }
 
 async function getChromiumProfiles(basePath: string): Promise<string[]> {
@@ -1012,6 +1130,7 @@ async function runLegacyScanClean(categories: string[], doClean: boolean, json: 
     app: scanApp,
     gaming: scanGaming,
     'recycle-bin': scanRecycleBin,
+    database: scanDatabaseCli,
   }
 
   const allResults: ScanResult[] = []
@@ -1050,21 +1169,27 @@ async function runLegacyScanClean(categories: string[], doClean: boolean, json: 
     // On Windows, recycle bin items are virtual (COM-based) and need special handling
     const fileItemIds = allResults
       .filter(r => r.category !== CleanerType.RecycleBin || hasTrashPath)
+      .filter(r => r.category !== CleanerType.Database)
+      .flatMap(r => r.items.map(i => i.id))
+    const dbItemIds = allResults
+      .filter(r => r.category === CleanerType.Database)
       .flatMap(r => r.items.map(i => i.id))
     const hasRecycleBin = !hasTrashPath && allResults.some(r => r.category === CleanerType.RecycleBin)
     let fileCleaned: CleanResult = { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [], needsElevation: false }
     let recycleCleaned: CleanResult = { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [], needsElevation: false }
+    let dbCleaned: CleanResult = { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [], needsElevation: false }
     if (fileItemIds.length > 0) fileCleaned = await cleanItems(fileItemIds)
     if (hasRecycleBin) {
       const rbSize = allResults.find(r => r.category === CleanerType.RecycleBin)?.totalSize || 0
       recycleCleaned = await cleanRecycleBin(rbSize)
     }
+    if (dbItemIds.length > 0) dbCleaned = await cleanDatabasesCli(dbItemIds)
     cleanResult = {
-      totalCleaned: fileCleaned.totalCleaned + recycleCleaned.totalCleaned,
-      filesDeleted: fileCleaned.filesDeleted + recycleCleaned.filesDeleted,
-      filesSkipped: fileCleaned.filesSkipped + recycleCleaned.filesSkipped,
-      errors: [...fileCleaned.errors, ...recycleCleaned.errors],
-      needsElevation: fileCleaned.needsElevation || recycleCleaned.needsElevation,
+      totalCleaned: fileCleaned.totalCleaned + recycleCleaned.totalCleaned + dbCleaned.totalCleaned,
+      filesDeleted: fileCleaned.filesDeleted + recycleCleaned.filesDeleted + dbCleaned.filesDeleted,
+      filesSkipped: fileCleaned.filesSkipped + recycleCleaned.filesSkipped + dbCleaned.filesSkipped,
+      errors: [...fileCleaned.errors, ...recycleCleaned.errors, ...dbCleaned.errors],
+      needsElevation: fileCleaned.needsElevation || recycleCleaned.needsElevation || dbCleaned.needsElevation,
     }
     if (!json) {
       log(`  Deleted: ${cleanResult.filesDeleted} items (${formatBytes(cleanResult.totalCleaned)})`)

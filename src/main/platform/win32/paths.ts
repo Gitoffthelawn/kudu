@@ -1,7 +1,7 @@
 import path from 'path'
 const { join } = path.win32
 import { homedir } from 'os'
-import type { PlatformPaths, CleanTarget, BrowserPathConfig, AppCacheDef, UninstallLeftoverDir } from '../types'
+import type { PlatformPaths, CleanTarget, BrowserPathConfig, AppCacheDef, UninstallLeftoverDir, DatabaseTarget } from '../types'
 
 const HOME = homedir()
 const LOCALAPPDATA = process.env.LOCALAPPDATA || join(HOME, 'AppData', 'Local')
@@ -99,7 +99,7 @@ export function createWin32Paths(): PlatformPaths {
         { id: 'discord', name: 'Discord', paths: [join(APPDATA, 'discord', 'Cache', 'Cache_Data'), join(APPDATA, 'discord', 'Code Cache'), join(APPDATA, 'discord', 'GPUCache')] },
         { id: 'teams', name: 'Microsoft Teams', paths: [join(APPDATA, 'Microsoft', 'Teams', 'Cache')] },
         { id: 'slack', name: 'Slack', paths: [join(APPDATA, 'Slack', 'Cache', 'Cache_Data'), join(APPDATA, 'Slack', 'Code Cache'), join(APPDATA, 'Slack', 'GPUCache')] },
-        { id: 'zoom', name: 'Zoom', paths: [join(APPDATA, 'Zoom', 'data'), join(APPDATA, 'Zoom', 'logs')] },
+        { id: 'zoom', name: 'Zoom', paths: [join(APPDATA, 'Zoom', 'data', 'Cache'), join(APPDATA, 'Zoom', 'data', 'GPUCache'), join(APPDATA, 'Zoom', 'data', 'logs'), join(APPDATA, 'Zoom', 'logs')] },
         { id: 'telegram', name: 'Telegram', paths: [join(APPDATA, 'Telegram Desktop', 'tdata', 'user_data'), join(APPDATA, 'Telegram Desktop', 'tdata', 'emoji')] },
         { id: 'vscode', name: 'VS Code', paths: [join(APPDATA, 'Code', 'Cache', 'Cache_Data'), join(APPDATA, 'Code', 'CachedData'), join(APPDATA, 'Code', 'CachedExtensions'), join(APPDATA, 'Code', 'logs')] },
         { id: 'jetbrains', name: 'JetBrains IDEs', paths: [join(LOCALAPPDATA, 'JetBrains')], childSubdir: 'caches' },
@@ -124,6 +124,18 @@ export function createWin32Paths(): PlatformPaths {
         { id: 'figma', name: 'Figma', paths: [join(APPDATA, 'Figma', 'Cache', 'Cache_Data'), join(APPDATA, 'Figma', 'GPUCache')] },
         { id: 'github-desktop', name: 'GitHub Desktop', paths: [join(APPDATA, 'GitHub Desktop', 'Cache', 'Cache_Data'), join(APPDATA, 'GitHub Desktop', 'GPUCache')] },
         { id: 'vlc', name: 'VLC', paths: [join(APPDATA, 'vlc', 'art_cache')] },
+        // Apps added from BleachBit comparison — cache/temp/logs only, never user data
+        { id: 'thunderbird', name: 'Thunderbird', paths: [join(LOCALAPPDATA, 'Thunderbird', 'Profiles')], childSubdir: 'cache2' },
+        { id: 'gimp', name: 'GIMP', paths: [join(APPDATA, 'GIMP')], childSubdir: 'tmp' },
+        { id: 'blender', name: 'Blender', paths: [join(APPDATA, 'Blender Foundation', 'Blender')], childSubdir: 'cache' },
+        { id: 'libreoffice', name: 'LibreOffice', paths: [join(APPDATA, 'LibreOffice')], childSubdir: 'cache' },
+        { id: 'teamviewer', name: 'TeamViewer', paths: [join(APPDATA, 'TeamViewer', 'Logs')] },
+        { id: 'google-earth', name: 'Google Earth', paths: [join(LOCALAPPDATA, 'Google', 'GoogleEarth', 'Cache')] },
+        { id: 'inkscape', name: 'Inkscape', paths: [join(LOCALAPPDATA, 'inkscape', 'cache')] },
+        { id: 'krita', name: 'Krita', paths: [join(LOCALAPPDATA, 'krita', 'cache')] },
+        { id: 'filezilla', name: 'FileZilla', paths: [join(APPDATA, 'FileZilla', 'cache')] },
+        { id: 'pidgin', name: 'Pidgin', paths: [join(APPDATA, '.purple', 'icons')] },
+        { id: 'transmission', name: 'Transmission', paths: [join(LOCALAPPDATA, 'Transmission', 'cache')] },
       ]
     },
 
@@ -207,6 +219,36 @@ export function createWin32Paths(): PlatformPaths {
     trashPath(): string | null {
       // Windows recycle bin is managed via COM/PowerShell, not a simple folder
       return null
+    },
+
+    databaseOptimizeTargets(): DatabaseTarget[] {
+      // Cookies moved to Network/Cookies in modern Chromium; include both locations
+      const chromiumDbFiles = ['History', 'Cookies', join('Network', 'Cookies'), 'Favicons', 'Top Sites', 'Web Data', 'Shortcuts', 'Login Data']
+      const firefoxDbFiles = ['places.sqlite', 'cookies.sqlite', 'favicons.sqlite', 'formhistory.sqlite', 'webappsstore.sqlite', 'content-prefs.sqlite']
+
+      return [
+        // Chromium-based browsers
+        { label: 'Google Chrome', basePath: join(LOCALAPPDATA, 'Google', 'Chrome', 'User Data'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Microsoft Edge', basePath: join(LOCALAPPDATA, 'Microsoft', 'Edge', 'User Data'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Brave', basePath: join(LOCALAPPDATA, 'BraveSoftware', 'Brave-Browser', 'User Data'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Vivaldi', basePath: join(LOCALAPPDATA, 'Vivaldi', 'User Data'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Opera', basePath: join(APPDATA, 'Opera Software', 'Opera Stable'), dbFiles: chromiumDbFiles },
+        { label: 'Opera GX', basePath: join(APPDATA, 'Opera Software', 'Opera GX Stable'), dbFiles: chromiumDbFiles },
+        { label: 'Arc', basePath: join(LOCALAPPDATA, 'Arc', 'User Data'), dbFiles: chromiumDbFiles, multiProfile: true },
+        { label: 'Chromium', basePath: join(LOCALAPPDATA, 'Chromium', 'User Data'), dbFiles: chromiumDbFiles, multiProfile: true },
+        // Firefox
+        { label: 'Firefox', basePath: join(APPDATA, 'Mozilla', 'Firefox', 'Profiles'), dbFiles: firefoxDbFiles, multiProfile: true, profilePattern: ['*.default*', '*.dev-edition*'] },
+        // Electron / Chromium-based apps
+        { label: 'Discord', basePath: join(APPDATA, 'discord'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'Slack', basePath: join(APPDATA, 'Slack'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'Microsoft Teams', basePath: join(APPDATA, 'Microsoft', 'Teams'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'VS Code', basePath: join(APPDATA, 'Code'), dbFiles: [join('Network', 'Cookies'), join('User', 'globalStorage', 'state.vscdb')] },
+        { label: 'Cursor IDE', basePath: join(APPDATA, 'Cursor'), dbFiles: [join('Network', 'Cookies'), join('User', 'globalStorage', 'state.vscdb')] },
+        { label: 'Figma', basePath: join(APPDATA, 'Figma'), dbFiles: [join('Network', 'Cookies')] },
+        { label: 'Postman', basePath: join(APPDATA, 'Postman'), dbFiles: [join('Network', 'Cookies')] },
+        // Thunderbird
+        { label: 'Thunderbird', basePath: join(APPDATA, 'Thunderbird', 'Profiles'), dbFiles: ['global-messages-db.sqlite', 'places.sqlite', 'cookies.sqlite'], multiProfile: true, profilePattern: ['*.default*'] },
+      ]
     },
   }
 }

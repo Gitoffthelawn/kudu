@@ -652,6 +652,24 @@ export interface UpdateResult {
   errors: { appId: string; name: string; reason: string }[]
 }
 
+// ─── Disk Repair ───────────────────────────────────────────
+export interface DiskRepairProgress {
+  tool: 'sfc' | 'dism'
+  phase: 'running' | 'done' | 'failed'
+  percent: number
+  message: string
+}
+
+export interface DiskRepairResult {
+  tool: 'sfc' | 'dism'
+  success: boolean
+  exitCode: number | null
+  summary: string
+  log: string
+  requiresReboot: boolean
+  needsAdmin: boolean
+}
+
 // ─── Threat Monitor ────────────────────────────────────────
 
 export interface FlaggedConnection {

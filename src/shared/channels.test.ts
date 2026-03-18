@@ -43,11 +43,13 @@ describe('CleanerType enum', () => {
     expect(CleanerType.Gaming).toBe('gaming')
     expect(CleanerType.RecycleBin).toBe('recycleBin')
     expect(CleanerType.UninstallLeftovers).toBe('uninstallLeftovers')
+    expect(CleanerType.Shortcut).toBe('shortcut')
+    expect(CleanerType.Database).toBe('database')
   })
 
-  it('has exactly 6 members', () => {
+  it('has exactly 8 members', () => {
     const keys = Object.keys(CleanerType).filter((k) => isNaN(Number(k)))
-    expect(keys).toHaveLength(6)
+    expect(keys).toHaveLength(8)
   })
 })
 

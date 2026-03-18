@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { HardDrive, ChevronRight, Folder, File, RefreshCw, FileType2 } from 'lucide-react'
+import { HardDrive, ChevronRight, Folder, File, RefreshCw, FileType2, Wrench, ShieldCheck, ShieldAlert, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -8,9 +8,9 @@ import { ScanProgress } from '@/components/shared/ScanProgress'
 import { cn, formatBytes } from '@/lib/utils'
 import { useDiskStore } from '@/stores/disk-store'
 import { usePlatform } from '@/hooks/usePlatform'
-import type { DiskNode, DriveInfo } from '@shared/types'
+import type { DiskNode, DriveInfo, DiskRepairResult } from '@shared/types'
 
-type ViewMode = 'folders' | 'filetypes'
+type ViewMode = 'folders' | 'filetypes' | 'repair'
 
 const COLORS = ['#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f', '#a16207', '#ca8a04', '#eab308', '#facc15', '#fbbf24']
 
@@ -101,8 +101,13 @@ export function DiskAnalyzerPage() {
   const error = useDiskStore((s) => s.error)
   const fileTypes = useDiskStore((s) => s.fileTypes)
   const fileTypesLoading = useDiskStore((s) => s.fileTypesLoading)
+  const repairRunning = useDiskStore((s) => s.repairRunning)
+  const repairProgress = useDiskStore((s) => s.repairProgress)
+  const sfcResult = useDiskStore((s) => s.sfcResult)
+  const dismResult = useDiskStore((s) => s.dismResult)
   const store = useDiskStore()
   const [viewMode, setViewMode] = useState<ViewMode>('folders')
+  const [showRepairLog, setShowRepairLog] = useState<'sfc' | 'dism' | null>(null)
 
   useEffect(() => {
     if (drives.length === 0) {
@@ -144,6 +149,57 @@ export function DiskAnalyzerPage() {
     }
   }, [viewMode])
 
+  // Listen for disk repair progress events
+  useEffect(() => {
+    if (!window.kudu?.onDiskRepairProgress) return
+    return window.kudu.onDiskRepairProgress((data) => store.setRepairProgress(data))
+  }, [])
+
+  const handleRunSfc = async () => {
+    store.setRepairRunning(true)
+    store.setSfcResult(null)
+    store.setRepairProgress({ tool: 'sfc', phase: 'running', percent: 0, message: 'Starting System File Checker...' })
+    try {
+      // SFC always targets the system drive (C:), not the analysis drive
+      const result = await window.kudu.diskRepairSfc('C')
+      store.setSfcResult(result)
+      if (result.needsAdmin) {
+        toast.error('Administrator privileges required', { description: 'Relaunch Kudu as administrator to run SFC.' })
+      } else if (result.success) {
+        toast.success('SFC completed', { description: result.summary })
+      } else {
+        toast.error('SFC finished with issues', { description: result.summary })
+      }
+    } catch (err) {
+      console.error('SFC failed:', err)
+      toast.error('SFC failed to run')
+    }
+    store.setRepairRunning(false)
+    store.setRepairProgress(null)
+  }
+
+  const handleRunDism = async () => {
+    store.setRepairRunning(true)
+    store.setDismResult(null)
+    store.setRepairProgress({ tool: 'dism', phase: 'running', percent: 0, message: 'Starting DISM RestoreHealth...' })
+    try {
+      const result = await window.kudu.diskRepairDism()
+      store.setDismResult(result)
+      if (result.needsAdmin) {
+        toast.error('Administrator privileges required', { description: 'Relaunch Kudu as administrator to run DISM.' })
+      } else if (result.success) {
+        toast.success('DISM completed', { description: result.summary })
+      } else {
+        toast.error('DISM finished with issues', { description: result.summary })
+      }
+    } catch (err) {
+      console.error('DISM failed:', err)
+      toast.error('DISM failed to run')
+    }
+    store.setRepairRunning(false)
+    store.setRepairProgress(null)
+  }
+
   const currentNode = breadcrumb[breadcrumb.length - 1] ?? data
   const treemapData = useMemo(() => {
     if (!currentNode?.children) return []
@@ -179,25 +235,35 @@ export function DiskAnalyzerPage() {
       {error && <ErrorAlert message={error} onDismiss={() => store.setError(null)} className="mb-5" />}
 
       {analyzing && <ScanProgress status="scanning" progress={0} currentPath={isWin ? `Analyzing ${selectedDrive}:\\...` : `Analyzing ${selectedDrive}...`} className="mb-5" />}
-      {!data && !analyzing && !error && <EmptyState icon={HardDrive} title="No analysis data" description="Select a drive and click Analyze to visualize disk space usage." />}
+
+      {/* View mode toggle — always visible so Repair tab is accessible without analyzing first */}
+      <div className="mb-5 flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', width: 'fit-content' }}>
+        <button onClick={() => setViewMode('folders')}
+          className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
+          style={{ background: viewMode === 'folders' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'folders' ? '#f59e0b' : '#6e6e76' }}>
+          <Folder className="h-3.5 w-3.5" strokeWidth={2} />
+          Folders
+        </button>
+        <button onClick={() => setViewMode('filetypes')}
+          className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
+          style={{ background: viewMode === 'filetypes' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'filetypes' ? '#f59e0b' : '#6e6e76' }}>
+          <FileType2 className="h-3.5 w-3.5" strokeWidth={2} />
+          File Types
+        </button>
+        {isWin && (
+          <button onClick={() => setViewMode('repair')}
+            className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
+            style={{ background: viewMode === 'repair' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'repair' ? '#f59e0b' : '#6e6e76' }}>
+            <Wrench className="h-3.5 w-3.5" strokeWidth={2} />
+            Repair
+          </button>
+        )}
+      </div>
+
+      {!data && !analyzing && !error && viewMode !== 'repair' && <EmptyState icon={HardDrive} title="No analysis data" description="Select a drive and click Analyze to visualize disk space usage." />}
 
       {data && (
         <>
-          {/* View mode toggle */}
-          <div className="mb-5 flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', width: 'fit-content' }}>
-            <button onClick={() => setViewMode('folders')}
-              className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
-              style={{ background: viewMode === 'folders' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'folders' ? '#f59e0b' : '#6e6e76' }}>
-              <Folder className="h-3.5 w-3.5" strokeWidth={2} />
-              Folders
-            </button>
-            <button onClick={() => setViewMode('filetypes')}
-              className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
-              style={{ background: viewMode === 'filetypes' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'filetypes' ? '#f59e0b' : '#6e6e76' }}>
-              <FileType2 className="h-3.5 w-3.5" strokeWidth={2} />
-              File Types
-            </button>
-          </div>
 
           {viewMode === 'folders' && currentNode && (
             <>
@@ -367,6 +433,161 @@ export function DiskAnalyzerPage() {
               )}
             </>
           )}
+        </>
+      )}
+
+      {/* Repair tab — Windows only, works independently of disk analysis */}
+      {viewMode === 'repair' && isWin && (
+        <>
+          {/* Info banner */}
+          <div className="mb-5 rounded-2xl px-5 py-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" strokeWidth={1.8} />
+              <div>
+                <p className="text-[13px] font-medium text-zinc-200">Windows System Repair</p>
+                <p className="mt-1 text-[12px]" style={{ color: '#6e6e76' }}>
+                  Use these built-in Windows tools to scan for and repair corrupted system files.
+                  Run <span className="text-zinc-400 font-medium">DISM</span> first to repair the component store, then <span className="text-zinc-400 font-medium">SFC</span> to fix system files.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          {repairRunning && repairProgress && (
+            <div className="mb-5 rounded-2xl px-5 py-4" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <RefreshCw className="h-4 w-4 animate-spin text-amber-400" strokeWidth={2} />
+                <span className="text-[13px] font-medium text-zinc-200">
+                  {repairProgress.tool === 'sfc' ? 'System File Checker' : 'DISM RestoreHealth'}
+                </span>
+                <span className="ml-auto font-mono text-[12px]" style={{ color: '#6e6e76' }}>{repairProgress.percent}%</span>
+              </div>
+              <div className="h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${repairProgress.percent}%`, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }} />
+              </div>
+              <p className="mt-2 text-[12px]" style={{ color: '#52525e' }}>{repairProgress.message}</p>
+            </div>
+          )}
+
+          {/* Tool cards */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* DISM card */}
+            <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(245,158,11,0.1)' }}>
+                  <ShieldCheck className="h-5 w-5 text-amber-400" strokeWidth={1.8} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-medium text-zinc-200">DISM RestoreHealth</p>
+                  <p className="text-[11px]" style={{ color: '#52525e' }}>Repair Windows component store</p>
+                </div>
+              </div>
+              <p className="mb-4 text-[12px] leading-relaxed" style={{ color: '#6e6e76' }}>
+                Scans the Windows component store for corruption and repairs it using Windows Update.
+                Run this before SFC if system files can't be repaired.
+              </p>
+
+              {dismResult && (
+                <div className="mb-4 rounded-xl px-4 py-3" style={{
+                  background: dismResult.success ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.06)',
+                  border: `1px solid ${dismResult.success ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}`
+                }}>
+                  <div className="flex items-center gap-2">
+                    {dismResult.success
+                      ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" strokeWidth={1.8} />
+                      : dismResult.needsAdmin
+                        ? <ShieldAlert className="h-4 w-4 text-amber-400 shrink-0" strokeWidth={1.8} />
+                        : <XCircle className="h-4 w-4 text-red-400 shrink-0" strokeWidth={1.8} />}
+                    <p className="text-[12px] text-zinc-300">{dismResult.summary}</p>
+                  </div>
+                  {dismResult.requiresReboot && (
+                    <p className="mt-2 flex items-center gap-1.5 text-[11px] text-amber-400">
+                      <AlertTriangle className="h-3 w-3" strokeWidth={2} /> A restart is recommended to complete repairs
+                    </p>
+                  )}
+                  {dismResult.log && (
+                    <button onClick={() => setShowRepairLog(showRepairLog === 'dism' ? null : 'dism')}
+                      className="mt-2 text-[11px] font-medium text-amber-500 hover:text-amber-400">
+                      {showRepairLog === 'dism' ? 'Hide Log' : 'Show Log'}
+                    </button>
+                  )}
+                  {showRepairLog === 'dism' && dismResult.log && (
+                    <pre className="mt-2 max-h-48 overflow-auto rounded-lg p-3 font-mono text-[11px]"
+                      style={{ background: 'rgba(0,0,0,0.3)', color: '#6e6e76' }}>
+                      {dismResult.log}
+                    </pre>
+                  )}
+                </div>
+              )}
+
+              <button onClick={handleRunDism} disabled={repairRunning}
+                className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#1a0a00' }}>
+                {repairRunning && repairProgress?.tool === 'dism'
+                  ? <><RefreshCw className="h-4 w-4 animate-spin" /> Running...</>
+                  : <><ShieldCheck className="h-4 w-4" strokeWidth={2} /> Run DISM</>}
+              </button>
+            </div>
+
+            {/* SFC card */}
+            <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(245,158,11,0.1)' }}>
+                  <Wrench className="h-5 w-5 text-amber-400" strokeWidth={1.8} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-medium text-zinc-200">SFC /scannow</p>
+                  <p className="text-[11px]" style={{ color: '#52525e' }}>Scan and repair system files</p>
+                </div>
+              </div>
+              <p className="mb-4 text-[12px] leading-relaxed" style={{ color: '#6e6e76' }}>
+                Scans all protected Windows system files and replaces corrupted or missing files
+                with a cached copy from the component store.
+              </p>
+
+              {sfcResult && (
+                <div className="mb-4 rounded-xl px-4 py-3" style={{
+                  background: sfcResult.success ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.06)',
+                  border: `1px solid ${sfcResult.success ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}`
+                }}>
+                  <div className="flex items-center gap-2">
+                    {sfcResult.success
+                      ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" strokeWidth={1.8} />
+                      : sfcResult.needsAdmin
+                        ? <ShieldAlert className="h-4 w-4 text-amber-400 shrink-0" strokeWidth={1.8} />
+                        : <XCircle className="h-4 w-4 text-red-400 shrink-0" strokeWidth={1.8} />}
+                    <p className="text-[12px] text-zinc-300">{sfcResult.summary}</p>
+                  </div>
+                  {sfcResult.requiresReboot && (
+                    <p className="mt-2 flex items-center gap-1.5 text-[11px] text-amber-400">
+                      <AlertTriangle className="h-3 w-3" strokeWidth={2} /> A restart is recommended to complete repairs
+                    </p>
+                  )}
+                  {sfcResult.log && (
+                    <button onClick={() => setShowRepairLog(showRepairLog === 'sfc' ? null : 'sfc')}
+                      className="mt-2 text-[11px] font-medium text-amber-500 hover:text-amber-400">
+                      {showRepairLog === 'sfc' ? 'Hide Log' : 'Show Log'}
+                    </button>
+                  )}
+                  {showRepairLog === 'sfc' && sfcResult.log && (
+                    <pre className="mt-2 max-h-48 overflow-auto rounded-lg p-3 font-mono text-[11px]"
+                      style={{ background: 'rgba(0,0,0,0.3)', color: '#6e6e76' }}>
+                      {sfcResult.log}
+                    </pre>
+                  )}
+                </div>
+              )}
+
+              <button onClick={handleRunSfc} disabled={repairRunning}
+                className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#1a0a00' }}>
+                {repairRunning && repairProgress?.tool === 'sfc'
+                  ? <><RefreshCw className="h-4 w-4 animate-spin" /> Running...</>
+                  : <><Wrench className="h-4 w-4" strokeWidth={2} /> Run SFC</>}
+              </button>
+            </div>
+          </div>
         </>
       )}
     </div>

@@ -2,8 +2,9 @@ import { app, BrowserWindow, Notification } from 'electron'
 import { IPC } from '../../shared/channels'
 import * as si from 'systeminformation'
 import { hostname } from 'os'
-import { existsSync } from 'fs'
+import { existsSync, readdirSync, statSync, openSync, readSync, closeSync } from 'fs'
 import { readdir } from 'fs/promises'
+import { randomUUID } from 'crypto'
 import { join } from 'path'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
@@ -1851,6 +1852,92 @@ class CloudAgentService {
         return
       }
 
+      case 'database': {
+        const dbTargets = getPlatform().paths.databaseOptimizeTargets()
+        const dbResults: ScanResult[] = []
+        const dbCategory = CleanerType.Database
+
+        for (const target of dbTargets) {
+          try {
+            if (!existsSync(target.basePath)) continue
+            const items: ScanResult['items'] = []
+            let profileDirs = [target.basePath]
+            if (target.multiProfile) {
+              const entries = readdirSync(target.basePath, { withFileTypes: true })
+              const dirs: string[] = []
+              if (target.profilePattern) {
+                for (const entry of entries) {
+                  if (!entry.isDirectory()) continue
+                  for (const pattern of target.profilePattern) {
+                    const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')
+                    if (new RegExp('^' + escaped + '$').test(entry.name)) { dirs.push(join(target.basePath, entry.name)); break }
+                  }
+                }
+              } else {
+                for (const entry of entries) {
+                  if (!entry.isDirectory()) continue
+                  if (entry.name === 'Default' || /^Profile \d+$/.test(entry.name)) {
+                    dirs.push(join(target.basePath, entry.name))
+                  }
+                }
+              }
+              if (dirs.length > 0) profileDirs = dirs
+            }
+
+            for (const profileDir of profileDirs) {
+              for (const dbFile of target.dbFiles) {
+                const dbPath = join(profileDir, dbFile)
+                if (!existsSync(dbPath)) continue
+
+                // Fast scan: validate SQLite header and estimate from file sizes
+                let isSqlite = false
+                let fd: number | undefined
+                try {
+                  fd = openSync(dbPath, 'r')
+                  const buf = Buffer.alloc(16)
+                  readSync(fd, buf, 0, 16, 0)
+                  isSqlite = buf.toString('utf8', 0, 16) === 'SQLite format 3\0'
+                } catch { /* skip */ }
+                finally { if (fd !== undefined) closeSync(fd) }
+                if (!isSqlite) continue
+
+                const fileStat = statSync(dbPath)
+                if (fileStat.size === 0) continue
+                let walSize = 0
+                try { walSize = statSync(dbPath + '-wal').size } catch { /* no WAL */ }
+                const wastedBytes = walSize + Math.floor(fileStat.size * 0.1)
+                if (wastedBytes < 4096) continue
+
+                items.push({
+                  id: randomUUID(), path: dbPath, size: wastedBytes,
+                  category: dbCategory, subcategory: target.label,
+                  lastModified: fileStat.mtimeMs, selected: true,
+                })
+              }
+            }
+
+            if (items.length > 0) {
+              cacheItems(items)
+              dbResults.push({ category: dbCategory, subcategory: target.label, items, totalSize: items.reduce((s, i) => s + i.size, 0), itemCount: items.length })
+            }
+          } catch { /* skip */ }
+        }
+
+        await this.postCommandResult(requestId, true, {
+          scanType,
+          results: dbResults.map((r) => ({
+            category: r.category,
+            subcategory: r.subcategory,
+            totalSize: r.totalSize,
+            itemCount: r.itemCount,
+            items: r.items.map((i) => ({ id: i.id, size: i.size, category: i.category, subcategory: i.subcategory })),
+          })),
+          totalSize: dbResults.reduce((s, r) => s + r.totalSize, 0),
+          totalItems: dbResults.reduce((s, r) => s + r.itemCount, 0),
+        })
+        return
+      }
+
       default:
         await this.postCommandResult(requestId, false, undefined, 'Scan type not yet supported via cloud')
         return
@@ -1866,14 +1953,63 @@ class CloudAgentService {
       await this.postCommandResult(requestId, false, undefined, 'Invalid itemIds')
       return
     }
-    const result = await cleanItems(itemIds)
+
+    // Separate database items from file items — databases need VACUUM, not deletion
+    const { getCachedItem } = await import('./scan-cache')
+    const dbIds: string[] = []
+    const fileIds: string[] = []
+    for (const id of itemIds) {
+      const item = getCachedItem(id)
+      if (item?.category === CleanerType.Database) dbIds.push(id)
+      else fileIds.push(id)
+    }
+
+    const fileResult = fileIds.length > 0 ? await cleanItems(fileIds) : { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [] as { path: string; reason: string }[], needsElevation: false }
+
+    let dbResult = { totalCleaned: 0, filesDeleted: 0, filesSkipped: 0, errors: [] as { path: string; reason: string }[], needsElevation: false }
+    if (dbIds.length > 0) {
+      const Database = (await import('better-sqlite3')).default
+      for (const id of dbIds) {
+        const item = getCachedItem(id)
+        if (!item) continue
+        try {
+          const sizeBefore = statSync(item.path).size
+          let walSizeBefore = 0
+          try { walSizeBefore = statSync(item.path + '-wal').size } catch { /* no WAL */ }
+          const db = new Database(item.path, { fileMustExist: true })
+          try {
+            const journalMode = (db.pragma('journal_mode', { simple: true }) as string).toLowerCase()
+            db.exec('VACUUM')
+            if (journalMode === 'wal') db.pragma('journal_mode = WAL')
+          } finally { db.close() }
+          const sizeAfter = statSync(item.path).size
+          let walSizeAfter = 0
+          try { walSizeAfter = statSync(item.path + '-wal').size } catch { /* no WAL */ }
+          const reclaimed = (sizeBefore + walSizeBefore) - (sizeAfter + walSizeAfter)
+          if (reclaimed > 0) dbResult.totalCleaned += reclaimed
+          dbResult.filesDeleted++
+        } catch (err: unknown) {
+          dbResult.filesSkipped++
+          const code = (err as { code?: string }).code
+          if (code === 'SQLITE_BUSY' || code === 'SQLITE_LOCKED' || code === 'EBUSY') {
+            dbResult.errors.push({ path: item.path, reason: 'in-use' })
+          } else if (code === 'EPERM' || code === 'EACCES') {
+            dbResult.errors.push({ path: item.path, reason: 'permission-denied' })
+            dbResult.needsElevation = true
+          } else {
+            dbResult.errors.push({ path: item.path, reason: (err as Error).message || 'unknown error' })
+          }
+        }
+      }
+    }
+
     // Strip local file paths from error details before sending to cloud
     await this.postCommandResult(requestId, true, {
-      totalCleaned: result.totalCleaned,
-      filesDeleted: result.filesDeleted,
-      filesSkipped: result.filesSkipped,
-      errorCount: result.errors.length,
-      needsElevation: result.needsElevation,
+      totalCleaned: fileResult.totalCleaned + dbResult.totalCleaned,
+      filesDeleted: fileResult.filesDeleted + dbResult.filesDeleted,
+      filesSkipped: fileResult.filesSkipped + dbResult.filesSkipped,
+      errorCount: fileResult.errors.length + dbResult.errors.length,
+      needsElevation: fileResult.needsElevation || dbResult.needsElevation,
     })
   }
 
