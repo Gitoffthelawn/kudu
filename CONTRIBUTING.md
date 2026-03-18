@@ -33,13 +33,26 @@ src/
 
 ## Adding Cleaner Rules
 
-Want to add support for cleaning a new app's cache? You don't need to write any TypeScript — just edit a JSON file in the [`rules/`](rules/) directory. See the **[Rules Contributing Guide](rules/RULES.md)** for full instructions.
+Want to add support for cleaning a new app's cache? You don't need to write any TypeScript — just edit a JSON file in the [`rules/`](rules/) directory. See the **[Rules Contributing Guide](rules/RULES.md)** for full instructions and the **[Rules Catalog](rules/CATALOG.md)** for what's already covered.
 
-Quick version:
+**Fastest way** — use the interactive generator:
+```bash
+npm run new-rule
+```
+
+**Manual way:**
 1. Add your app to `rules/<platform>/apps.json`
 2. Run `npm run validate:rules` to check your changes
 3. Run `npm test` to make sure everything passes
 4. Submit a PR!
+
+**Helpful tools for contributors:**
+```bash
+npm run find-cache       # Discover uncovered cache dirs on your machine
+npm run preview-rule     # Dry-run a rule to see what it would clean
+npm run parity-check     # Find cross-platform coverage gaps
+npm run catalog          # Regenerate the rules catalog
+```
 
 ## Making Changes
 
