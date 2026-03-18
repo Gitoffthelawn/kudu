@@ -72,6 +72,62 @@ function splitTaskPath(fullPath: string): { path: string; name: string } | null 
 // Session-scoped scan results keyed by scan ID to prevent race conditions
 const scanSessions = new Map<string, Map<string, RegistryEntry>>()
 
+/**
+ * Check if a CLSID key exists in the registry, probing both the native
+ * 64-bit view and the WOW6432Node (32-bit) view. On x64 Windows, 32-bit
+ * COM servers register under the 32-bit hive, so a single-view lookup
+ * produces false-positive "missing" results for valid 32-bit components.
+ */
+async function clsidExists(clsid: string): Promise<boolean> {
+  // Try native view first
+  try {
+    await execFileAsync('reg', ['query', `HKCR\\CLSID\\${clsid}`], { timeout: 5000 })
+    return true
+  } catch { /* not in native view */ }
+  // Try 32-bit (WOW64) view
+  try {
+    await execFileAsync('reg', [
+      'query', `HKCR\\WOW6432Node\\CLSID\\${clsid}`
+    ], { timeout: 5000 })
+    return true
+  } catch { /* not in WOW64 view either */ }
+  return false
+}
+
+/**
+ * Check if a CLSID's InprocServer32 DLL exists on disk.
+ * Probes both native and WOW6432Node registry views and returns
+ * the missing DLL path if found in neither, or null if valid.
+ */
+async function findMissingClsidDll(clsid: string): Promise<string | null> {
+  const views = [
+    `HKCR\\CLSID\\${clsid}\\InprocServer32`,
+    `HKCR\\WOW6432Node\\CLSID\\${clsid}\\InprocServer32`
+  ]
+  for (const key of views) {
+    try {
+      const { stdout } = await execFileAsync('reg', ['query', key], { timeout: 5000 })
+      const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
+      if (dllMatch) {
+        const dllPath = dllMatch[1].trim().replace(/"/g, '')
+        if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && existsSync(dllPath)) {
+          return null // DLL found on disk — not orphaned
+        }
+        // DLL path exists in registry but file missing — continue checking other view
+      }
+    } catch { /* key doesn't exist in this view */ }
+  }
+  // Neither view had a valid DLL, return the path from the first match for the issue message
+  for (const key of views) {
+    try {
+      const { stdout } = await execFileAsync('reg', ['query', key], { timeout: 5000 })
+      const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
+      if (dllMatch) return dllMatch[1].trim().replace(/"/g, '')
+    } catch { /* skip */ }
+  }
+  return null // No InprocServer32 in either view — may use LocalServer32, not orphaned
+}
+
 // ── Exported core logic ──
 
 export async function scanRegistry(): Promise<RegistryEntry[]> {
@@ -672,12 +728,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
         const clsidMatch = block.match(/CLSID\s+REG_SZ\s+(\{[0-9A-Fa-f-]+\})/i)
         if (keyMatch && clsidMatch) {
           const clsid = clsidMatch[1]
-          try {
-            await execFileAsync('reg', [
-              'query', `HKCR\\CLSID\\${clsid}`
-            ], { timeout: 5000 })
-          } catch {
-            // CLSID not found — handler is orphaned
+          if (!await clsidExists(clsid)) {
             const mimeType = keyMatch[1].replace('HKCR\\MIME\\Database\\Content Type\\', '')
             entries.push({
               id: randomUUID(),
@@ -802,14 +853,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
         if (!subKeyMatch) continue
         const bhoSubKey = subKeyMatch[1].trim()
         const clsid = subKeyMatch[2]
-        // Check if the CLSID exists at all first
-        let clsidExists = false
-        try {
-          await execFileAsync('reg', ['query', `HKCR\\CLSID\\${clsid}`], { timeout: 5000 })
-          clsidExists = true
-        } catch { /* CLSID missing entirely */ }
-
-        if (!clsidExists) {
+        if (!await clsidExists(clsid)) {
           entries.push({
             id: randomUUID(),
             type: 'orphaned',
@@ -821,29 +865,19 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
             fix: { op: 'delete-key' }
           })
         } else {
-          // CLSID exists — check if its DLL is present
-          try {
-            const { stdout: clsidOut } = await execFileAsync('reg', [
-              'query', `HKCR\\CLSID\\${clsid}\\InprocServer32`
-            ], { timeout: 5000 })
-            const dllMatch = clsidOut.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
-            if (dllMatch) {
-              const dllPath = dllMatch[1].trim().replace(/"/g, '')
-              if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
-                entries.push({
-                  id: randomUUID(),
-                  type: 'orphaned',
-                  keyPath: bhoSubKey,
-                  valueName: clsid,
-                  issue: `Browser Helper Object DLL missing: ${dllPath}`,
-                  risk: 'low',
-                  selected: true,
-                  fix: { op: 'delete-key' }
-                })
-              }
-            }
-          } catch {
-            // InprocServer32 missing but CLSID exists — may use LocalServer32, skip
+          // CLSID exists in at least one view — check if its DLL is present
+          const missingDll = await findMissingClsidDll(clsid)
+          if (missingDll) {
+            entries.push({
+              id: randomUUID(),
+              type: 'orphaned',
+              keyPath: bhoSubKey,
+              valueName: clsid,
+              issue: `Browser Helper Object DLL missing: ${missingDll}`,
+              risk: 'low',
+              selected: true,
+              fix: { op: 'delete-key' }
+            })
           }
         }
       }
@@ -879,19 +913,24 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           ], { timeout: 5000 })
           const pathMatch = srcOut.match(/EventMessageFile\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
           if (pathMatch) {
-            let msgFile = pathMatch[1].trim().replace(/"/g, '')
-            // Skip env-var paths we can't resolve
-            if (msgFile.startsWith('%') && !msgFile.toLowerCase().startsWith('%systemroot%')) continue
-            msgFile = msgFile.replace(/%SystemRoot%/i, process.env.WINDIR || 'C:\\Windows')
-            // Handle semicolon-separated paths — check first path only
-            const firstPath = msgFile.split(';')[0].trim()
-            if (firstPath && firstPath.includes('\\') && !existsSync(firstPath)) {
+            const rawValue = pathMatch[1].trim().replace(/"/g, '')
+            const winDir = process.env.WINDIR || 'C:\\Windows'
+            // Split semicolon-separated paths and resolve %SystemRoot%
+            const allPaths = rawValue.split(';')
+              .map(p => p.trim())
+              .filter(p => p.length > 0)
+              .map(p => p.replace(/%SystemRoot%/i, winDir))
+            // Skip if any path uses env vars we can't resolve
+            if (allPaths.some(p => p.startsWith('%'))) continue
+            // Only flag as orphaned if EVERY message file is missing
+            const checkable = allPaths.filter(p => p.includes('\\'))
+            if (checkable.length > 0 && checkable.every(p => !existsSync(p))) {
               entries.push({
                 id: randomUUID(),
                 type: 'orphaned',
                 keyPath: sourceKey,
                 valueName: 'EventMessageFile',
-                issue: `Event log source "${sourceName}" message file missing: ${firstPath}`,
+                issue: `Event log source "${sourceName}" — all message files missing`,
                 risk: 'low',
                 selected: true,
                 fix: { op: 'delete-key' }
@@ -923,14 +962,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           // Skip well-known system proxy stubs (OLE/COM standard marshaler)
           if (proxyClsid === '{00000320-0000-0000-C000-000000000046}' ||
               proxyClsid === '{0000033A-0000-0000-C000-000000000046}') continue
-          // Check if the proxy CLSID exists at all
-          let proxyExists = false
-          try {
-            await execFileAsync('reg', ['query', `HKCR\\CLSID\\${proxyClsid}`], { timeout: 5000 })
-            proxyExists = true
-          } catch { /* CLSID missing entirely */ }
-
-          if (!proxyExists) {
+          if (!await clsidExists(proxyClsid)) {
             const parentIfaceKey = `HKCR\\Interface\\${keyMatch[2]}`
             entries.push({
               id: randomUUID(),
@@ -944,31 +976,21 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
             })
             ifaceCount++
           } else {
-            // CLSID exists — check if its DLL is present
-            try {
-              const { stdout: clsidOut } = await execFileAsync('reg', [
-                'query', `HKCR\\CLSID\\${proxyClsid}\\InprocServer32`
-              ], { timeout: 5000 })
-              const dllMatch = clsidOut.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
-              if (dllMatch) {
-                const dllPath = dllMatch[1].trim().replace(/"/g, '')
-                if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
-                  const parentIfaceKey = `HKCR\\Interface\\${keyMatch[2]}`
-                  entries.push({
-                    id: randomUUID(),
-                    type: 'orphaned',
-                    keyPath: keyMatch[1],
-                    valueName: proxyClsid,
-                    issue: `COM interface proxy stub DLL missing: ${dllPath}`,
-                    risk: 'medium',
-                    selected: true,
-                    fix: { op: 'delete-key', key: parentIfaceKey }
-                  })
-                  ifaceCount++
-                }
-              }
-            } catch {
-              // InprocServer32 missing but CLSID exists — may use different server type, skip
+            // CLSID exists in at least one view — check if its DLL is present
+            const missingDll = await findMissingClsidDll(proxyClsid)
+            if (missingDll) {
+              const parentIfaceKey = `HKCR\\Interface\\${keyMatch[2]}`
+              entries.push({
+                id: randomUUID(),
+                type: 'orphaned',
+                keyPath: keyMatch[1],
+                valueName: proxyClsid,
+                issue: `COM interface proxy stub DLL missing: ${missingDll}`,
+                risk: 'medium',
+                selected: true,
+                fix: { op: 'delete-key', key: parentIfaceKey }
+              })
+              ifaceCount++
             }
           }
         }
