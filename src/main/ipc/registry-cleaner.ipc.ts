@@ -671,10 +671,19 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
       let svcCount = 0
       for (const block of blocks) {
         if (svcCount >= 40) break
-        const keyMatch = block.match(/^(HKLM\\SYSTEM\\CurrentControlSet\\Services\\([^\\\r\n]+))/m)
+        // Extract the full key path from the block header
+        const fullKeyMatch = block.match(/^(HK[^\r\n]+)/m)
+        if (!fullKeyMatch) continue
+        const fullKey = fullKeyMatch[1].trim()
+        // Only process the service root key (exactly one level under Services\).
+        // Skip child keys like Services\Foo\Parameters which may have their own
+        // ImagePath values that don't represent the main service executable.
+        // Count segments after "Services\" — should be exactly 1.
+        const afterServices = fullKey.replace(/^.*\\Services\\/i, '')
+        if (afterServices.includes('\\')) continue // deeper than one level
+        const svcName = afterServices
         const valMatch = block.match(/ImagePath\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
-        if (keyMatch && valMatch) {
-          const svcName = keyMatch[2]
+        if (valMatch) {
           const rawImagePath = valMatch[1].trim()
           let imagePath = extractExePath(rawImagePath)
           if (!imagePath) continue
@@ -700,7 +709,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
             entries.push({
               id: randomUUID(),
               type: 'orphaned',
-              keyPath: keyMatch[1],
+              keyPath: fullKey,
               valueName: 'ImagePath',
               issue: `Service "${svcName}" points to missing executable: ${imagePath}`,
               risk: 'medium',
