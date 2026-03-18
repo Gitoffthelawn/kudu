@@ -774,7 +774,12 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
               // MSI uninstallers are always functional (Windows Installer handles them)
             } else if (exePath && exePath.toLowerCase().includes('rundll32')) {
               // For rundll32 commands, check if the DLL argument exists.
-              const dllMatch = rawUninstall.match(/rundll32(?:\.exe)?\s+"?([^",]+\.dll)/i)
+              // Handle both quoted and unquoted forms:
+              //   rundll32.exe C:\path\helper.dll,Entry
+              //   "C:\Windows\System32\rundll32.exe" "C:\path\helper.dll",Entry
+              //   rundll32.exe "C:\path\helper.dll",Entry
+              const strippedUninstall = rawUninstall.replace(/"/g, '')
+              const dllMatch = strippedUninstall.match(/rundll32(?:\.exe)?\s+([^,]+\.dll)/i)
               if (dllMatch) {
                 const dllPath = expandEnvVars(dllMatch[1].trim())
                 if (dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
@@ -904,13 +909,24 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
     // --- ORPHANED REGISTERED CLIENTS ---
 
     // Scan for orphaned registered client applications (browsers, email, media)
-    const clientCategories = [
-      { key: 'HKLM\\SOFTWARE\\Clients\\StartMenuInternet', label: 'web browser' },
-      { key: 'HKLM\\SOFTWARE\\Clients\\Mail', label: 'email client' },
-      { key: 'HKLM\\SOFTWARE\\Clients\\Media', label: 'media player' },
-      { key: 'HKLM\\SOFTWARE\\Clients\\News', label: 'news reader' },
-      { key: 'HKLM\\SOFTWARE\\Clients\\Calendar', label: 'calendar app' }
+    const clientLabels = [
+      { subKey: 'StartMenuInternet', label: 'web browser' },
+      { subKey: 'Mail', label: 'email client' },
+      { subKey: 'Media', label: 'media player' },
+      { subKey: 'News', label: 'news reader' },
+      { subKey: 'Calendar', label: 'calendar app' }
     ]
+    const clientRoots = [
+      'HKLM\\SOFTWARE\\Clients',
+      'HKLM\\SOFTWARE\\WOW6432Node\\Clients',
+      'HKCU\\SOFTWARE\\Clients'
+    ]
+    const clientCategories: { key: string; label: string }[] = []
+    for (const root of clientRoots) {
+      for (const { subKey, label } of clientLabels) {
+        clientCategories.push({ key: `${root}\\${subKey}`, label })
+      }
+    }
     for (const client of clientCategories) {
       try {
         const { stdout } = await execFileAsync('reg', [
@@ -919,7 +935,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
 
         const lines = stdout.split(/\r?\n/)
         for (const line of lines) {
-          const subKeyMatch = line.match(/^(HKLM\\SOFTWARE\\Clients\\[^\\]+\\(.+))$/m)
+          const subKeyMatch = line.match(/^(HK\w+\\SOFTWARE\\(?:WOW6432Node\\)?Clients\\[^\\]+\\(.+))$/m)
           if (!subKeyMatch) continue
           const subKey = subKeyMatch[1].trim()
           const clientName = subKeyMatch[2].trim()
