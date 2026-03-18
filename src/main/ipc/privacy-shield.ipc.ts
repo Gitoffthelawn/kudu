@@ -72,6 +72,15 @@ async function disableService(serviceName: string): Promise<void> {
   ], { timeout: 5000, windowsHide: true })
 }
 
+async function isBrowserInstalled(registryKey: string): Promise<boolean> {
+  try {
+    await execFileAsync('reg', ['query', registryKey, '/ve'], { timeout: 5000, windowsHide: true })
+    return true
+  } catch {
+    return false
+  }
+}
+
 async function isServiceEnabled(serviceName: string): Promise<boolean> {
   const val = await regQueryDword(`HKLM\\SYSTEM\\CurrentControlSet\\Services\\${serviceName}`, 'Start')
   return val !== null && val !== 4 // 4 = disabled
@@ -419,10 +428,10 @@ const SETTINGS: SettingDef[] = [
     description: 'Disable Click To Do AI text and image analysis on screen content',
     requiresAdmin: true,
     check: async () => {
-      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'TurnOffSavingSnapshots')
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'DisableClickToDo')
       return val === 1
     },
-    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'TurnOffSavingSnapshots', 1)
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'DisableClickToDo', 1)
   },
   {
     id: 'ai-service-autostart',
@@ -450,24 +459,24 @@ const SETTINGS: SettingDef[] = [
     category: 'ai',
     label: 'Paint AI Features',
     description: 'Disable AI image generation features in Microsoft Paint',
-    requiresAdmin: false,
+    requiresAdmin: true,
     check: async () => {
-      const val = await regQueryDword('HKCU\\SOFTWARE\\Microsoft\\Paint', 'CocreatorEnabled')
-      return val === 0
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Paint', 'DisableCocreator')
+      return val === 1
     },
-    apply: () => regSetDword('HKCU\\SOFTWARE\\Microsoft\\Paint', 'CocreatorEnabled', 0)
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Paint', 'DisableCocreator', 1)
   },
   {
     id: 'notepad-ai',
     category: 'ai',
     label: 'Notepad AI Features',
     description: 'Disable AI text rewriting features in Microsoft Notepad',
-    requiresAdmin: false,
+    requiresAdmin: true,
     check: async () => {
-      const val = await regQueryDword('HKCU\\SOFTWARE\\Microsoft\\Notepad', 'CowriterEnabled')
-      return val === 0
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\WindowsNotepad', 'DisableAIFeatures')
+      return val === 1
     },
-    apply: () => regSetDword('HKCU\\SOFTWARE\\Microsoft\\Notepad', 'CowriterEnabled', 0)
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\WindowsNotepad', 'DisableAIFeatures', 1)
   },
 
   // ─── TELEMETRY SERVICES ───
@@ -702,6 +711,7 @@ const SETTINGS: SettingDef[] = [
     description: 'Stop Chrome from sending usage and crash metrics to Google',
     requiresAdmin: true,
     check: async () => {
+      if (!await isBrowserInstalled('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe')) return true
       const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'MetricsReportingEnabled')
       return val === 0
     },
@@ -714,6 +724,7 @@ const SETTINGS: SettingDef[] = [
     description: 'Prevent Chrome from collecting and sending user feedback data',
     requiresAdmin: true,
     check: async () => {
+      if (!await isBrowserInstalled('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe')) return true
       const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'UserFeedbackAllowed')
       return val === 0
     },
@@ -726,6 +737,7 @@ const SETTINGS: SettingDef[] = [
     description: 'Stop Chrome from sending extended URL and download reports to Google',
     requiresAdmin: true,
     check: async () => {
+      if (!await isBrowserInstalled('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe')) return true
       const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'SafeBrowsingExtendedReportingEnabled')
       return val === 0
     },
@@ -740,6 +752,7 @@ const SETTINGS: SettingDef[] = [
     description: 'Disable Firefox telemetry data collection and upload to Mozilla',
     requiresAdmin: true,
     check: async () => {
+      if (!await isBrowserInstalled('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\firefox.exe')) return true
       const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Mozilla\\Firefox', 'DisableTelemetry')
       return val === 1
     },
@@ -752,6 +765,7 @@ const SETTINGS: SettingDef[] = [
     description: 'Disable the background agent that reports browser usage data to Mozilla',
     requiresAdmin: true,
     check: async () => {
+      if (!await isBrowserInstalled('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\firefox.exe')) return true
       const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Mozilla\\Firefox', 'DisableDefaultBrowserAgent')
       return val === 1
     },
