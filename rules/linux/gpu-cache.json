@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "gpu-cache",
+  "apps": [
+    { "id": "mesa-cache", "name": "Mesa Shader Cache", "paths": ["${CACHE}/mesa_shader_cache"] },
+    { "id": "nvidia-cache", "name": "NVIDIA Shader Cache", "paths": ["${CACHE}/nvidia/GLCache"] },
+    { "id": "unity-cache", "name": "Unity Shader Cache", "paths": ["${CACHE}/unity3d"] }
+  ]
+}

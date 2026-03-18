@@ -1,0 +1,27 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "databases",
+  "sharedDbFileSets": {
+    "chromium": ["History", "Cookies", "Network/Cookies", "Favicons", "Top Sites", "Web Data", "Shortcuts", "Login Data"],
+    "firefox": ["places.sqlite", "cookies.sqlite", "favicons.sqlite", "formhistory.sqlite", "webappsstore.sqlite", "content-prefs.sqlite"]
+  },
+  "targets": [
+    { "label": "Google Chrome", "basePath": "${APP_SUPPORT}/Google/Chrome", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Microsoft Edge", "basePath": "${APP_SUPPORT}/Microsoft Edge", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Brave", "basePath": "${APP_SUPPORT}/BraveSoftware/Brave-Browser", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Vivaldi", "basePath": "${APP_SUPPORT}/Vivaldi", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Opera", "basePath": "${APP_SUPPORT}/com.operasoftware.Opera", "dbFiles": "$chromium" },
+    { "label": "Opera GX", "basePath": "${APP_SUPPORT}/com.operasoftware.OperaGX", "dbFiles": "$chromium" },
+    { "label": "Arc", "basePath": "${APP_SUPPORT}/Arc/User Data", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Chromium", "basePath": "${APP_SUPPORT}/Chromium", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Firefox", "basePath": "${APP_SUPPORT}/Firefox/Profiles", "dbFiles": "$firefox", "multiProfile": true, "profilePattern": ["*.default*", "*.dev-edition*"] },
+    { "label": "Discord", "basePath": "${APP_SUPPORT}/discord", "dbFiles": ["Network/Cookies"] },
+    { "label": "Slack", "basePath": "${APP_SUPPORT}/Slack", "dbFiles": ["Network/Cookies"] },
+    { "label": "Microsoft Teams", "basePath": "${APP_SUPPORT}/Microsoft Teams", "dbFiles": ["Network/Cookies"] },
+    { "label": "VS Code", "basePath": "${APP_SUPPORT}/Code", "dbFiles": ["Network/Cookies", "User/globalStorage/state.vscdb"] },
+    { "label": "Cursor IDE", "basePath": "${APP_SUPPORT}/Cursor", "dbFiles": ["Network/Cookies", "User/globalStorage/state.vscdb"] },
+    { "label": "Figma", "basePath": "${APP_SUPPORT}/Figma", "dbFiles": ["Network/Cookies"] },
+    { "label": "Safari", "basePath": "${LIBRARY}/Safari", "dbFiles": ["History.db", "CloudTabs.db"] },
+    { "label": "Thunderbird", "basePath": "${APP_SUPPORT}/Thunderbird/Profiles", "dbFiles": ["global-messages-db.sqlite", "places.sqlite", "cookies.sqlite"], "multiProfile": true, "profilePattern": ["*.default*"] }
+  ]
+}

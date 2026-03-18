@@ -1,0 +1,17 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "gaming",
+  "apps": [
+    { "id": "steam", "name": "Steam Launcher", "paths": ["${PROGRAMFILES_X86}/Steam/logs", "${PROGRAMFILES_X86}/Steam/dumps", "${PROGRAMFILES_X86}/Steam/appcache/httpcache"] },
+    { "id": "epic", "name": "Epic Games Launcher", "paths": ["${LOCALAPPDATA}/EpicGamesLauncher/Saved/webcache", "${LOCALAPPDATA}/EpicGamesLauncher/Saved/webcache_4430", "${LOCALAPPDATA}/EpicGamesLauncher/Saved/Logs", "${LOCALAPPDATA}/EpicGamesLauncher/Intermediate", "${PROGRAMDATA}/Epic/EpicGamesLauncher/VaultCache"] },
+    { "id": "ea", "name": "EA App", "paths": ["${LOCALAPPDATA}/Electronic Arts/EA Desktop/Logs", "${LOCALAPPDATA}/Electronic Arts/EA Desktop/IGOCache", "${LOCALAPPDATA}/EADesktop/cache", "${LOCALAPPDATA}/Origin/cache"] },
+    { "id": "ubisoft", "name": "Ubisoft Connect", "paths": ["${LOCALAPPDATA}/Ubisoft Game Launcher/logs"] },
+    { "id": "gog", "name": "GOG Galaxy", "paths": ["${LOCALAPPDATA}/GOG.com/Galaxy/webcache", "${PROGRAMDATA}/GOG.com/Galaxy/logs", "${PROGRAMDATA}/GOG.com/Galaxy/webcache"] },
+    { "id": "battlenet", "name": "Battle.net", "paths": ["${LOCALAPPDATA}/Blizzard Entertainment/Battle.net/Logs", "${APPDATA}/Battle.net/Logs"] },
+    { "id": "riot", "name": "Riot Games", "paths": ["${LOCALAPPDATA}/Riot Games/Riot Client/Logs"] },
+    { "id": "xbox", "name": "Xbox App", "paths": ["${LOCALAPPDATA}/Packages/Microsoft.GamingApp_8wekyb3d8bbwe/LocalCache", "${LOCALAPPDATA}/Packages/Microsoft.XboxApp_8wekyb3d8bbwe/LocalCache"] },
+    { "id": "rockstar", "name": "Rockstar Games Launcher", "paths": ["${LOCALAPPDATA}/Rockstar Games/Launcher/cache", "${LOCALAPPDATA}/Rockstar Games/Launcher/logs"] },
+    { "id": "itch", "name": "itch.io", "paths": ["${APPDATA}/itch/Cache/Cache_Data", "${APPDATA}/itch/logs"] },
+    { "id": "minecraft", "name": "Minecraft Java Edition", "paths": ["${APPDATA}/.minecraft/logs", "${APPDATA}/.minecraft/crash-reports", "${APPDATA}/.minecraft/webcache2"], "description": "Minecraft logs, crash reports, and launcher web cache" }
+  ]
+}

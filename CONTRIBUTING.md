@@ -23,12 +23,23 @@ Thanks for your interest in contributing! Kudu is a community-driven project and
 ## Project Structure
 
 ```
+rules/           # Cleaner rule definitions (JSON) — edit these to add new cleaners!
 src/
 ├── main/        # Electron main process
 ├── preload/     # Preload scripts (bridge between main & renderer)
 ├── renderer/    # React frontend
 └── shared/      # Shared types and utilities
 ```
+
+## Adding Cleaner Rules
+
+Want to add support for cleaning a new app's cache? You don't need to write any TypeScript — just edit a JSON file in the [`rules/`](rules/) directory. See the **[Rules Contributing Guide](rules/RULES.md)** for full instructions.
+
+Quick version:
+1. Add your app to `rules/<platform>/apps.json`
+2. Run `npm run validate:rules` to check your changes
+3. Run `npm test` to make sure everything passes
+4. Submit a PR!
 
 ## Making Changes
 

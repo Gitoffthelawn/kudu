@@ -1,0 +1,34 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "system",
+  "cleanTargets": [
+    { "path": "${LOCALAPPDATA}/Temp", "subcategory": "User Temp Files" },
+    { "path": "${WINDIR}/Temp", "subcategory": "System Temp Files" },
+    { "path": "${WINDIR}/Prefetch", "subcategory": "Prefetch Data", "needsAdmin": true },
+    { "path": "${WINDIR}/Logs", "subcategory": "Windows Logs", "needsAdmin": true },
+    { "path": "${WINDIR}/Panther", "subcategory": "Setup Logs", "needsAdmin": true },
+    { "path": "${LOCALAPPDATA}/Microsoft/Windows/Explorer", "subcategory": "Thumbnail & Icon Cache" },
+    { "path": "${WINDIR}/ServiceProfiles/LocalService/AppData/Local/FontCache", "subcategory": "Font Cache", "needsAdmin": true },
+    { "path": "${LOCALAPPDATA}/D3DSCache", "subcategory": "DirectX Shader Cache" },
+    { "path": "${LOCALAPPDATA}/Microsoft/Windows/INetCache", "subcategory": "Internet Cache" },
+    { "path": "${WINDIR}/SoftwareDistribution/Download", "subcategory": "Windows Update Cache", "needsAdmin": true },
+    { "path": "${WINDIR}/SoftwareDistribution/DeliveryOptimization", "subcategory": "Delivery Optimization Cache", "needsAdmin": true },
+    { "path": "${LOCALAPPDATA}/Microsoft/Windows/WER", "subcategory": "Error Reports" },
+    { "path": "${PROGRAMDATA}/Microsoft/Windows/WER", "subcategory": "System Error Reports", "needsAdmin": true },
+    { "path": "${LOCALAPPDATA}/CrashDumps", "subcategory": "Crash Dumps" },
+    { "path": "${WINDIR}/Minidump", "subcategory": "Minidump Files", "needsAdmin": true },
+    { "path": "${WINDIR}/Installer/$PatchCache$", "subcategory": "Installer Patch Cache", "needsAdmin": true },
+    { "path": "${WINDIR}/System32/winevt/Logs", "subcategory": "Event Log Archives", "needsAdmin": true },
+    { "path": "${PROGRAMDATA}/Microsoft/Windows Defender/Scans/History", "subcategory": "Defender Scan History", "needsAdmin": true },
+    { "path": "C:/Windows.old", "subcategory": "Previous Windows Installation", "needsAdmin": true },
+    { "path": "${LOCALAPPDATA}/Microsoft/CLR_v4.0/UsageLogs", "subcategory": ".NET Usage Logs" },
+    { "path": "${LOCALAPPDATA}/Microsoft/CLR_v4.0_32/UsageLogs", "subcategory": ".NET Usage Logs (32-bit)" },
+    { "path": "${LOCALAPPDATA}/Microsoft/Terminal Server Client/Cache", "subcategory": "RDP Bitmap Cache" },
+    { "path": "${WINDIR}/debug", "subcategory": "Windows Debug Logs", "needsAdmin": true },
+    { "path": "${WINDIR}/ServiceProfiles/NetworkService/AppData/Local/Temp", "subcategory": "Network Service Temp", "needsAdmin": true },
+    { "path": "${LOCALAPPDATA}/Microsoft/Windows/Caches", "subcategory": "Windows Caches" }
+  ],
+  "singleFileTargets": [
+    { "path": "${WINDIR}/MEMORY.DMP", "subcategory": "Full Memory Dump" }
+  ]
+}

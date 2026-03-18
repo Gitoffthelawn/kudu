@@ -1,0 +1,25 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "browsers",
+  "chromiumCacheDirs": {
+    "cache": "Cache/Cache_Data",
+    "codeCache": "Code Cache",
+    "gpuCache": "GPUCache",
+    "serviceWorker": "Service Worker/CacheStorage"
+  },
+  "chromium": [
+    { "key": "chrome", "base": "${LOCALAPPDATA}/Google/Chrome/User Data" },
+    { "key": "edge", "base": "${LOCALAPPDATA}/Microsoft/Edge/User Data" },
+    { "key": "brave", "base": "${LOCALAPPDATA}/BraveSoftware/Brave-Browser/User Data" },
+    { "key": "opera", "base": "${APPDATA}/Opera Software/Opera Stable" },
+    { "key": "operaGX", "base": "${APPDATA}/Opera Software/Opera GX Stable" },
+    { "key": "vivaldi", "base": "${LOCALAPPDATA}/Vivaldi/User Data" },
+    { "key": "arc", "base": "${LOCALAPPDATA}/Arc/User Data" },
+    { "key": "chromium", "base": "${LOCALAPPDATA}/Chromium/User Data" }
+  ],
+  "firefox": {
+    "base": "${APPDATA}/Mozilla/Firefox/Profiles",
+    "cache": "${LOCALAPPDATA}/Mozilla/Firefox/Profiles"
+  },
+  "safari": null
+}

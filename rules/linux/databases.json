@@ -1,0 +1,23 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "databases",
+  "sharedDbFileSets": {
+    "chromium": ["History", "Cookies", "Network/Cookies", "Favicons", "Top Sites", "Web Data", "Shortcuts", "Login Data"],
+    "firefox": ["places.sqlite", "cookies.sqlite", "favicons.sqlite", "formhistory.sqlite", "webappsstore.sqlite", "content-prefs.sqlite"]
+  },
+  "targets": [
+    { "label": "Google Chrome", "basePath": "${CONFIG}/google-chrome", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Microsoft Edge", "basePath": "${CONFIG}/microsoft-edge", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Brave", "basePath": "${CONFIG}/BraveSoftware/Brave-Browser", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Vivaldi", "basePath": "${CONFIG}/vivaldi", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Opera", "basePath": "${CONFIG}/opera", "dbFiles": "$chromium" },
+    { "label": "Chromium", "basePath": "${CONFIG}/chromium", "dbFiles": "$chromium", "multiProfile": true },
+    { "label": "Firefox", "basePath": "${HOME}/.mozilla/firefox", "dbFiles": "$firefox", "multiProfile": true, "profilePattern": ["*.default*", "*.dev-edition*"] },
+    { "label": "Discord", "basePath": "${CONFIG}/discord", "dbFiles": ["Network/Cookies"] },
+    { "label": "Slack", "basePath": "${CONFIG}/Slack", "dbFiles": ["Network/Cookies"] },
+    { "label": "Microsoft Teams", "basePath": "${CONFIG}/Microsoft/Microsoft Teams", "dbFiles": ["Network/Cookies"] },
+    { "label": "VS Code", "basePath": "${CONFIG}/Code", "dbFiles": ["Network/Cookies", "User/globalStorage/state.vscdb"] },
+    { "label": "Cursor IDE", "basePath": "${CONFIG}/Cursor", "dbFiles": ["Network/Cookies", "User/globalStorage/state.vscdb"] },
+    { "label": "Thunderbird", "basePath": "${HOME}/.thunderbird", "dbFiles": ["global-messages-db.sqlite", "places.sqlite", "cookies.sqlite"], "multiProfile": true, "profilePattern": ["*.default*"] }
+  ]
+}

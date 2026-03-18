@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate cleaner rules
+        run: npm run validate:rules
+
       - name: Test
         run: npm test
 

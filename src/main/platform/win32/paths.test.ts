@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // Stub os.homedir before importing the module under test
-vi.mock('os', () => ({ homedir: () => 'C:\\Users\\TestUser' }))
+vi.mock('os', () => ({ homedir: () => 'C:\\Users\\TestUser', tmpdir: () => 'C:\\Users\\TestUser\\AppData\\Local\\Temp' }))
 
 // Set deterministic env vars before import
 process.env.LOCALAPPDATA = 'C:\\Users\\TestUser\\AppData\\Local'

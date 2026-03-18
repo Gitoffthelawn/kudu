@@ -1,3 +1,7 @@
+cleaner-rules:
+  - changed-files:
+      - any-glob-to-any-file: rules/**
+
 electron:
   - changed-files:
       - any-glob-to-any-file: src/main/**

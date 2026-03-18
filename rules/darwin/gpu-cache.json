@@ -1,0 +1,8 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "gpu-cache",
+  "apps": [
+    { "id": "metal-cache", "name": "Metal Shader Cache", "paths": ["${CACHES}/com.apple.metal"] },
+    { "id": "unity-cache", "name": "Unity Shader Cache", "paths": ["${CACHES}/com.unity3d.UnityEditor"] }
+  ]
+}

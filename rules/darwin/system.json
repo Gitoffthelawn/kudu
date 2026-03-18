@@ -1,0 +1,17 @@
+{
+  "$schema": "../schema/rules.schema.json",
+  "type": "system",
+  "cleanTargets": [
+    { "path": "${TMPDIR}", "subcategory": "User Temp Files" },
+    { "path": "/private/tmp", "subcategory": "System Temp Files" },
+    { "path": "${LIBRARY}/Logs", "subcategory": "User Logs" },
+    { "path": "/Library/Logs", "subcategory": "System Logs", "needsAdmin": true },
+    { "path": "${LIBRARY}/Logs/DiagnosticReports", "subcategory": "Crash Reports" },
+    { "path": "${CACHES}/com.apple.QuickLook.thumbnailcache", "subcategory": "Thumbnail Cache" },
+    { "path": "/Library/Caches/com.apple.ATS", "subcategory": "Font Cache", "needsAdmin": true },
+    { "path": "${LIBRARY}/Saved Application State", "subcategory": "Saved Application State" },
+    { "path": "${LIBRARY}/Developer/Xcode/DerivedData", "subcategory": "Xcode DerivedData" },
+    { "path": "${LIBRARY}/Developer/CoreSimulator/Caches", "subcategory": "CoreSimulator Caches" }
+  ],
+  "singleFileTargets": []
+}
