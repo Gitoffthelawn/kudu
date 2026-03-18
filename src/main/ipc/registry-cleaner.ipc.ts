@@ -536,6 +536,488 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
       // Skip
     }
 
+    // --- ORPHANED TRACES ---
+
+    // Scan for orphaned services pointing to missing executables
+    try {
+      const servicesKey = 'HKLM\\SYSTEM\\CurrentControlSet\\Services'
+      const { stdout } = await execFileAsync('reg', [
+        'query', servicesKey, '/s', '/f', 'ImagePath', '/v'
+      ], { timeout: 20000 })
+
+      const blocks = stdout.split(/\r?\n\r?\n/)
+      let svcCount = 0
+      for (const block of blocks) {
+        if (svcCount >= 40) break
+        const keyMatch = block.match(/^(HKLM\\SYSTEM\\CurrentControlSet\\Services\\([^\\\r\n]+))/m)
+        const valMatch = block.match(/ImagePath\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
+        if (keyMatch && valMatch) {
+          const svcName = keyMatch[2]
+          let imagePath = valMatch[1].trim().replace(/"/g, '')
+          // Skip system/Microsoft services and drivers
+          if (imagePath.toLowerCase().startsWith('\\systemroot\\') ||
+              imagePath.toLowerCase().startsWith('%systemroot%\\system32\\') ||
+              imagePath.toLowerCase().startsWith('c:\\windows\\system32\\') ||
+              imagePath.toLowerCase().includes('\\microsoft\\') ||
+              imagePath.toLowerCase().includes('\\windows\\') ||
+              imagePath.startsWith('\\??\\') ||
+              !imagePath.includes('\\')) continue
+          // Extract exe path (handle arguments after the exe)
+          const exeMatch = imagePath.match(/^"?([^"]+\.\w{2,4})"?/)
+          if (exeMatch) {
+            imagePath = exeMatch[1].trim()
+          } else {
+            // No extension found — extract first space-separated token as path
+            const spaceIdx = imagePath.indexOf(' ')
+            if (spaceIdx > 0) imagePath = imagePath.substring(0, spaceIdx)
+          }
+          // Resolve %ProgramFiles% etc.
+          if (imagePath.startsWith('%')) continue
+          if (imagePath && !existsSync(imagePath)) {
+            entries.push({
+              id: randomUUID(),
+              type: 'orphaned',
+              keyPath: keyMatch[1],
+              valueName: 'ImagePath',
+              issue: `Service "${svcName}" points to missing executable: ${imagePath}`,
+              risk: 'medium',
+              selected: true,
+              fix: { op: 'delete-key' }
+            })
+            svcCount++
+          }
+        }
+      }
+    } catch {
+      // Skip
+    }
+
+    // Scan for stale Programs & Features / Uninstall entries
+    const uninstallKeys = [
+      'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+      'HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+      'HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall'
+    ]
+    for (const uninstallKey of uninstallKeys) {
+      try {
+        const { stdout } = await execFileAsync('reg', [
+          'query', uninstallKey, '/s'
+        ], { timeout: 15000 })
+
+        const blocks = stdout.split(/\r?\n\r?\n/)
+        for (const block of blocks) {
+          const keyMatch = block.match(/^(HK[^\r\n]+)/m)
+          if (!keyMatch) continue
+          const subKey = keyMatch[1]
+          // Skip the parent key itself
+          if (subKey === uninstallKey) continue
+          // Look for InstallLocation or UninstallString
+          const installLocMatch = block.match(/InstallLocation\s+REG_SZ\s+(.+)/i)
+          const uninstallStrMatch = block.match(/UninstallString\s+REG_SZ\s+(.+)/i)
+          const displayNameMatch = block.match(/DisplayName\s+REG_SZ\s+(.+)/i)
+          // Skip entries without a display name (system components)
+          if (!displayNameMatch) continue
+          const displayName = displayNameMatch[1].trim()
+          // Skip Microsoft/Windows entries
+          if (displayName.startsWith('Microsoft') || displayName.startsWith('Windows') ||
+              displayName.includes('Update for') || displayName.includes('Security Update') ||
+              displayName.includes('Hotfix') || displayName.includes('KB')) continue
+
+          let orphaned = false
+          if (installLocMatch) {
+            const installLoc = installLocMatch[1].trim().replace(/"/g, '')
+            if (installLoc && installLoc.length > 3 && installLoc.includes('\\') && !existsSync(installLoc)) {
+              orphaned = true
+            }
+          }
+          if (!orphaned && uninstallStrMatch) {
+            const uninstallStr = uninstallStrMatch[1].trim().replace(/"/g, '')
+            const exeMatch = uninstallStr.match(/^([^"]+\.\w{2,4})/)
+            if (exeMatch) {
+              const exePath = exeMatch[1].trim()
+              if (exePath && exePath.includes('\\') && !exePath.startsWith('%') &&
+                  !exePath.toLowerCase().includes('msiexec') && !existsSync(exePath)) {
+                orphaned = true
+              }
+            }
+          }
+          if (orphaned) {
+            entries.push({
+              id: randomUUID(),
+              type: 'orphaned',
+              keyPath: subKey,
+              valueName: 'DisplayName',
+              issue: `Uninstall entry for removed program: ${displayName}`,
+              risk: 'low',
+              selected: true,
+              fix: { op: 'delete-key' }
+            })
+          }
+        }
+      } catch {
+        // Skip
+      }
+    }
+
+    // Scan for orphaned MIME content type handlers
+    try {
+      const mimeKey = 'HKCR\\MIME\\Database\\Content Type'
+      const { stdout } = await execFileAsync('reg', [
+        'query', mimeKey, '/s'
+      ], { timeout: 15000 })
+
+      const blocks = stdout.split(/\r?\n\r?\n/)
+      for (const block of blocks) {
+        const keyMatch = block.match(/^(HKCR\\MIME\\Database\\Content Type\\[^\r\n]+)/m)
+        const clsidMatch = block.match(/CLSID\s+REG_SZ\s+(\{[0-9A-Fa-f-]+\})/i)
+        if (keyMatch && clsidMatch) {
+          const clsid = clsidMatch[1]
+          try {
+            await execFileAsync('reg', [
+              'query', `HKCR\\CLSID\\${clsid}`
+            ], { timeout: 5000 })
+          } catch {
+            // CLSID not found — handler is orphaned
+            const mimeType = keyMatch[1].replace('HKCR\\MIME\\Database\\Content Type\\', '')
+            entries.push({
+              id: randomUUID(),
+              type: 'orphaned',
+              keyPath: keyMatch[1],
+              valueName: 'CLSID',
+              issue: `MIME type "${mimeType}" references missing handler: ${clsid}`,
+              risk: 'low',
+              selected: true,
+              fix: { op: 'delete-value' }
+            })
+          }
+        }
+      }
+    } catch {
+      // Skip
+    }
+
+    // Scan for orphaned AutoPlay handler paths
+    try {
+      const autoPlayKey = 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers\\Handlers'
+      const { stdout } = await execFileAsync('reg', [
+        'query', autoPlayKey, '/s'
+      ], { timeout: 15000 })
+
+      const blocks = stdout.split(/\r?\n\r?\n/)
+      for (const block of blocks) {
+        const keyMatch = block.match(/^(HKLM\\[^\r\n]+)/m)
+        if (!keyMatch || keyMatch[1] === autoPlayKey) continue
+        const progIdMatch = block.match(/ProgID\s+REG_SZ\s+(.+)/i)
+        if (progIdMatch) {
+          const progId = progIdMatch[1].trim()
+          if (progId) {
+            try {
+              await execFileAsync('reg', ['query', `HKCR\\${progId}`], { timeout: 5000 })
+            } catch {
+              const handlerName = keyMatch[1].split('\\').pop() || 'Unknown'
+              entries.push({
+                id: randomUUID(),
+                type: 'orphaned',
+                keyPath: keyMatch[1],
+                valueName: 'ProgID',
+                issue: `AutoPlay handler "${handlerName}" references missing ProgID: ${progId}`,
+                risk: 'low',
+                selected: true,
+                fix: { op: 'delete-key' }
+              })
+            }
+          }
+        }
+      }
+    } catch {
+      // Skip
+    }
+
+    // --- ORPHANED REGISTERED CLIENTS ---
+
+    // Scan for orphaned registered client applications (browsers, email, media)
+    const clientCategories = [
+      { key: 'HKLM\\SOFTWARE\\Clients\\StartMenuInternet', label: 'web browser' },
+      { key: 'HKLM\\SOFTWARE\\Clients\\Mail', label: 'email client' },
+      { key: 'HKLM\\SOFTWARE\\Clients\\Media', label: 'media player' },
+      { key: 'HKLM\\SOFTWARE\\Clients\\News', label: 'news reader' },
+      { key: 'HKLM\\SOFTWARE\\Clients\\Calendar', label: 'calendar app' }
+    ]
+    for (const client of clientCategories) {
+      try {
+        const { stdout } = await execFileAsync('reg', [
+          'query', client.key
+        ], { timeout: 10000 })
+
+        const lines = stdout.split(/\r?\n/)
+        for (const line of lines) {
+          const subKeyMatch = line.match(/^(HKLM\\SOFTWARE\\Clients\\[^\\]+\\(.+))$/m)
+          if (!subKeyMatch) continue
+          const subKey = subKeyMatch[1].trim()
+          const clientName = subKeyMatch[2].trim()
+          // Skip Windows built-in clients
+          if (clientName.toLowerCase().includes('microsoft') ||
+              clientName.toLowerCase().includes('windows') ||
+              clientName.toLowerCase() === 'outlook') continue
+          // Check if the client has a shell/open/command with a valid exe
+          try {
+            const { stdout: cmdOut } = await execFileAsync('reg', [
+              'query', `${subKey}\\shell\\open\\command`
+            ], { timeout: 5000 })
+            const exeMatch = cmdOut.match(/\(Default\)\s+REG_SZ\s+"?([^"]+\.\w{2,4})"?/i)
+            if (exeMatch) {
+              const exePath = exeMatch[1].trim()
+              if (exePath && exePath.includes('\\') && !exePath.startsWith('%') && !existsSync(exePath)) {
+                entries.push({
+                  id: randomUUID(),
+                  type: 'orphaned',
+                  keyPath: subKey,
+                  valueName: 'shell\\open\\command',
+                  issue: `Registered ${client.label} "${clientName}" points to missing executable: ${exePath}`,
+                  risk: 'low',
+                  selected: true,
+                  fix: { op: 'delete-key' }
+                })
+              }
+            }
+          } catch {
+            // No shell command — check if LocalServer32/InstallInfo exists instead
+          }
+        }
+      } catch {
+        // Skip
+      }
+    }
+
+    // Scan for orphaned Browser Helper Objects (BHOs)
+    try {
+      const bhoKey = 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects'
+      const { stdout } = await execFileAsync('reg', [
+        'query', bhoKey
+      ], { timeout: 10000 })
+
+      const lines = stdout.split(/\r?\n/)
+      for (const line of lines) {
+        const subKeyMatch = line.match(/^(HKLM\\[^\\]+.*\\(\{[0-9A-Fa-f-]+\}))$/m)
+        if (!subKeyMatch) continue
+        const bhoSubKey = subKeyMatch[1].trim()
+        const clsid = subKeyMatch[2]
+        // Check if the CLSID exists at all first
+        let clsidExists = false
+        try {
+          await execFileAsync('reg', ['query', `HKCR\\CLSID\\${clsid}`], { timeout: 5000 })
+          clsidExists = true
+        } catch { /* CLSID missing entirely */ }
+
+        if (!clsidExists) {
+          entries.push({
+            id: randomUUID(),
+            type: 'orphaned',
+            keyPath: bhoSubKey,
+            valueName: clsid,
+            issue: `Browser Helper Object references missing COM object: ${clsid}`,
+            risk: 'low',
+            selected: true,
+            fix: { op: 'delete-key' }
+          })
+        } else {
+          // CLSID exists — check if its DLL is present
+          try {
+            const { stdout: clsidOut } = await execFileAsync('reg', [
+              'query', `HKCR\\CLSID\\${clsid}\\InprocServer32`
+            ], { timeout: 5000 })
+            const dllMatch = clsidOut.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
+            if (dllMatch) {
+              const dllPath = dllMatch[1].trim().replace(/"/g, '')
+              if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
+                entries.push({
+                  id: randomUUID(),
+                  type: 'orphaned',
+                  keyPath: bhoSubKey,
+                  valueName: clsid,
+                  issue: `Browser Helper Object DLL missing: ${dllPath}`,
+                  risk: 'low',
+                  selected: true,
+                  fix: { op: 'delete-key' }
+                })
+              }
+            }
+          } catch {
+            // InprocServer32 missing but CLSID exists — may use LocalServer32, skip
+          }
+        }
+      }
+    } catch {
+      // Skip
+    }
+
+    // Scan for orphaned Event Log application sources
+    try {
+      const eventLogKey = 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application'
+      const { stdout } = await execFileAsync('reg', [
+        'query', eventLogKey
+      ], { timeout: 10000 })
+
+      const lines = stdout.split(/\r?\n/)
+      for (const line of lines) {
+        const subKeyMatch = line.match(/^(HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\(.+))$/m)
+        if (!subKeyMatch) continue
+        const sourceKey = subKeyMatch[1].trim()
+        const sourceName = subKeyMatch[2].trim()
+        // Skip system/Microsoft event sources
+        if (sourceName.toLowerCase().startsWith('microsoft') ||
+            sourceName.toLowerCase().startsWith('windows') ||
+            sourceName.toLowerCase().startsWith('.net') ||
+            sourceName.toLowerCase() === 'application' ||
+            sourceName.toLowerCase() === 'application error' ||
+            sourceName.toLowerCase() === 'application hang' ||
+            sourceName.toLowerCase() === 'eventlog' ||
+            sourceName.toLowerCase() === 'vssetup') continue
+        try {
+          const { stdout: srcOut } = await execFileAsync('reg', [
+            'query', sourceKey, '/v', 'EventMessageFile'
+          ], { timeout: 5000 })
+          const pathMatch = srcOut.match(/EventMessageFile\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
+          if (pathMatch) {
+            let msgFile = pathMatch[1].trim().replace(/"/g, '')
+            // Skip env-var paths we can't resolve
+            if (msgFile.startsWith('%') && !msgFile.toLowerCase().startsWith('%systemroot%')) continue
+            msgFile = msgFile.replace(/%SystemRoot%/i, process.env.WINDIR || 'C:\\Windows')
+            // Handle semicolon-separated paths — check first path only
+            const firstPath = msgFile.split(';')[0].trim()
+            if (firstPath && firstPath.includes('\\') && !existsSync(firstPath)) {
+              entries.push({
+                id: randomUUID(),
+                type: 'orphaned',
+                keyPath: sourceKey,
+                valueName: 'EventMessageFile',
+                issue: `Event log source "${sourceName}" message file missing: ${firstPath}`,
+                risk: 'low',
+                selected: true,
+                fix: { op: 'delete-key' }
+              })
+            }
+          }
+        } catch {
+          // No EventMessageFile value — not necessarily orphaned
+        }
+      }
+    } catch {
+      // Skip
+    }
+
+    // Scan for orphaned COM Interface proxy stubs
+    try {
+      const { stdout } = await execFileAsync('reg', [
+        'query', 'HKCR\\Interface', '/s', '/f', 'ProxyStubClsid32', '/k'
+      ], { timeout: 20000 })
+
+      const blocks = stdout.split(/\r?\n\r?\n/)
+      let ifaceCount = 0
+      for (const block of blocks) {
+        if (ifaceCount >= 30) break
+        const keyMatch = block.match(/^(HKCR\\Interface\\(\{[^}]+\})\\ProxyStubClsid32)/m)
+        const valMatch = block.match(/\(Default\)\s+REG_SZ\s+(\{[0-9A-Fa-f-]+\})/i)
+        if (keyMatch && valMatch) {
+          const proxyClsid = valMatch[1]
+          // Skip well-known system proxy stubs (OLE/COM standard marshaler)
+          if (proxyClsid === '{00000320-0000-0000-C000-000000000046}' ||
+              proxyClsid === '{0000033A-0000-0000-C000-000000000046}') continue
+          // Check if the proxy CLSID exists at all
+          let proxyExists = false
+          try {
+            await execFileAsync('reg', ['query', `HKCR\\CLSID\\${proxyClsid}`], { timeout: 5000 })
+            proxyExists = true
+          } catch { /* CLSID missing entirely */ }
+
+          if (!proxyExists) {
+            const parentIfaceKey = `HKCR\\Interface\\${keyMatch[2]}`
+            entries.push({
+              id: randomUUID(),
+              type: 'orphaned',
+              keyPath: keyMatch[1],
+              valueName: proxyClsid,
+              issue: `COM interface references missing proxy stub: ${proxyClsid}`,
+              risk: 'medium',
+              selected: true,
+              fix: { op: 'delete-key', key: parentIfaceKey }
+            })
+            ifaceCount++
+          } else {
+            // CLSID exists — check if its DLL is present
+            try {
+              const { stdout: clsidOut } = await execFileAsync('reg', [
+                'query', `HKCR\\CLSID\\${proxyClsid}\\InprocServer32`
+              ], { timeout: 5000 })
+              const dllMatch = clsidOut.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
+              if (dllMatch) {
+                const dllPath = dllMatch[1].trim().replace(/"/g, '')
+                if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
+                  const parentIfaceKey = `HKCR\\Interface\\${keyMatch[2]}`
+                  entries.push({
+                    id: randomUUID(),
+                    type: 'orphaned',
+                    keyPath: keyMatch[1],
+                    valueName: proxyClsid,
+                    issue: `COM interface proxy stub DLL missing: ${dllPath}`,
+                    risk: 'medium',
+                    selected: true,
+                    fix: { op: 'delete-key', key: parentIfaceKey }
+                  })
+                  ifaceCount++
+                }
+              }
+            } catch {
+              // InprocServer32 missing but CLSID exists — may use different server type, skip
+            }
+          }
+        }
+      }
+    } catch {
+      // Skip
+    }
+
+    // Scan for orphaned UserChoice file associations (default app for removed programs)
+    try {
+      const fileExtsKey = 'HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts'
+      const { stdout } = await execFileAsync('reg', [
+        'query', fileExtsKey, '/s', '/f', 'UserChoice', '/k'
+      ], { timeout: 15000 })
+
+      const blocks = stdout.split(/\r?\n\r?\n/)
+      for (const block of blocks) {
+        const keyMatch = block.match(/^(HKCU\\[^\r\n]*\\UserChoice)/m)
+        const progIdMatch = block.match(/ProgId\s+REG_SZ\s+(.+)/i)
+        if (keyMatch && progIdMatch) {
+          const progId = progIdMatch[1].trim()
+          // Skip system/built-in ProgIDs
+          if (!progId || progId.startsWith('AppX') || progId.startsWith('Microsoft.') ||
+              progId.startsWith('Windows.') || progId === 'Applications' ||
+              progId.startsWith('IE.') || progId.startsWith('MSEdge') ||
+              progId.startsWith('Acrobat') || progId.startsWith('WMP')) continue
+          // Check if the ProgID still exists in HKCR
+          try {
+            await execFileAsync('reg', ['query', `HKCR\\${progId}`], { timeout: 3000 })
+          } catch {
+            const extMatch = keyMatch[1].match(/FileExts\\([^\\]+)\\UserChoice/)
+            const ext = extMatch ? extMatch[1] : 'unknown'
+            entries.push({
+              id: randomUUID(),
+              type: 'orphaned',
+              keyPath: keyMatch[1],
+              valueName: 'ProgId',
+              issue: `Default app for "${ext}" references removed program: ${progId}`,
+              risk: 'low',
+              selected: true,
+              fix: { op: 'delete-key' }
+            })
+          }
+        }
+      }
+    } catch {
+      // Skip
+    }
+
     // --- SECURITY VULNERABILITY SCANS ---
     // Security hardening checks
 
