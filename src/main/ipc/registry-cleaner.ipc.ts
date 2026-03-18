@@ -161,27 +161,31 @@ async function clsidExists(clsid: string): Promise<boolean> {
  */
 async function findMissingClsidDll(clsid: string): Promise<string | 'no-inproc' | null> {
   // Check both native and WOW6432Node views for InprocServer32/LocalServer32.
-  // A CLSID may only exist in one view (clsidExists checks both), so we must
-  // probe both here too to avoid false 'no-inproc' for 32-bit-only CLSIDs.
+  // Only report broken if NO view has a healthy DLL — a stale native entry
+  // should not cause deletion when the WOW6432Node entry is healthy.
   const prefixes = [
     `HKCR\\CLSID\\${clsid}`,
     `HKCR\\WOW6432Node\\CLSID\\${clsid}`
   ]
+  let foundAnyServer = false
+  let firstMissingDll: string | null = null
   for (const prefix of prefixes) {
     // Check InprocServer32
     try {
       const { stdout } = await execFileAsync('reg', [
         'query', `${prefix}\\InprocServer32`
       ], { timeout: 5000 })
+      foundAnyServer = true
       const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
       if (dllMatch) {
         const dllPath = dllMatch[1].trim().replace(/"/g, '')
         if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%')) {
-          if (existsSync(dllPath)) return null // DLL exists — healthy
-          return dllPath // DLL missing in this view
+          if (existsSync(dllPath)) return null // At least one view is healthy
+          if (!firstMissingDll) firstMissingDll = dllPath
         }
+      } else {
+        return null // InprocServer32 exists but no parseable path — don't flag
       }
-      return null // InprocServer32 exists but no parseable path
     } catch { /* No InprocServer32 in this view */ }
     // Check LocalServer32 as fallback
     try {
@@ -191,8 +195,9 @@ async function findMissingClsidDll(clsid: string): Promise<string | 'no-inproc' 
       return null // Uses out-of-process server — healthy
     } catch { /* No LocalServer32 in this view either */ }
   }
-  // Neither view has InprocServer32 or LocalServer32
-  return 'no-inproc'
+  if (firstMissingDll) return firstMissingDll // All views with InprocServer32 have missing DLLs
+  if (!foundAnyServer) return 'no-inproc' // No server registration at all
+  return null
 }
 
 // ── Exported core logic ──
@@ -671,21 +676,26 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
         if (keyMatch && valMatch) {
           const svcName = keyMatch[2]
           const rawImagePath = valMatch[1].trim()
-          const imagePath = extractExePath(rawImagePath)
+          let imagePath = extractExePath(rawImagePath)
           if (!imagePath) continue
+          // Expand common environment variables
+          imagePath = imagePath
+            .replace(/%SystemRoot%/gi, process.env.WINDIR || 'C:\\Windows')
+            .replace(/%ProgramFiles%/gi, process.env.PROGRAMFILES || 'C:\\Program Files')
+            .replace(/%ProgramFiles\(x86\)%/gi, process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)')
+            .replace(/%ProgramData%/gi, process.env.PROGRAMDATA || 'C:\\ProgramData')
+            .replace(/%CommonProgramFiles%/gi, process.env.COMMONPROGRAMFILES || 'C:\\Program Files\\Common Files')
+            .replace(/%USERPROFILE%/gi, process.env.USERPROFILE || '')
           const lowerPath = imagePath.toLowerCase()
           // Skip system/Microsoft services and drivers
           if (lowerPath.startsWith('\\systemroot\\') ||
-              lowerPath.startsWith('%systemroot%\\') ||
               lowerPath.startsWith('c:\\windows\\') ||
               lowerPath.includes('\\microsoft\\') ||
               lowerPath.includes('\\windows\\') ||
               imagePath.startsWith('\\??\\')) continue
-          // Skip relative paths (e.g. "system32\drivers\foo.sys") — these are
-          // resolved relative to %SystemRoot% by the SCM, not absolute paths
+          // Skip relative paths (e.g. "system32\drivers\foo.sys") and any
+          // remaining unresolved env vars
           if (!imagePath.match(/^[A-Za-z]:\\/)) continue
-          // Skip env-var paths we can't resolve
-          if (imagePath.startsWith('%')) continue
           if (imagePath && !existsSync(imagePath)) {
             entries.push({
               id: randomUUID(),
