@@ -8,5 +8,6 @@ on:
 jobs:
   trigger-deploy:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - run: curl -X POST ${{ secrets.WEB_DEPLOY_HOOK }}
