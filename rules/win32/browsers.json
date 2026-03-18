@@ -18,7 +18,7 @@
     { "key": "chromium", "base": "${LOCALAPPDATA}/Chromium/User Data" },
     { "key": "thorium", "base": "${LOCALAPPDATA}/Thorium/User Data" },
     { "key": "supermium", "base": "${LOCALAPPDATA}/Supermium/User Data" },
-    { "key": "helium", "base": "${LOCALAPPDATA}/Helium/User Data" },
+    { "key": "helium", "base": "${LOCALAPPDATA}/imput/Helium/User Data" },
     { "key": "cromite", "base": "${LOCALAPPDATA}/Cromite/User Data" }
   ],
   "firefox": {
