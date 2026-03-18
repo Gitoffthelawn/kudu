@@ -22,7 +22,6 @@
     { "path": "/var/log/apt", "subcategory": "APT Logs", "needsAdmin": true, "description": "APT package manager history and terminal log files (Debian/Ubuntu)" }
   ],
   "singleFileTargets": [
-    { "path": "${HOME}/.xsession-errors", "subcategory": "X Session Errors", "description": "stderr output from the current X11 session" },
     { "path": "${HOME}/.xsession-errors.old", "subcategory": "X Session Errors", "description": "stderr output from the previous X11 session" },
     { "path": "/var/log/syslog.1", "subcategory": "Rotated Syslog", "description": "Previous rotated syslog file; no longer actively written to" },
     { "path": "/var/log/kern.log.1", "subcategory": "Rotated Kernel Log", "description": "Previous rotated kernel log file; no longer actively written to" }

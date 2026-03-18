@@ -17,11 +17,8 @@
     { "path": "${CACHES}/com.apple.FontRegistry", "subcategory": "Font Registry Cache", "description": "Font registry cache files; rebuilt automatically on demand" },
     { "path": "/Library/Caches/com.apple.iconservices.store", "subcategory": "Icon Services Cache", "needsAdmin": true, "description": "System-wide cached application icon data; rebuilt automatically" },
     { "path": "${LIBRARY}/Caches/com.apple.diagnosticsextensions.statuskit", "subcategory": "Diagnostics Cache", "description": "Cached data from macOS diagnostics and system reports" },
-    { "path": "/private/var/db/diagnostics", "subcategory": "System Diagnostic Logs", "needsAdmin": true, "description": "Unified logging system diagnostic data and trace files" },
     { "path": "${LIBRARY}/Caches/com.apple.nsurlsessiond", "subcategory": "URL Session Cache", "description": "Cached HTTP/HTTPS response data from system network requests" },
     { "path": "${LIBRARY}/Caches/com.apple.CacheDelete", "subcategory": "Cache Delete Logs", "description": "Logs from the macOS automatic cache management service" }
   ],
-  "singleFileTargets": [
-    { "path": "/private/var/log/install.log", "subcategory": "Installer Log", "description": "Log file from macOS software installations and updates" }
-  ]
+  "singleFileTargets": []
 }

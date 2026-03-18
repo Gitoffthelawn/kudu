@@ -431,29 +431,8 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           const clsidMatch = block.match(/\(Default\)\s+REG_SZ\s+(\{[0-9A-Fa-f-]+\})/i)
           if (clsidMatch) {
             const clsid = clsidMatch[1]
-            try {
-              const { stdout: clsidOut } = await execFileAsync('reg', [
-                'query', `HKCR\\CLSID\\${clsid}\\InprocServer32`
-              ], { timeout: 5000 })
-              const dllMatch = clsidOut.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
-              if (dllMatch) {
-                const dllPath = dllMatch[1].trim().replace(/"/g, '')
-                if (dllPath && !existsSync(dllPath)) {
-                  const keyMatch = block.match(/^(HK[^\r\n]+)/m)
-                  entries.push({
-                    id: randomUUID(),
-                    type: 'broken',
-                    keyPath: keyMatch?.[1]?.trim() || shellKey,
-                    valueName: clsid,
-                    issue: `Context menu handler DLL missing: ${dllPath}`,
-                    risk: 'medium',
-                    selected: true,
-                    fix: { op: 'delete-key' }
-                  })
-                }
-              }
-            } catch {
-              const keyMatch = block.match(/^(HK[^\r\n]+)/m)
+            const keyMatch = block.match(/^(HK[^\r\n]+)/m)
+            if (!await clsidExists(clsid)) {
               entries.push({
                 id: randomUUID(),
                 type: 'orphaned',
@@ -464,6 +443,20 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
                 selected: true,
                 fix: { op: 'delete-key' }
               })
+            } else {
+              const missingDll = await findMissingClsidDll(clsid)
+              if (missingDll) {
+                entries.push({
+                  id: randomUUID(),
+                  type: 'broken',
+                  keyPath: keyMatch?.[1]?.trim() || shellKey,
+                  valueName: clsid,
+                  issue: `Context menu handler DLL missing: ${missingDll}`,
+                  risk: 'medium',
+                  selected: true,
+                  fix: { op: 'delete-key' }
+                })
+              }
             }
           }
         }
