@@ -12,6 +12,16 @@
     { "id": "xbox", "name": "Xbox App", "paths": ["${LOCALAPPDATA}/Packages/Microsoft.GamingApp_8wekyb3d8bbwe/LocalCache", "${LOCALAPPDATA}/Packages/Microsoft.XboxApp_8wekyb3d8bbwe/LocalCache"], "description": "Xbox app local cache (UWP package cache)" },
     { "id": "rockstar", "name": "Rockstar Games Launcher", "paths": ["${LOCALAPPDATA}/Rockstar Games/Launcher/cache", "${LOCALAPPDATA}/Rockstar Games/Launcher/logs"], "description": "Rockstar Games Launcher cache and log files" },
     { "id": "itch", "name": "itch.io", "paths": ["${APPDATA}/itch/Cache/Cache_Data", "${APPDATA}/itch/logs"], "description": "itch.io Electron app cache and log files" },
-    { "id": "minecraft", "name": "Minecraft Java Edition", "paths": ["${APPDATA}/.minecraft/logs", "${APPDATA}/.minecraft/crash-reports", "${APPDATA}/.minecraft/webcache2"], "description": "Minecraft logs, crash reports, and launcher web cache" }
+    { "id": "minecraft", "name": "Minecraft Java Edition", "paths": ["${APPDATA}/.minecraft/logs", "${APPDATA}/.minecraft/crash-reports", "${APPDATA}/.minecraft/webcache2"], "description": "Minecraft logs, crash reports, and launcher web cache" },
+
+    { "id": "roblox", "name": "Roblox", "paths": ["${LOCALAPPDATA}/Roblox/logs"], "description": "Roblox player logs" },
+    { "id": "valorant", "name": "Valorant", "paths": ["${LOCALAPPDATA}/VALORANT/Saved/Logs", "${LOCALAPPDATA}/VALORANT/Saved/Crashes"], "description": "Valorant game logs and crash reports" },
+    { "id": "fortnite", "name": "Fortnite", "paths": ["${LOCALAPPDATA}/FortniteGame/Saved/Logs", "${LOCALAPPDATA}/FortniteGame/Saved/Crashes"], "description": "Fortnite game logs and crash reports" },
+    { "id": "genshin-impact", "name": "Genshin Impact", "paths": ["${LOCALAPPDATA}/miHoYo/Genshin Impact/webCaches", "${LOCALAPPDATA}/HoYoverse/Genshin Impact/webCaches"], "description": "Genshin Impact embedded browser cache (miHoYo and HoYoverse paths)" },
+    { "id": "amazon-games", "name": "Amazon Games", "paths": ["${LOCALAPPDATA}/Amazon Games/App/logs", "${LOCALAPPDATA}/Amazon Games/App/CEFCache"], "description": "Amazon Games launcher logs and Chromium embedded framework cache" },
+    { "id": "overwolf", "name": "Overwolf / CurseForge", "paths": ["${LOCALAPPDATA}/Overwolf/Log", "${LOCALAPPDATA}/Overwolf/BrowserCache"], "description": "Overwolf overlay and CurseForge mod manager logs and browser cache" },
+    { "id": "playnite", "name": "Playnite", "paths": ["${APPDATA}/Playnite/cache"], "description": "Playnite meta-launcher image and metadata cache" },
+
+    { "id": "overwatch-2", "name": "Overwatch 2", "paths": ["${LOCALAPPDATA}/Blizzard Entertainment/Overwatch/Logs"], "description": "Overwatch 2 game-specific log files" }
   ]
 }
