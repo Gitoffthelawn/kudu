@@ -118,9 +118,15 @@ export function SettingsPage() {
     window.kudu?.settingsSet?.(partial).catch(() => {})
   }
 
-  const saveStartup = (enabled: boolean) => {
+  const saveStartup = async (enabled: boolean) => {
     save({ runAtStartup: enabled })
-    window.kudu?.applyStartup?.(enabled)
+    try {
+      await window.kudu?.applyStartup?.(enabled)
+    } catch {
+      // Revert the toggle — the OS rejected the change
+      save({ runAtStartup: !enabled })
+      toast.error('Failed to update startup setting. Make sure Kudu has permission to create scheduled tasks.')
+    }
   }
 
   const saveTray = (enabled: boolean) => {
@@ -134,7 +140,9 @@ export function SettingsPage() {
     // so the app stays alive to run them
     if (schedule.enabled && !settings.runAtStartup) {
       save({ runAtStartup: true })
-      window.kudu?.applyStartup?.(true)
+      window.kudu?.applyStartup?.(true).catch(() => {
+        toast.error('Failed to enable startup. Scheduled scans may not run after reboot.')
+      })
     }
     if (schedule.enabled && !settings.minimizeToTray) {
       save({ minimizeToTray: true })

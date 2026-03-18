@@ -78,7 +78,7 @@ export const IPC = {
   SCHEDULE_SCAN_TRIGGER: 'schedule:scan-trigger',
   SCHEDULE_SCAN_COMPLETE: 'schedule:scan-complete',
 
-  // Settings apply (renderer -> main, fire-and-forget)
+  // Settings apply (renderer -> main)
   SETTINGS_APPLY_STARTUP: 'settings:apply-startup',
   SETTINGS_APPLY_TRAY: 'settings:apply-tray',
 

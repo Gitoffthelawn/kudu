@@ -35,7 +35,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         settingsPayload.schedule = { enabled: true, frequency: 'weekly', day: 1, hour: 9 }
       }
       await window.kudu?.settingsSet?.(settingsPayload)
-      window.kudu?.applyStartup?.(settings.runAtStartup)
+      await window.kudu?.applyStartup?.(settings.runAtStartup).catch(() => {})
       window.kudu?.applyTray?.(settings.minimizeToTray)
     } catch {
       // Best-effort

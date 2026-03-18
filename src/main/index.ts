@@ -92,14 +92,55 @@ async function applyAutoLaunchWin32(enabled: boolean): Promise<void> {
       ], { timeout: 10000 })
     } catch { /* task may not exist yet */ }
 
+    // Build the task via XML so the /TR value is never subject to
+    // schtasks command-line quoting quirks (common cause of silent failures
+    // when the exe path contains spaces, e.g. "C:\Program Files\...").
+    const xml = [
+      '<?xml version="1.0" encoding="UTF-16"?>',
+      '<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">',
+      '  <Triggers>',
+      '    <LogonTrigger><Enabled>true</Enabled></LogonTrigger>',
+      '  </Triggers>',
+      '  <Principals>',
+      '    <Principal id="Author">',
+      '      <LogonType>InteractiveToken</LogonType>',
+      '      <RunLevel>HighestAvailable</RunLevel>',
+      '    </Principal>',
+      '  </Principals>',
+      '  <Settings>',
+      '    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>',
+      '    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>',
+      '    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>',
+      '    <ExecutionTimeLimit>PT0S</ExecutionTimeLimit>',
+      '    <Enabled>true</Enabled>',
+      '  </Settings>',
+      '  <Actions Context="Author">',
+      `    <Exec>`,
+      `      <Command>${escapeXml(exePath)}</Command>`,
+      '      <Arguments>--startup</Arguments>',
+      '    </Exec>',
+      '  </Actions>',
+      '</Task>'
+    ].join('\r\n')
+
+    const tmpPath = join(app.getPath('temp'), `${TASK_NAME}.xml`)
+    const { writeFile, unlink } = await import('fs/promises')
+    await writeFile(tmpPath, xml, 'utf-16le')
+
+    try {
+      await execFileAsync('schtasks', [
+        '/Create',
+        '/TN', TASK_NAME,
+        '/XML', tmpPath,
+        '/F',
+      ], { timeout: 10000 })
+    } finally {
+      unlink(tmpPath).catch(() => {})
+    }
+
+    // Verify the task was actually registered
     await execFileAsync('schtasks', [
-      '/Create',
-      '/TN', TASK_NAME,
-      '/TR', `"${exePath}" --startup`,
-      '/SC', 'ONLOGON',
-      '/RL', 'HIGHEST',
-      '/IT',   // run only when user is logged on (interactive)
-      '/F',    // overwrite if exists
+      '/Query', '/TN', TASK_NAME
     ], { timeout: 10000 })
   } else {
     try {
@@ -113,15 +154,17 @@ async function applyAutoLaunchWin32(enabled: boolean): Promise<void> {
   app.setLoginItemSettings({ openAtLogin: false })
 }
 
-function applyAutoLaunch(enabled: boolean): void {
+function escapeXml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+async function applyAutoLaunch(enabled: boolean): Promise<void> {
   // Only register auto-launch when packaged — in dev mode this would register
   // the bare Electron binary, causing a generic "Getting Started" window on reboot.
   if (!app.isPackaged) return
 
   if (process.platform === 'win32') {
-    applyAutoLaunchWin32(enabled).catch((err) => {
-      console.error('Failed to configure auto-launch via Task Scheduler:', err)
-    })
+    await applyAutoLaunchWin32(enabled)
   } else {
     app.setLoginItemSettings({
       openAtLogin: enabled,
@@ -288,7 +331,9 @@ app.whenReady().then(() => {
   const settings = getSettings()
 
   // Apply auto-launch setting
-  applyAutoLaunch(settings.runAtStartup)
+  applyAutoLaunch(settings.runAtStartup).catch((err) => {
+    console.error('Failed to configure auto-launch:', err)
+  })
 
   // Create tray if minimize-to-tray is enabled or scheduled scans are on
   if (settings.minimizeToTray || settings.schedule.enabled) {
@@ -309,8 +354,8 @@ app.whenReady().then(() => {
   }
 
   // Listen for settings changes to update auto-launch and tray
-  ipcMain.on(IPC.SETTINGS_APPLY_STARTUP, (_event, enabled: boolean) => {
-    applyAutoLaunch(enabled)
+  ipcMain.handle(IPC.SETTINGS_APPLY_STARTUP, async (_event, enabled: boolean) => {
+    await applyAutoLaunch(enabled)
   })
 
   ipcMain.on(IPC.SETTINGS_APPLY_TRAY, (_event, enabled: boolean) => {
