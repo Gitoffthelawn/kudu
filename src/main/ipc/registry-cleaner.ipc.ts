@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { existsSync } from 'fs'
+import { existsSync, statSync } from 'fs'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 import { join } from 'path'
@@ -98,14 +98,19 @@ function extractExePath(raw: string): string | null {
   if (!trimmed.includes(' ')) return trimmed
   // Case 3: unquoted with spaces — use the Windows CreateProcess algorithm:
   // try progressively longer prefixes up to each space, returning the first
-  // that exists on disk.
+  // that exists on disk as a FILE (not a directory).
   const spacePositions: number[] = []
   for (let i = 0; i < trimmed.length; i++) {
     if (trimmed[i] === ' ') spacePositions.push(i)
   }
   for (const pos of spacePositions) {
     const candidate = trimmed.substring(0, pos)
-    if (candidate && existsSync(candidate)) return candidate
+    if (candidate) {
+      try {
+        const s = statSync(candidate)
+        if (s.isFile()) return candidate
+      } catch { /* doesn't exist or inaccessible */ }
+    }
   }
   // Case 4: no candidate exists on disk (the exe is missing). Find the
   // longest prefix up to a space that ends with a known executable extension.
@@ -716,13 +721,23 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           // even after the install folder is deleted.
           let uninstallBroken = false
           if (uninstallStrMatch) {
-            const exePath = extractExePath(uninstallStrMatch[1].trim())
-            if (exePath && exePath.includes('\\') && !exePath.startsWith('%') &&
-                !exePath.toLowerCase().includes('msiexec') &&
-                !exePath.toLowerCase().includes('rundll32') && !existsSync(exePath)) {
+            const rawUninstall = uninstallStrMatch[1].trim()
+            const exePath = extractExePath(rawUninstall)
+            if (exePath && exePath.toLowerCase().includes('msiexec')) {
+              // MSI uninstallers are always functional (Windows Installer handles them)
+            } else if (exePath && exePath.toLowerCase().includes('rundll32')) {
+              // For rundll32 commands, check if the DLL argument exists.
+              // Format: rundll32.exe C:\path\helper.dll,EntryPoint
+              const dllMatch = rawUninstall.match(/rundll32(?:\.exe)?\s+"?([^",]+\.dll)/i)
+              if (dllMatch) {
+                const dllPath = dllMatch[1].trim()
+                if (dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
+                  uninstallBroken = true
+                }
+              }
+            } else if (exePath && exePath.includes('\\') && !exePath.startsWith('%') && !existsSync(exePath)) {
               uninstallBroken = true
             }
-            // MSI and rundll32 uninstallers are always considered functional
           }
           // Only flag as orphaned if the uninstall command itself is broken.
           // If there's no UninstallString at all but InstallLocation is missing,
