@@ -73,6 +73,27 @@ function splitTaskPath(fullPath: string): { path: string; name: string } | null 
 const scanSessions = new Map<string, Map<string, RegistryEntry>>()
 
 /**
+ * Extract the executable path from a command-line string, correctly
+ * handling quoted paths with spaces and ignoring trailing arguments.
+ *
+ * Examples:
+ *   '"C:\\Program Files\\App\\svc.exe" --config foo.toml' → 'C:\\Program Files\\App\\svc.exe'
+ *   'C:\\App\\svc.exe -k netsvcs'                         → 'C:\\App\\svc.exe'
+ *   'rundll32.exe helper.dll,Entry'                       → 'rundll32.exe'
+ */
+function extractExePath(raw: string): string | null {
+  const trimmed = raw.trim()
+  // Case 1: quoted path — extract content between first pair of quotes
+  const quotedMatch = trimmed.match(/^"([^"]+)"/)
+  if (quotedMatch) return quotedMatch[1].trim()
+  // Case 2: unquoted — take everything up to the first space
+  const spaceIdx = trimmed.indexOf(' ')
+  if (spaceIdx > 0) return trimmed.substring(0, spaceIdx)
+  // Case 3: no spaces at all — the whole string is the path
+  return trimmed || null
+}
+
+/**
  * Check if a CLSID key exists in the registry, probing both the native
  * 64-bit view and the WOW6432Node (32-bit) view. On x64 Windows, 32-bit
  * COM servers register under the 32-bit hive, so a single-view lookup
@@ -212,10 +233,9 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           if (match) {
             const valueName = match[1].trim()
             const command = match[2].trim()
-            const exeMatch = command.match(/^"?([^"]+\.\w{2,4})"?/)
-            if (exeMatch) {
-              const exePath = exeMatch[1].trim()
-              if (exePath && !existsSync(exePath)) {
+            const exePath = extractExePath(command)
+            if (exePath) {
+              if (exePath.includes('\\') && !existsSync(exePath)) {
                 entries.push({
                   id: randomUUID(),
                   type: 'broken',
@@ -609,7 +629,9 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
         const valMatch = block.match(/ImagePath\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
         if (keyMatch && valMatch) {
           const svcName = keyMatch[2]
-          let imagePath = valMatch[1].trim().replace(/"/g, '')
+          const rawImagePath = valMatch[1].trim()
+          const imagePath = extractExePath(rawImagePath)
+          if (!imagePath) continue
           // Skip system/Microsoft services and drivers
           if (imagePath.toLowerCase().startsWith('\\systemroot\\') ||
               imagePath.toLowerCase().startsWith('%systemroot%\\system32\\') ||
@@ -618,15 +640,6 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
               imagePath.toLowerCase().includes('\\windows\\') ||
               imagePath.startsWith('\\??\\') ||
               !imagePath.includes('\\')) continue
-          // Extract exe path (handle arguments after the exe)
-          const exeMatch = imagePath.match(/^"?([^"]+\.\w{2,4})"?/)
-          if (exeMatch) {
-            imagePath = exeMatch[1].trim()
-          } else {
-            // No extension found — extract first space-separated token as path
-            const spaceIdx = imagePath.indexOf(' ')
-            if (spaceIdx > 0) imagePath = imagePath.substring(0, spaceIdx)
-          }
           // Resolve %ProgramFiles% etc.
           if (imagePath.startsWith('%')) continue
           if (imagePath && !existsSync(imagePath)) {
@@ -687,14 +700,11 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
             }
           }
           if (!orphaned && uninstallStrMatch) {
-            const uninstallStr = uninstallStrMatch[1].trim().replace(/"/g, '')
-            const exeMatch = uninstallStr.match(/^([^"]+\.\w{2,4})/)
-            if (exeMatch) {
-              const exePath = exeMatch[1].trim()
-              if (exePath && exePath.includes('\\') && !exePath.startsWith('%') &&
-                  !exePath.toLowerCase().includes('msiexec') && !existsSync(exePath)) {
-                orphaned = true
-              }
+            const exePath = extractExePath(uninstallStrMatch[1].trim())
+            if (exePath && exePath.includes('\\') && !exePath.startsWith('%') &&
+                !exePath.toLowerCase().includes('msiexec') &&
+                !exePath.toLowerCase().includes('rundll32') && !existsSync(exePath)) {
+              orphaned = true
             }
           }
           if (orphaned) {
@@ -815,21 +825,19 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
             const { stdout: cmdOut } = await execFileAsync('reg', [
               'query', `${subKey}\\shell\\open\\command`
             ], { timeout: 5000 })
-            const exeMatch = cmdOut.match(/\(Default\)\s+REG_SZ\s+"?([^"]+\.\w{2,4})"?/i)
-            if (exeMatch) {
-              const exePath = exeMatch[1].trim()
-              if (exePath && exePath.includes('\\') && !exePath.startsWith('%') && !existsSync(exePath)) {
-                entries.push({
-                  id: randomUUID(),
-                  type: 'orphaned',
-                  keyPath: subKey,
-                  valueName: 'shell\\open\\command',
-                  issue: `Registered ${client.label} "${clientName}" points to missing executable: ${exePath}`,
-                  risk: 'low',
-                  selected: true,
-                  fix: { op: 'delete-key' }
-                })
-              }
+            const rawValMatch = cmdOut.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
+            const exePath = rawValMatch ? extractExePath(rawValMatch[1].trim()) : null
+            if (exePath && exePath.includes('\\') && !exePath.startsWith('%') && !existsSync(exePath)) {
+              entries.push({
+                id: randomUUID(),
+                type: 'orphaned',
+                keyPath: subKey,
+                valueName: 'shell\\open\\command',
+                issue: `Registered ${client.label} "${clientName}" points to missing executable: ${exePath}`,
+                risk: 'low',
+                selected: true,
+                fix: { op: 'delete-key' }
+              })
             }
           } catch {
             // No shell command — check if LocalServer32/InstallInfo exists instead
@@ -1459,9 +1467,8 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
         if (!taskToRun || taskToRun === 'N/A' || taskToRun.startsWith('COM handler') || seen.has(taskName)) continue
         seen.add(taskName)
 
-        const exeMatch = taskToRun.match(/^"?([^"]+\.\w{2,4})"?/)
-        if (exeMatch) {
-          const exePath = exeMatch[1].trim()
+        const exePath = extractExePath(taskToRun)
+        if (exePath) {
           if (exePath.includes('\\') && !exePath.toLowerCase().startsWith('c:\\windows\\') &&
               !exePath.startsWith('%') && !existsSync(exePath)) {
             entries.push({
@@ -1499,7 +1506,8 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
             const taskName = cols[1]
             // Check if the executable actually exists — skip if the software is still installed
             const taskToRun = cols[8]
-            if (taskToRun && existsSync(taskToRun.replace(/^"/, '').replace(/".*$/, ''))) continue
+            const taskExe = taskToRun ? extractExePath(taskToRun) : null
+            if (taskExe && existsSync(taskExe)) continue
             entries.push({
               id: randomUUID(),
               type: 'task',
