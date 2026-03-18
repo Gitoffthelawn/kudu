@@ -76,21 +76,39 @@ const scanSessions = new Map<string, Map<string, RegistryEntry>>()
  * Extract the executable path from a command-line string, correctly
  * handling quoted paths with spaces and ignoring trailing arguments.
  *
+ * For unquoted paths, uses the same algorithm as Windows CreateProcess:
+ * progressively tries longer prefixes up to each space, checking if
+ * the candidate path exists on disk. This correctly handles paths like
+ * `C:\Program Files\App\svc.exe --background` where naive space-splitting
+ * would return `C:\Program`.
+ *
  * Examples:
  *   '"C:\\Program Files\\App\\svc.exe" --config foo.toml' → 'C:\\Program Files\\App\\svc.exe'
+ *   'C:\\Program Files\\App\\svc.exe -k netsvcs'          → 'C:\\Program Files\\App\\svc.exe'
  *   'C:\\App\\svc.exe -k netsvcs'                         → 'C:\\App\\svc.exe'
  *   'rundll32.exe helper.dll,Entry'                       → 'rundll32.exe'
  */
 function extractExePath(raw: string): string | null {
   const trimmed = raw.trim()
+  if (!trimmed) return null
   // Case 1: quoted path — extract content between first pair of quotes
   const quotedMatch = trimmed.match(/^"([^"]+)"/)
   if (quotedMatch) return quotedMatch[1].trim()
-  // Case 2: unquoted — take everything up to the first space
-  const spaceIdx = trimmed.indexOf(' ')
-  if (spaceIdx > 0) return trimmed.substring(0, spaceIdx)
-  // Case 3: no spaces at all — the whole string is the path
-  return trimmed || null
+  // Case 2: unquoted — progressively try longer prefixes up to each space,
+  // matching how Windows CreateProcess resolves ambiguous command lines.
+  // Try each space boundary to find the longest prefix that exists on disk.
+  let searchFrom = 0
+  while (true) {
+    const spaceIdx = trimmed.indexOf(' ', searchFrom)
+    if (spaceIdx === -1) break
+    const candidate = trimmed.substring(0, spaceIdx)
+    if (candidate && existsSync(candidate)) return candidate
+    searchFrom = spaceIdx + 1
+  }
+  // Case 3: no candidate matched — return the full string (may be a path
+  // with no args, or a path whose file is missing — the caller's
+  // existsSync check will handle the latter)
+  return trimmed
 }
 
 /**
