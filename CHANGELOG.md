@@ -1,3 +1,43 @@
+# [1.13.0](https://github.com/adventdevinc/kudu/compare/v1.12.0...v1.13.0) (2026-03-18)
+
+
+### Bug Fixes
+
+* **ci:** pass single URL to match winget manifest installer count ([8a1878d](https://github.com/adventdevinc/kudu/commit/8a1878dbe9499c33fb2a709554f5b4af4e763523))
+* **registry:** back up SYSTEM/HKCR hives and remove rotated log targets ([9f9bb85](https://github.com/adventdevinc/kudu/commit/9f9bb8526d79f8a85db09a9029a43f67a766a265))
+* **registry:** check files not dirs in path resolution, inspect rundll32 DLLs ([1c8c107](https://github.com/adventdevinc/kudu/commit/1c8c10787cd400e450fed0894866f09707c14d0c))
+* **registry:** check WOW6432Node in findMissingClsidDll, fix backup filename ([35d5c02](https://github.com/adventdevinc/kudu/commit/35d5c0245c3d328108fdbc474d8c21973cb16a7a))
+* **registry:** expand env vars in uninstall scan paths via shared helper ([f5c6f9b](https://github.com/adventdevinc/kudu/commit/f5c6f9be0ba476709632e6b5c88e5f4b895e2eda))
+* **registry:** handle PATH-resolved commands and evaluate COM views independently ([f981580](https://github.com/adventdevinc/kudu/commit/f98158064965b5b9ef727d2d6fc81a07fcba988a))
+* **registry:** handle unquoted paths with spaces, remove unsafe singleFileTargets ([3d104b0](https://github.com/adventdevinc/kudu/commit/3d104b02d7f8af659ddc872e6c6eb868256db770))
+* **registry:** match REG_EXPAND_SZ uninstall values, flag broken COM registrations, expand backups ([e3c53cd](https://github.com/adventdevinc/kudu/commit/e3c53cd9161177eb5b7b268030c5427830e71bd1))
+* **registry:** only check service root keys, skip child subkeys ([edf20a1](https://github.com/adventdevinc/kudu/commit/edf20a1ef88325d699e919d68036a55a47a1920d))
+* **registry:** preserve full exe paths and require broken uninstaller for orphan detection ([8498159](https://github.com/adventdevinc/kudu/commit/8498159c80ec6bbb99d5c754b2f49ab0423b9635))
+* **registry:** require all COM views broken before flagging, expand service env vars ([e2bb59c](https://github.com/adventdevinc/kudu/commit/e2bb59c50a21d8e15106af628548e5cdd1096c01))
+* **registry:** require missing install directory before flagging uninstall entries ([c9f8e3a](https://github.com/adventdevinc/kudu/commit/c9f8e3a7a716718f5ef786c92965fe5d5c06ba9c))
+* **registry:** scan HKCU/WOW6432Node client hives, fix quoted rundll32 parsing ([5d3793f](https://github.com/adventdevinc/kudu/commit/5d3793f309c2982b96b12032a840ef6ba4d7ba56))
+* **registry:** scan WOW6432Node BHO hive for 32-bit orphaned entries ([9f13381](https://github.com/adventdevinc/kudu/commit/9f13381069c1711a36604399576158b66d90ae47))
+* **registry:** skip relative service paths and only check native COM view ([9808863](https://github.com/adventdevinc/kudu/commit/9808863a8a05ad4a7d545da530a77a8a82c73823))
+* **registry:** split EventMessageFile on commas too and check PrimaryModule ([0bff7c1](https://github.com/adventdevinc/kudu/commit/0bff7c1bd3acbfb922df23c79d678849ebdbda90))
+* **registry:** try full string as path candidate in extractExePath ([ed16a64](https://github.com/adventdevinc/kudu/commit/ed16a644c664923864b4ab795c5f7a240942e977))
+* **registry:** use extractExePath() for all command-line path parsing ([289a94a](https://github.com/adventdevinc/kudu/commit/289a94ab59f69d7dd13193eb1df01f2b0e3a92e5))
+* **registry:** WOW64-aware CLSID lookups, validate EventMessageFile, drop duplicate targets ([3a27695](https://github.com/adventdevinc/kudu/commit/3a27695f97507282aa0486347ff2b591c68698d9))
+* **rules:** correct macOS/Linux paths and fix rules-bot template injection ([b0ccff4](https://github.com/adventdevinc/kudu/commit/b0ccff4f719c37f94d4fe6ffd393d0f49d74d505))
+* **rules:** correct misleading descriptions for Google caches and Windows Update ([c0d583a](https://github.com/adventdevinc/kudu/commit/c0d583a04b22e61a5046276479e4fbd6fb23e77f))
+* **rules:** remove debconf target and fix registry scan query flags ([8a3272e](https://github.com/adventdevinc/kudu/commit/8a3272e7d5b11afb92022cd5a6d7f6f84f9bd966))
+* **rules:** remove live SRUM database from cleanup targets ([7c3ad2f](https://github.com/adventdevinc/kudu/commit/7c3ad2fbaf7dac0cb9b3f1e0a70e4cc2052783a3))
+* **rules:** remove unsafe targets and use WOW64-aware context menu scan ([a01096d](https://github.com/adventdevinc/kudu/commit/a01096da6018ee778148906b998d7629965a0fe0))
+* **startup:** add ConsoleConnect trigger for Windows Fast Startup ([bc47e06](https://github.com/adventdevinc/kudu/commit/bc47e064dbde9fd8783b601c580796baeba9cc6d))
+* **startup:** revert startup state if auto-enable fails for scheduled scans ([6ac6673](https://github.com/adventdevinc/kudu/commit/6ac6673b8fbde6a6abb41bface7960742708e6a0))
+* **startup:** use XML-based task creation and surface errors to UI ([28f1260](https://github.com/adventdevinc/kudu/commit/28f1260b0b4927440dafd025c207ad4d5b203127)), closes [#20](https://github.com/adventdevinc/kudu/issues/20)
+
+
+### Features
+
+* add contributor tooling for cleaner rules ([b6a6200](https://github.com/adventdevinc/kudu/commit/b6a6200f9831d33252dc1231a4167009cf776c6a))
+* **rules:** add Claude, Sublime Text, Termius, Ledger Live, and more ([ef2dd70](https://github.com/adventdevinc/kudu/commit/ef2dd70f1c3699797dda88b4923aef540263ccf3))
+* **rules:** add cleaning rules for browser forks, Kodi, qBittorrent, HandBrake, ccache, and Java ([33c59fb](https://github.com/adventdevinc/kudu/commit/33c59fbb4716fbdd7228392a1ae0d7f82b0a73e7))
+* **rules:** expand system cleaning targets and registry orphan detection ([22f39d6](https://github.com/adventdevinc/kudu/commit/22f39d631032259f665cf5c583bc7ede3b3cdc02))
 # [1.12.0](https://github.com/adventdevinc/kudu/compare/v1.11.0...v1.12.0) (2026-03-18)
 
 
