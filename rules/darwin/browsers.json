@@ -18,7 +18,7 @@
     { "key": "chromium", "base": "${APP_SUPPORT}/Chromium" },
     { "key": "thorium", "base": "${APP_SUPPORT}/Thorium" },
     { "key": "supermium", "base": "${APP_SUPPORT}/Supermium" },
-    { "key": "helium", "base": "${APP_SUPPORT}/Helium" },
+    { "key": "helium", "base": "${APP_SUPPORT}/net.imput.helium" },
     { "key": "cromite", "base": "${APP_SUPPORT}/Cromite" }
   ],
   "firefox": {

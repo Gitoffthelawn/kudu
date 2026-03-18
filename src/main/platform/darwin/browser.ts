@@ -19,6 +19,9 @@ export function createDarwinBrowser(): PlatformBrowser {
         'Arc',
         'Chromium',
         'Thorium',
+        'Supermium',
+        'Helium',
+        'Cromite',
         'Safari',
       ]
 
