@@ -1,3 +1,22 @@
+# [1.14.0](https://github.com/adventdevinc/kudu/compare/v1.13.0...v1.14.0) (2026-03-18)
+
+
+### Bug Fixes
+
+* **browsers:** correct Helium Windows path and add missing database rules ([8e3c11b](https://github.com/adventdevinc/kudu/commit/8e3c11b7d687dd9c967dd6c4e7179064d9ed7f03))
+* **cloud-agent:** add new browsers to cloud-agent browser scan list ([c4dd384](https://github.com/adventdevinc/kudu/commit/c4dd3847ab7f45733cf36745f3e1e698bc37b561))
+* **darwin:** correct Helium macOS path and add missing browsers to shutdown list ([b39e9f5](https://github.com/adventdevinc/kudu/commit/b39e9f591297e37cbb5e76aee7a3beba3af069ef))
+* **gaming:** correct Amazon Games log path, remove Playnite ([0832ae3](https://github.com/adventdevinc/kudu/commit/0832ae33dadadb12f1e79ff3989ca1acf469db08))
+* **gaming:** remove Genshin Impact and Overwatch 2 cleaners ([3128674](https://github.com/adventdevinc/kudu/commit/31286744d4912a54d5a1e340ee5adfa4585a74db))
+* **linux:** add Supermium, Helium, and Cromite to browser shutdown list ([0997d7c](https://github.com/adventdevinc/kudu/commit/0997d7c3b4e00df471bfc818bcdd548fb9edaa1a))
+
+
+### Features
+
+* **browsers:** add Thorium, Supermium, Helium, and Cromite cleaning support ([b3fea2c](https://github.com/adventdevinc/kudu/commit/b3fea2cd2861b459d497d5bda7d320b1a5aff889))
+* **gaming:** add cleaners for popular games and launchers ([07e2c0a](https://github.com/adventdevinc/kudu/commit/07e2c0ab3284ba59aa7d4def06ef48e7868e355d))
+* **privacy:** add AI, browser telemetry controls and expand bloatware list ([c9d3853](https://github.com/adventdevinc/kudu/commit/c9d3853a1d736cd7e76b7dbae6f32e3432011ad8))
+* **privacy:** fix AI setting registry keys, skip browser checks when uninstalled ([77b8b70](https://github.com/adventdevinc/kudu/commit/77b8b70ed5504197bd624ddf827b7adeabfd9441))
 # [1.13.0](https://github.com/adventdevinc/kudu/compare/v1.12.0...v1.13.0) (2026-03-18)
 
 
