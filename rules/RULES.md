@@ -2,6 +2,8 @@
 
 Kudu's cleaning targets are defined as JSON files in this directory. Adding support for a new app, game launcher, or cache location is as simple as editing a JSON file — no TypeScript or Electron knowledge required.
 
+Browse the [full cleaner directory](https://usekudu.com/cleaners) to see what's already covered and what's missing.
+
 ## Directory Layout
 
 ```
@@ -25,9 +27,28 @@ Each platform has 8 files:
 | `steam.json` | Steam library paths and redistributable patterns |
 | `misc.json` | Protected event logs and trash path |
 
-## Adding a New App Cleaner
+## Quick Start: Use the CLI Generator
 
-The most common contribution is adding a new app to `apps.json`. Here's how:
+The fastest way to add a new rule — no manual JSON editing needed:
+
+```bash
+npm run new-rule
+```
+
+This interactive tool will ask for the app name, platforms, and cache paths, then write the JSON entries for you. It auto-detects Chromium/Electron apps and generates the standard cache subdirectories.
+
+### Other Helpful Tools
+
+```bash
+npm run find-cache       # Discover uncovered cache directories on your machine
+npm run preview-rule     # Preview what a rule would clean (dry run)
+npm run parity-check     # See cross-platform coverage gaps
+npm run catalog          # Regenerate the rules catalog page
+```
+
+## Adding a New App Cleaner (Manual)
+
+If you prefer to edit the JSON files directly, here's how:
 
 ### 1. Find the cache paths
 

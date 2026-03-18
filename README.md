@@ -21,6 +21,7 @@
 <p align="center">
   <a href="https://github.com/adventdevinc/kudu/releases"><b>Download</b></a> &nbsp;&middot;&nbsp;
   <a href="https://usekudu.com"><b>Website</b></a> &nbsp;&middot;&nbsp;
+  <a href="https://usekudu.com/cleaners"><b>Cleaners</b></a> &nbsp;&middot;&nbsp;
   <a href="CLI.md"><b>CLI Docs</b></a>
 </p>
 
@@ -97,6 +98,8 @@ Kudu is intended for **advanced users** who understand system maintenance. You a
 ## Contributing
 
 Contributions are welcome! Feel free to open issues, submit PRs, or suggest features.
+
+**Want to add a cleaner for your favorite app?** Kudu's cleaning rules are simple JSON files — no code required. See the [Cleaner Rules Guide](rules/RULES.md) to get started, or browse the [full cleaner directory](https://usekudu.com/cleaners) to see what's already covered.
 
 If you find Kudu useful, consider giving it a star — it helps others discover the project.
 
