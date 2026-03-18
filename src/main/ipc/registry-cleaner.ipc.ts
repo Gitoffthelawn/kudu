@@ -909,7 +909,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
     // Scan for orphaned COM Interface proxy stubs
     try {
       const { stdout } = await execFileAsync('reg', [
-        'query', 'HKCR\\Interface', '/s', '/f', 'ProxyStubClsid32', '/k'
+        'query', 'HKCR\\Interface', '/s', '/f', 'ProxyStubClsid32'
       ], { timeout: 20000 })
 
       const blocks = stdout.split(/\r?\n\r?\n/)
@@ -981,7 +981,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
     try {
       const fileExtsKey = 'HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts'
       const { stdout } = await execFileAsync('reg', [
-        'query', fileExtsKey, '/s', '/f', 'UserChoice', '/k'
+        'query', fileExtsKey, '/s', '/f', 'UserChoice'
       ], { timeout: 15000 })
 
       const blocks = stdout.split(/\r?\n\r?\n/)

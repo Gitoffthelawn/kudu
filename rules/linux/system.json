@@ -19,7 +19,6 @@
     { "path": "/var/log/installer", "subcategory": "Installer Logs", "needsAdmin": true, "description": "Log files from system installation and initial setup" },
     { "path": "/var/cache/fontconfig", "subcategory": "System Font Cache", "needsAdmin": true, "description": "System-wide fontconfig cache; rebuilt automatically by fc-cache" },
     { "path": "/var/cache/man", "subcategory": "Man Page Cache", "needsAdmin": true, "description": "Cached formatted manual pages; rebuilt on next access" },
-    { "path": "/var/cache/debconf", "subcategory": "Debconf Cache", "needsAdmin": true, "description": "Cached debconf configuration database entries (Debian/Ubuntu)" },
     { "path": "/var/log/apt", "subcategory": "APT Logs", "needsAdmin": true, "description": "APT package manager history and terminal log files (Debian/Ubuntu)" }
   ],
   "singleFileTargets": [
