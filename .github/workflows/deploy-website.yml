@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths: ['rules/**']
 
+permissions: {}
+
 jobs:
   trigger-deploy:
     runs-on: ubuntu-latest
