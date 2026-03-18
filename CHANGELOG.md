@@ -1,3 +1,14 @@
+# [1.12.0](https://github.com/adventdevinc/kudu/compare/v1.11.0...v1.12.0) (2026-03-18)
+
+
+### Bug Fixes
+
+* **ci:** pass duplicate URL to resolve winget manifest multi-match error ([52fbdb5](https://github.com/adventdevinc/kudu/commit/52fbdb5983fdc02b7a1243c06523f113f92b3455))
+
+
+### Features
+
+* extract cleaner rules into community-editable JSON files ([3a2b345](https://github.com/adventdevinc/kudu/commit/3a2b345234c2e722ce3690cdf065eae844ee8d9a))
 # [1.11.0](https://github.com/adventdevinc/kudu/compare/v1.10.0...v1.11.0) (2026-03-18)
 
 
