@@ -930,51 +930,55 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
       }
     }
 
-    // Scan for orphaned Browser Helper Objects (BHOs)
-    try {
-      const bhoKey = 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects'
-      const { stdout } = await execFileAsync('reg', [
-        'query', bhoKey
-      ], { timeout: 10000 })
+    // Scan for orphaned Browser Helper Objects (BHOs) in both native and WOW6432Node hives
+    const bhoKeys = [
+      'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects',
+      'HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects'
+    ]
+    for (const bhoKey of bhoKeys) {
+      try {
+        const { stdout } = await execFileAsync('reg', [
+          'query', bhoKey
+        ], { timeout: 10000 })
 
-      const lines = stdout.split(/\r?\n/)
-      for (const line of lines) {
-        const subKeyMatch = line.match(/^(HKLM\\[^\\]+.*\\(\{[0-9A-Fa-f-]+\}))$/m)
-        if (!subKeyMatch) continue
-        const bhoSubKey = subKeyMatch[1].trim()
-        const clsid = subKeyMatch[2]
-        if (!await clsidExists(clsid)) {
-          entries.push({
-            id: randomUUID(),
-            type: 'orphaned',
-            keyPath: bhoSubKey,
-            valueName: clsid,
-            issue: `Browser Helper Object references missing COM object: ${clsid}`,
-            risk: 'low',
-            selected: true,
-            fix: { op: 'delete-key' }
-          })
-        } else {
-          // CLSID exists in at least one view — check if its DLL is present
-          const missingDll = await findMissingClsidDll(clsid)
-          if (missingDll) {
+        const lines = stdout.split(/\r?\n/)
+        for (const line of lines) {
+          const subKeyMatch = line.match(/^(HKLM\\[^\\]+.*\\(\{[0-9A-Fa-f-]+\}))$/m)
+          if (!subKeyMatch) continue
+          const bhoSubKey = subKeyMatch[1].trim()
+          const clsid = subKeyMatch[2]
+          if (!await clsidExists(clsid)) {
             entries.push({
               id: randomUUID(),
               type: 'orphaned',
               keyPath: bhoSubKey,
               valueName: clsid,
-              issue: missingDll === 'no-inproc'
-                ? `Browser Helper Object has broken COM registration: ${clsid}`
-                : `Browser Helper Object DLL missing: ${missingDll}`,
+              issue: `Browser Helper Object references missing COM object: ${clsid}`,
               risk: 'low',
               selected: true,
               fix: { op: 'delete-key' }
             })
+          } else {
+            const missingDll = await findMissingClsidDll(clsid)
+            if (missingDll) {
+              entries.push({
+                id: randomUUID(),
+                type: 'orphaned',
+                keyPath: bhoSubKey,
+                valueName: clsid,
+                issue: missingDll === 'no-inproc'
+                  ? `Browser Helper Object has broken COM registration: ${clsid}`
+                  : `Browser Helper Object DLL missing: ${missingDll}`,
+                risk: 'low',
+                selected: true,
+                fix: { op: 'delete-key' }
+              })
+            }
           }
         }
+      } catch {
+        // Skip — key may not exist
       }
-    } catch {
-      // Skip
     }
 
     // Scan for orphaned Event Log application sources
