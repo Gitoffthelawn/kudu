@@ -94,25 +94,32 @@ function extractExePath(raw: string): string | null {
   // Case 1: quoted path — extract content between first pair of quotes
   const quotedMatch = trimmed.match(/^"([^"]+)"/)
   if (quotedMatch) return quotedMatch[1].trim()
-  // Case 2: unquoted — progressively try longer prefixes up to each space,
-  // matching how Windows CreateProcess resolves ambiguous command lines.
-  // Try each space boundary to find the longest prefix that exists on disk.
-  if (trimmed.includes(' ')) {
-    let searchFrom = 0
-    while (true) {
-      const spaceIdx = trimmed.indexOf(' ', searchFrom)
-      if (spaceIdx === -1) break
-      const candidate = trimmed.substring(0, spaceIdx)
-      if (candidate && existsSync(candidate)) return candidate
-      searchFrom = spaceIdx + 1
-    }
-    // No space-boundary candidate exists on disk — return the first token.
-    // This handles PATH-resolved commands like "rundll32.exe C:\...\helper.dll"
-    // where the exe has no absolute path but the arguments contain backslashes.
-    return trimmed.substring(0, trimmed.indexOf(' '))
+  // Case 2: no spaces — the whole string is the path
+  if (!trimmed.includes(' ')) return trimmed
+  // Case 3: unquoted with spaces — use the Windows CreateProcess algorithm:
+  // try progressively longer prefixes up to each space, returning the first
+  // that exists on disk.
+  const spacePositions: number[] = []
+  for (let i = 0; i < trimmed.length; i++) {
+    if (trimmed[i] === ' ') spacePositions.push(i)
   }
-  // Case 3: no spaces at all — the whole string is the path
-  return trimmed
+  for (const pos of spacePositions) {
+    const candidate = trimmed.substring(0, pos)
+    if (candidate && existsSync(candidate)) return candidate
+  }
+  // Case 4: no candidate exists on disk (the exe is missing). Find the
+  // longest prefix up to a space that ends with a known executable extension.
+  // This preserves the full path for orphan detection (e.g. "C:\Program
+  // Files\Vendor\svc.exe -k" → "C:\Program Files\Vendor\svc.exe").
+  const exeExtRe = /\.(exe|dll|sys|cmd|bat|com|msc|cpl|scr)$/i
+  for (let i = spacePositions.length - 1; i >= 0; i--) {
+    const candidate = trimmed.substring(0, spacePositions[i])
+    if (exeExtRe.test(candidate)) return candidate
+  }
+  // Case 5: no extension-bearing candidate either — first token only.
+  // Handles PATH-resolved commands like "rundll32.exe helper.dll,Entry"
+  // where the exe name has no backslash path.
+  return trimmed.substring(0, spacePositions[0])
 }
 
 /**
@@ -704,18 +711,29 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
               displayName.includes('Update for') || displayName.includes('Security Update') ||
               displayName.includes('Hotfix') || displayName.includes('KB')) continue
 
-          let orphaned = false
-          if (installLocMatch) {
-            const installLoc = installLocMatch[1].trim().replace(/"/g, '')
-            if (installLoc && installLoc.length > 3 && installLoc.includes('\\') && !existsSync(installLoc)) {
-              orphaned = true
-            }
-          }
-          if (!orphaned && uninstallStrMatch) {
+          // Check if the uninstall command still works — this is the primary signal.
+          // A missing InstallLocation alone is not sufficient because MSI entries
+          // (msiexec /x {GUID}) and rundll32-based uninstallers remain functional
+          // even after the install folder is deleted.
+          let uninstallBroken = false
+          if (uninstallStrMatch) {
             const exePath = extractExePath(uninstallStrMatch[1].trim())
             if (exePath && exePath.includes('\\') && !exePath.startsWith('%') &&
                 !exePath.toLowerCase().includes('msiexec') &&
                 !exePath.toLowerCase().includes('rundll32') && !existsSync(exePath)) {
+              uninstallBroken = true
+            }
+            // MSI and rundll32 uninstallers are always considered functional
+          }
+          // Only flag as orphaned if the uninstall command itself is broken.
+          // If there's no UninstallString at all but InstallLocation is missing,
+          // the entry is also orphaned (no way to uninstall or find the program).
+          let orphaned = false
+          if (uninstallBroken) {
+            orphaned = true
+          } else if (!uninstallStrMatch && installLocMatch) {
+            const installLoc = installLocMatch[1].trim().replace(/"/g, '')
+            if (installLoc && installLoc.length > 3 && installLoc.includes('\\') && !existsSync(installLoc)) {
               orphaned = true
             }
           }
