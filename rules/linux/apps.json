@@ -47,6 +47,12 @@
     { "id": "bitwarden", "name": "Bitwarden", "paths": ["${CONFIG}/Bitwarden/Cache/Cache_Data"] },
     { "id": "1password", "name": "1Password", "paths": ["${CONFIG}/1Password/Cache/Cache_Data"] },
     { "id": "ruby-gems", "name": "Ruby Gem Cache", "paths": ["${HOME}/.gem"], "childSubdir": "cache", "description": "Downloaded .gem file cache (reinstall regenerates as needed)" },
-    { "id": "deno", "name": "Deno Cache", "paths": ["${CACHE}/deno"], "description": "Deno module cache (re-downloaded on demand)" }
+    { "id": "deno", "name": "Deno Cache", "paths": ["${CACHE}/deno"], "description": "Deno module cache (re-downloaded on demand)" },
+    { "id": "claude", "name": "Claude", "paths": ["${CONFIG}/Claude/Cache/Cache_Data"] },
+    { "id": "sublime-text", "name": "Sublime Text", "paths": ["${CACHE}/sublime-text"] },
+    { "id": "termius", "name": "Termius", "paths": ["${CONFIG}/Termius/Cache/Cache_Data"] },
+    { "id": "ledger-live", "name": "Ledger Live", "paths": ["${CONFIG}/Ledger Live/Cache/Cache_Data"] },
+    { "id": "node-gyp", "name": "node-gyp Cache", "paths": ["${HOME}/.node-gyp"], "description": "Node.js native addon build header cache (re-downloaded on demand)" },
+    { "id": "electron-builder", "name": "electron-builder Cache", "paths": ["${CACHE}/electron-builder"], "description": "Electron builder download cache (re-downloaded on demand)" }
   ]
 }

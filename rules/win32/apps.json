@@ -23,7 +23,7 @@
     { "id": "gradle", "name": "Gradle Cache", "paths": ["${HOME}/.gradle/caches", "${HOME}/.gradle/daemon"] },
     { "id": "maven", "name": "Maven Cache", "paths": ["${HOME}/.m2/repository"] },
     { "id": "composer", "name": "Composer Cache", "paths": ["${LOCALAPPDATA}/Composer/cache"] },
-    { "id": "docker", "name": "Docker Desktop", "paths": ["${APPDATA}/Docker Desktop/cache"] },
+    { "id": "docker", "name": "Docker Desktop", "paths": ["${APPDATA}/Docker Desktop/cache", "${APPDATA}/Docker Desktop/Code Cache", "${APPDATA}/Docker Desktop/GPUCache"] },
     { "id": "cursor", "name": "Cursor IDE", "paths": ["${APPDATA}/Cursor/Cache/Cache_Data", "${APPDATA}/Cursor/CachedData", "${APPDATA}/Cursor/CachedExtensions", "${APPDATA}/Cursor/logs"] },
     { "id": "signal", "name": "Signal Desktop", "paths": ["${APPDATA}/Signal/Cache/Cache_Data", "${APPDATA}/Signal/GPUCache"] },
     { "id": "postman", "name": "Postman", "paths": ["${APPDATA}/Postman/Cache/Cache_Data", "${APPDATA}/Postman/GPUCache"] },
@@ -51,6 +51,14 @@
     { "id": "bitwarden", "name": "Bitwarden", "paths": ["${APPDATA}/Bitwarden/Cache/Cache_Data", "${APPDATA}/Bitwarden/Code Cache", "${APPDATA}/Bitwarden/GPUCache"] },
     { "id": "1password", "name": "1Password", "paths": ["${APPDATA}/1Password/Cache/Cache_Data", "${APPDATA}/1Password/Code Cache", "${APPDATA}/1Password/GPUCache"] },
     { "id": "ruby-gems", "name": "Ruby Gem Cache", "paths": ["${HOME}/.gem"], "childSubdir": "cache", "description": "Downloaded .gem file cache (reinstall regenerates as needed)" },
-    { "id": "deno", "name": "Deno Cache", "paths": ["${LOCALAPPDATA}/deno"], "description": "Deno module cache (re-downloaded on demand)" }
+    { "id": "deno", "name": "Deno Cache", "paths": ["${LOCALAPPDATA}/deno"], "description": "Deno module cache (re-downloaded on demand)" },
+    { "id": "claude", "name": "Claude", "paths": ["${APPDATA}/Claude/Cache/Cache_Data", "${APPDATA}/Claude/Code Cache", "${APPDATA}/Claude/GPUCache", "${APPDATA}/Claude/logs"] },
+    { "id": "sublime-text", "name": "Sublime Text", "paths": ["${LOCALAPPDATA}/Sublime Text/Cache"] },
+    { "id": "termius", "name": "Termius", "paths": ["${APPDATA}/Termius/Cache/Cache_Data", "${APPDATA}/Termius/Code Cache", "${APPDATA}/Termius/GPUCache"] },
+    { "id": "ledger-live", "name": "Ledger Live", "paths": ["${APPDATA}/Ledger Live/Cache/Cache_Data", "${APPDATA}/Ledger Live/Code Cache", "${APPDATA}/Ledger Live/GPUCache"] },
+    { "id": "node-gyp", "name": "node-gyp Cache", "paths": ["${LOCALAPPDATA}/node-gyp/Cache"], "description": "Node.js native addon build header cache (re-downloaded on demand)" },
+    { "id": "electron-builder", "name": "electron-builder Cache", "paths": ["${LOCALAPPDATA}/electron-builder/Cache"], "description": "Electron builder download cache (re-downloaded on demand)" },
+    { "id": "curseforge", "name": "CurseForge", "paths": ["${APPDATA}/CurseForge/Cache/Cache_Data", "${APPDATA}/CurseForge/Code Cache", "${APPDATA}/CurseForge/GPUCache", "${APPDATA}/CurseForge/logs"] },
+    { "id": "logitech-ghub", "name": "Logitech G HUB", "paths": ["${APPDATA}/G HUB/Cache/Cache_Data", "${APPDATA}/G HUB/Code Cache", "${APPDATA}/G HUB/GPUCache"] }
   ]
 }

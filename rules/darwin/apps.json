@@ -48,6 +48,12 @@
     { "id": "bitwarden", "name": "Bitwarden", "paths": ["${APP_SUPPORT}/Bitwarden/Cache/Cache_Data"] },
     { "id": "ruby-gems", "name": "Ruby Gem Cache", "paths": ["${HOME}/.gem"], "childSubdir": "cache", "description": "Downloaded .gem file cache (reinstall regenerates as needed)" },
     { "id": "cocoapods", "name": "CocoaPods Cache", "paths": ["${CACHES}/CocoaPods"], "description": "CocoaPods download cache (pod cache clean --all clears this)" },
-    { "id": "deno", "name": "Deno Cache", "paths": ["${CACHES}/deno"], "description": "Deno module cache (re-downloaded on demand)" }
+    { "id": "deno", "name": "Deno Cache", "paths": ["${CACHES}/deno"], "description": "Deno module cache (re-downloaded on demand)" },
+    { "id": "claude", "name": "Claude", "paths": ["${APP_SUPPORT}/Claude/Cache/Cache_Data"] },
+    { "id": "sublime-text", "name": "Sublime Text", "paths": ["${CACHES}/com.sublimetext.4"] },
+    { "id": "termius", "name": "Termius", "paths": ["${APP_SUPPORT}/Termius/Cache/Cache_Data"] },
+    { "id": "ledger-live", "name": "Ledger Live", "paths": ["${APP_SUPPORT}/Ledger Live/Cache/Cache_Data"] },
+    { "id": "node-gyp", "name": "node-gyp Cache", "paths": ["${HOME}/.node-gyp"], "description": "Node.js native addon build header cache (re-downloaded on demand)" },
+    { "id": "electron-builder", "name": "electron-builder Cache", "paths": ["${CACHES}/electron-builder"], "description": "Electron builder download cache (re-downloaded on demand)" }
   ]
 }
