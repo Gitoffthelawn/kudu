@@ -146,33 +146,29 @@ async function clsidExists(clsid: string): Promise<boolean> {
 
 /**
  * Check if a CLSID's InprocServer32 DLL exists on disk.
- * Evaluates each registry view (native 64-bit and WOW6432Node) independently
- * because they are bitness-specific: a surviving 32-bit DLL does not make a
- * broken 64-bit registration usable, and vice versa.
+ * Only checks the native (64-bit) registry view. A stale WOW6432Node
+ * (32-bit) entry alone is not actionable — the 64-bit OS uses the native
+ * view for shell extensions, BHOs, and COM interfaces. Flagging a broken
+ * 32-bit leftover would trigger delete-key on the entire handler, which
+ * removes the working 64-bit registration too.
  *
- * Returns the missing DLL path from the first view that has a broken
- * registration, or null if all registered views are healthy (or if the
- * CLSID uses LocalServer32 instead).
+ * Returns the missing DLL path if the native view has a broken
+ * registration, or null if it is healthy (or uses LocalServer32).
  */
 async function findMissingClsidDll(clsid: string): Promise<string | null> {
-  const views = [
-    `HKCR\\CLSID\\${clsid}\\InprocServer32`,
-    `HKCR\\WOW6432Node\\CLSID\\${clsid}\\InprocServer32`
-  ]
-  for (const key of views) {
-    try {
-      const { stdout } = await execFileAsync('reg', ['query', key], { timeout: 5000 })
-      const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
-      if (dllMatch) {
-        const dllPath = dllMatch[1].trim().replace(/"/g, '')
-        if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
-          return dllPath // This view's DLL is missing — report it
-        }
-        // This view's DLL exists on disk — this view is healthy
+  try {
+    const { stdout } = await execFileAsync('reg', [
+      'query', `HKCR\\CLSID\\${clsid}\\InprocServer32`
+    ], { timeout: 5000 })
+    const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
+    if (dllMatch) {
+      const dllPath = dllMatch[1].trim().replace(/"/g, '')
+      if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
+        return dllPath // Native view DLL is missing
       }
-    } catch { /* key doesn't exist in this view — not registered here */ }
-  }
-  return null // All registered views are healthy, or CLSID uses LocalServer32
+    }
+  } catch { /* No native InprocServer32 — may use LocalServer32 or only registered in WOW64 */ }
+  return null
 }
 
 // ── Exported core logic ──
@@ -651,15 +647,18 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           const rawImagePath = valMatch[1].trim()
           const imagePath = extractExePath(rawImagePath)
           if (!imagePath) continue
+          const lowerPath = imagePath.toLowerCase()
           // Skip system/Microsoft services and drivers
-          if (imagePath.toLowerCase().startsWith('\\systemroot\\') ||
-              imagePath.toLowerCase().startsWith('%systemroot%\\system32\\') ||
-              imagePath.toLowerCase().startsWith('c:\\windows\\system32\\') ||
-              imagePath.toLowerCase().includes('\\microsoft\\') ||
-              imagePath.toLowerCase().includes('\\windows\\') ||
-              imagePath.startsWith('\\??\\') ||
-              !imagePath.includes('\\')) continue
-          // Resolve %ProgramFiles% etc.
+          if (lowerPath.startsWith('\\systemroot\\') ||
+              lowerPath.startsWith('%systemroot%\\') ||
+              lowerPath.startsWith('c:\\windows\\') ||
+              lowerPath.includes('\\microsoft\\') ||
+              lowerPath.includes('\\windows\\') ||
+              imagePath.startsWith('\\??\\')) continue
+          // Skip relative paths (e.g. "system32\drivers\foo.sys") — these are
+          // resolved relative to %SystemRoot% by the SCM, not absolute paths
+          if (!imagePath.match(/^[A-Za-z]:\\/)) continue
+          // Skip env-var paths we can't resolve
           if (imagePath.startsWith('%')) continue
           if (imagePath && !existsSync(imagePath)) {
             entries.push({
