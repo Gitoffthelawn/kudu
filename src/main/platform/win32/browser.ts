@@ -10,6 +10,7 @@ export function createWin32Browser(): PlatformBrowser {
       const browserProcesses = [
         'chrome.exe', 'msedge.exe', 'brave.exe', 'vivaldi.exe',
         'opera.exe', 'firefox.exe', 'arc.exe', 'chromium.exe',
+        'thorium.exe', 'supermium.exe', 'helium.exe', 'cromite.exe',
       ]
       for (const proc of browserProcesses) {
         try {

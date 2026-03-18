@@ -33,6 +33,10 @@ export interface BrowserPathConfig {
   vivaldi: BrowserPaths
   arc: BrowserPaths
   chromium: BrowserPaths
+  thorium: BrowserPaths
+  supermium: BrowserPaths
+  helium: BrowserPaths
+  cromite: BrowserPaths
   firefox: { base: string; cache: string }
   safari: { cache: string } | null
 }

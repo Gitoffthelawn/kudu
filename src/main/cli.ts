@@ -91,6 +91,10 @@ async function scanBrowserCli(): Promise<ScanResult[]> {
     { label: 'Opera GX', ...browserPaths.operaGX, hasProfiles: false },
     { label: 'Arc', ...browserPaths.arc, hasProfiles: true },
     { label: 'Chromium', ...browserPaths.chromium, hasProfiles: true },
+    { label: 'Thorium', ...browserPaths.thorium, hasProfiles: true },
+    { label: 'Supermium', ...browserPaths.supermium, hasProfiles: true },
+    { label: 'Helium', ...browserPaths.helium, hasProfiles: true },
+    { label: 'Cromite', ...browserPaths.cromite, hasProfiles: true },
   ]
   for (const browser of chromiumBrowsers) {
     if (!existsSync(browser.base)) continue

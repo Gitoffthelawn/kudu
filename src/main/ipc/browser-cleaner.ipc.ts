@@ -39,6 +39,10 @@ export function registerBrowserCleanerIpc(getWindow: WindowGetter): void {
       { key: 'operaGX', label: 'Opera GX', ...browserPaths.operaGX, hasProfiles: false },
       { key: 'arc', label: 'Arc', ...browserPaths.arc, hasProfiles: true },
       { key: 'chromium', label: 'Chromium', ...browserPaths.chromium, hasProfiles: true },
+      { key: 'thorium', label: 'Thorium', ...browserPaths.thorium, hasProfiles: true },
+      { key: 'supermium', label: 'Supermium', ...browserPaths.supermium, hasProfiles: true },
+      { key: 'helium', label: 'Helium', ...browserPaths.helium, hasProfiles: true },
+      { key: 'cromite', label: 'Cromite', ...browserPaths.cromite, hasProfiles: true },
     ]
 
     // Scan all Chromium-based browsers
