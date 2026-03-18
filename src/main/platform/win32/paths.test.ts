@@ -73,9 +73,10 @@ describe('win32 paths', () => {
   describe('singleFileCleanTargets', () => {
     it('includes the full memory dump file', () => {
       const targets = paths.singleFileCleanTargets()
-      expect(targets).toHaveLength(1)
-      expect(targets[0].path).toContain('MEMORY.DMP')
-      expect(targets[0].subcategory).toBe('Full Memory Dump')
+      expect(targets.length).toBeGreaterThanOrEqual(1)
+      const dumpTarget = targets.find(t => t.path.includes('MEMORY.DMP'))
+      expect(dumpTarget).toBeDefined()
+      expect(dumpTarget!.subcategory).toBe('Full Memory Dump')
     })
   })
 

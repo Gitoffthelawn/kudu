@@ -11,7 +11,14 @@
     { "path": "/Library/Caches/com.apple.ATS", "subcategory": "Font Cache", "needsAdmin": true, "description": "Apple Type Services font rendering cache; rebuilt automatically on next use" },
     { "path": "${LIBRARY}/Saved Application State", "subcategory": "Saved Application State", "description": "Window positions and state saved by apps for Resume on relaunch" },
     { "path": "${LIBRARY}/Developer/Xcode/DerivedData", "subcategory": "Xcode DerivedData", "description": "Xcode build products, indexes, and intermediate files; rebuilt on next build" },
-    { "path": "${LIBRARY}/Developer/CoreSimulator/Caches", "subcategory": "CoreSimulator Caches", "description": "Cached data for iOS/tvOS/watchOS simulator devices" }
+    { "path": "${LIBRARY}/Developer/CoreSimulator/Caches", "subcategory": "CoreSimulator Caches", "description": "Cached data for iOS/tvOS/watchOS simulator devices" },
+    { "path": "/Library/Logs/DiagnosticReports", "subcategory": "System Crash Reports", "needsAdmin": true, "description": "System-wide crash, hang, and spin reports from macOS services and kernel" },
+    { "path": "/private/var/log/asl", "subcategory": "Apple System Logs", "needsAdmin": true, "description": "Legacy Apple System Log archive files; replaced by unified logging on modern macOS" },
+    { "path": "${CACHES}/com.apple.FontRegistry", "subcategory": "Font Registry Cache", "description": "Font registry cache files; rebuilt automatically on demand" },
+    { "path": "/Library/Caches/com.apple.iconservices.store", "subcategory": "Icon Services Cache", "needsAdmin": true, "description": "System-wide cached application icon data; rebuilt automatically" },
+    { "path": "${LIBRARY}/Caches/com.apple.diagnosticsextensions.statuskit", "subcategory": "Diagnostics Cache", "description": "Cached data from macOS diagnostics and system reports" },
+    { "path": "${LIBRARY}/Caches/com.apple.nsurlsessiond", "subcategory": "URL Session Cache", "description": "Cached HTTP/HTTPS response data from system network requests" },
+    { "path": "${LIBRARY}/Caches/com.apple.CacheDelete", "subcategory": "Cache Delete Logs", "description": "Logs from the macOS automatic cache management service" }
   ],
   "singleFileTargets": []
 }
