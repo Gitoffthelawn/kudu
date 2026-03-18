@@ -72,6 +72,19 @@ function splitTaskPath(fullPath: string): { path: string; name: string } | null 
 // Session-scoped scan results keyed by scan ID to prevent race conditions
 const scanSessions = new Map<string, Map<string, RegistryEntry>>()
 
+/** Expand common Windows environment variables in a registry path. */
+function expandEnvVars(path: string): string {
+  return path
+    .replace(/%SystemRoot%/gi, process.env.WINDIR || 'C:\\Windows')
+    .replace(/%ProgramFiles%/gi, process.env.PROGRAMFILES || 'C:\\Program Files')
+    .replace(/%ProgramFiles\(x86\)%/gi, process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)')
+    .replace(/%ProgramData%/gi, process.env.PROGRAMDATA || 'C:\\ProgramData')
+    .replace(/%CommonProgramFiles%/gi, process.env.COMMONPROGRAMFILES || 'C:\\Program Files\\Common Files')
+    .replace(/%USERPROFILE%/gi, process.env.USERPROFILE || '')
+    .replace(/%LOCALAPPDATA%/gi, process.env.LOCALAPPDATA || '')
+    .replace(/%APPDATA%/gi, process.env.APPDATA || '')
+}
+
 /**
  * Extract the executable path from a command-line string, correctly
  * handling quoted paths with spaces and ignoring trailing arguments.
@@ -688,13 +701,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           let imagePath = extractExePath(rawImagePath)
           if (!imagePath) continue
           // Expand common environment variables
-          imagePath = imagePath
-            .replace(/%SystemRoot%/gi, process.env.WINDIR || 'C:\\Windows')
-            .replace(/%ProgramFiles%/gi, process.env.PROGRAMFILES || 'C:\\Program Files')
-            .replace(/%ProgramFiles\(x86\)%/gi, process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)')
-            .replace(/%ProgramData%/gi, process.env.PROGRAMDATA || 'C:\\ProgramData')
-            .replace(/%CommonProgramFiles%/gi, process.env.COMMONPROGRAMFILES || 'C:\\Program Files\\Common Files')
-            .replace(/%USERPROFILE%/gi, process.env.USERPROFILE || '')
+          imagePath = expandEnvVars(imagePath)
           const lowerPath = imagePath.toLowerCase()
           // Skip system/Microsoft services and drivers
           if (lowerPath.startsWith('\\systemroot\\') ||
@@ -762,15 +769,14 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           let uninstallBroken = false
           if (uninstallStrMatch) {
             const rawUninstall = uninstallStrMatch[1].trim()
-            const exePath = extractExePath(rawUninstall)
+            const exePath = expandEnvVars(extractExePath(rawUninstall) || '')
             if (exePath && exePath.toLowerCase().includes('msiexec')) {
               // MSI uninstallers are always functional (Windows Installer handles them)
             } else if (exePath && exePath.toLowerCase().includes('rundll32')) {
               // For rundll32 commands, check if the DLL argument exists.
-              // Format: rundll32.exe C:\path\helper.dll,EntryPoint
               const dllMatch = rawUninstall.match(/rundll32(?:\.exe)?\s+"?([^",]+\.dll)/i)
               if (dllMatch) {
-                const dllPath = dllMatch[1].trim()
+                const dllPath = expandEnvVars(dllMatch[1].trim())
                 if (dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
                   uninstallBroken = true
                 }
@@ -785,8 +791,8 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           // the install directory must also be missing (or not set).
           let installDirExists = false
           if (installLocMatch) {
-            const installLoc = installLocMatch[1].trim().replace(/"/g, '')
-            if (installLoc && installLoc.length > 3 && installLoc.includes('\\')) {
+            const installLoc = expandEnvVars(installLocMatch[1].trim().replace(/"/g, ''))
+            if (installLoc && installLoc.length > 3 && installLoc.includes('\\') && !installLoc.startsWith('%')) {
               installDirExists = existsSync(installLoc)
             }
           }
@@ -794,7 +800,7 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           if (!installDirExists) {
             const iconMatch = block.match(/DisplayIcon\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
             if (iconMatch) {
-              const iconPath = iconMatch[1].trim().replace(/"/g, '').split(',')[0].trim()
+              const iconPath = expandEnvVars(iconMatch[1].trim().replace(/"/g, '').split(',')[0].trim())
               if (iconPath && iconPath.includes('\\') && !iconPath.startsWith('%') && existsSync(iconPath)) {
                 installDirExists = true
               }
