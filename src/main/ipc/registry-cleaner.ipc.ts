@@ -915,8 +915,8 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           if (pathMatch) {
             const rawValue = pathMatch[1].trim().replace(/"/g, '')
             const winDir = process.env.WINDIR || 'C:\\Windows'
-            // Split semicolon-separated paths and resolve %SystemRoot%
-            const allPaths = rawValue.split(';')
+            // Split on both semicolons and commas (both are valid delimiters)
+            const allPaths = rawValue.split(/[;,]/)
               .map(p => p.trim())
               .filter(p => p.length > 0)
               .map(p => p.replace(/%SystemRoot%/i, winDir))
@@ -925,16 +925,27 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
             // Only flag as orphaned if EVERY message file is missing
             const checkable = allPaths.filter(p => p.includes('\\'))
             if (checkable.length > 0 && checkable.every(p => !existsSync(p))) {
-              entries.push({
-                id: randomUUID(),
-                type: 'orphaned',
-                keyPath: sourceKey,
-                valueName: 'EventMessageFile',
-                issue: `Event log source "${sourceName}" — all message files missing`,
-                risk: 'low',
-                selected: true,
-                fix: { op: 'delete-key' }
-              })
+              // Check if the source has a PrimaryModule fallback — if so, it can
+              // still resolve event descriptions without its own message files
+              let hasPrimaryModule = false
+              try {
+                const { stdout: pmOut } = await execFileAsync('reg', [
+                  'query', sourceKey, '/v', 'PrimaryModule'
+                ], { timeout: 3000 })
+                if (pmOut.includes('PrimaryModule')) hasPrimaryModule = true
+              } catch { /* no PrimaryModule — safe to flag */ }
+              if (!hasPrimaryModule) {
+                entries.push({
+                  id: randomUUID(),
+                  type: 'orphaned',
+                  keyPath: sourceKey,
+                  valueName: 'EventMessageFile',
+                  issue: `Event log source "${sourceName}" — all message files missing`,
+                  risk: 'low',
+                  selected: true,
+                  fix: { op: 'delete-key' }
+                })
+              }
             }
           }
         } catch {
