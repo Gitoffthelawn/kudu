@@ -1,0 +1,12 @@
+name: Deploy Website
+
+on:
+  push:
+    branches: [main]
+    paths: ['rules/**']
+
+jobs:
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -X POST ${{ secrets.WEB_DEPLOY_HOOK }}
