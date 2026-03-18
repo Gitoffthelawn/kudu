@@ -150,17 +150,15 @@ async function clsidExists(clsid: string): Promise<boolean> {
 }
 
 /**
- * Check if a CLSID's InprocServer32 DLL exists on disk.
- * Only checks the native (64-bit) registry view. A stale WOW6432Node
- * (32-bit) entry alone is not actionable — the 64-bit OS uses the native
- * view for shell extensions, BHOs, and COM interfaces. Flagging a broken
- * 32-bit leftover would trigger delete-key on the entire handler, which
- * removes the working 64-bit registration too.
+ * Check if a CLSID's InprocServer32 DLL exists on disk (native view only).
  *
- * Returns the missing DLL path if the native view has a broken
- * registration, or null if it is healthy (or uses LocalServer32).
+ * Returns:
+ *   - The missing DLL path string if InprocServer32 exists but the DLL is gone
+ *   - 'no-inproc' if InprocServer32 subkey is entirely missing (broken for
+ *     in-process handlers — the caller should treat this as actionable)
+ *   - null if the DLL exists on disk (healthy)
  */
-async function findMissingClsidDll(clsid: string): Promise<string | null> {
+async function findMissingClsidDll(clsid: string): Promise<string | 'no-inproc' | null> {
   try {
     const { stdout } = await execFileAsync('reg', [
       'query', `HKCR\\CLSID\\${clsid}\\InprocServer32`
@@ -172,8 +170,18 @@ async function findMissingClsidDll(clsid: string): Promise<string | null> {
         return dllPath // Native view DLL is missing
       }
     }
-  } catch { /* No native InprocServer32 — may use LocalServer32 or only registered in WOW64 */ }
-  return null
+    return null // DLL exists or no parseable path
+  } catch {
+    // InprocServer32 subkey doesn't exist — check if the CLSID uses LocalServer32
+    try {
+      await execFileAsync('reg', [
+        'query', `HKCR\\CLSID\\${clsid}\\LocalServer32`
+      ], { timeout: 5000 })
+      return null // Uses out-of-process server, not broken
+    } catch {
+      return 'no-inproc' // No InprocServer32 and no LocalServer32 — broken registration
+    }
+  }
 }
 
 // ── Exported core logic ──
@@ -460,7 +468,9 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
                   type: 'broken',
                   keyPath: keyMatch?.[1]?.trim() || shellKey,
                   valueName: clsid,
-                  issue: `Context menu handler DLL missing: ${missingDll}`,
+                  issue: missingDll === 'no-inproc'
+                    ? `Context menu handler has broken COM registration: ${clsid}`
+                    : `Context menu handler DLL missing: ${missingDll}`,
                   risk: 'medium',
                   selected: true,
                   fix: { op: 'delete-key' }
@@ -704,9 +714,9 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
           // Skip the parent key itself
           if (subKey === uninstallKey) continue
           // Look for InstallLocation or UninstallString
-          const installLocMatch = block.match(/InstallLocation\s+REG_SZ\s+(.+)/i)
-          const uninstallStrMatch = block.match(/UninstallString\s+REG_SZ\s+(.+)/i)
-          const displayNameMatch = block.match(/DisplayName\s+REG_SZ\s+(.+)/i)
+          const installLocMatch = block.match(/InstallLocation\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
+          const uninstallStrMatch = block.match(/UninstallString\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
+          const displayNameMatch = block.match(/DisplayName\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
           // Skip entries without a display name (system components)
           if (!displayNameMatch) continue
           const displayName = displayNameMatch[1].trim()
@@ -925,7 +935,9 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
               type: 'orphaned',
               keyPath: bhoSubKey,
               valueName: clsid,
-              issue: `Browser Helper Object DLL missing: ${missingDll}`,
+              issue: missingDll === 'no-inproc'
+                ? `Browser Helper Object has broken COM registration: ${clsid}`
+                : `Browser Helper Object DLL missing: ${missingDll}`,
               risk: 'low',
               selected: true,
               fix: { op: 'delete-key' }
@@ -1048,7 +1060,9 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
                 type: 'orphaned',
                 keyPath: keyMatch[1],
                 valueName: proxyClsid,
-                issue: `COM interface proxy stub DLL missing: ${missingDll}`,
+                issue: missingDll === 'no-inproc'
+                  ? `COM interface proxy stub has broken registration: ${proxyClsid}`
+                  : `COM interface proxy stub DLL missing: ${missingDll}`,
                 risk: 'medium',
                 selected: true,
                 fix: { op: 'delete-key', key: parentIfaceKey }
@@ -1591,8 +1605,18 @@ export async function fixRegistryEntries(
       // Back up HKLM\SYSTEM (services, event log sources) and HKCR (COM, interfaces, shell extensions)
       const systemBackupPath = join(backupDir, `registry-backup-SYSTEM-${timestamp}.reg`)
       await execFileAsync('reg', ['export', 'HKLM\\SYSTEM\\CurrentControlSet\\Services', systemBackupPath, '/y'], { timeout: 60000 }).catch(() => {})
-      const hkcrBackupPath = join(backupDir, `registry-backup-HKCR-${timestamp}.reg`)
-      await execFileAsync('reg', ['export', 'HKCR\\CLSID', hkcrBackupPath, '/y'], { timeout: 60000 }).catch(() => {})
+      // Back up HKCR branches that fix operations may delete from
+      const hkcrClsidPath = join(backupDir, `registry-backup-HKCR-CLSID-${timestamp}.reg`)
+      await execFileAsync('reg', ['export', 'HKCR\\CLSID', hkcrClsidPath, '/y'], { timeout: 60000 }).catch(() => {})
+      const hkcrIfacePath = join(backupDir, `registry-backup-HKCR-Interface-${timestamp}.reg`)
+      await execFileAsync('reg', ['export', 'HKCR\\Interface', hkcrIfacePath, '/y'], { timeout: 60000 }).catch(() => {})
+      const hkcrMimePath = join(backupDir, `registry-backup-HKCR-MIME-${timestamp}.reg`)
+      await execFileAsync('reg', ['export', 'HKCR\\MIME', hkcrMimePath, '/y'], { timeout: 30000 }).catch(() => {})
+      // Shell extension handlers are under HKCR\*\shellex, HKCR\Directory\shellex, HKCR\Folder\shellex
+      for (const shellRoot of ['*', 'Directory', 'Folder']) {
+        const shellPath = join(backupDir, `registry-backup-HKCR-${shellRoot}-shellex-${timestamp}.reg`)
+        await execFileAsync('reg', ['export', `HKCR\\${shellRoot}\\shellex`, shellPath, '/y'], { timeout: 30000 }).catch(() => {})
+      }
     } catch {
       // Backup failed, but continue
     }
