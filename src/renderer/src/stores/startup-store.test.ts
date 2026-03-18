@@ -6,8 +6,9 @@ function makeItem(overrides: Partial<StartupItem> = {}): StartupItem {
   return {
     id: 'item-1',
     name: 'Test App',
+    displayName: 'Test App',
     enabled: true,
-    source: 'registry',
+    source: 'registry-hkcu',
     location: 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
     command: 'C:\\App\\test.exe',
     impact: 'high',

@@ -5,9 +5,11 @@ import type { RegistryEntry } from '@shared/types'
 function makeEntry(overrides: Partial<RegistryEntry> = {}): RegistryEntry {
   return {
     id: 'entry-1',
-    type: 'broken_file_assoc',
-    path: 'HKCR\\.xyz',
+    type: 'broken',
+    keyPath: 'HKCR\\.xyz',
+    valueName: '',
     issue: 'Broken file association',
+    risk: 'low' as const,
     selected: false,
     ...overrides,
   }
@@ -54,12 +56,12 @@ describe('registry-store', () => {
 
   it('toggleCardAll selects all entries of given types when not all selected', () => {
     useRegistryStore.getState().setEntries([
-      makeEntry({ id: '1', type: 'broken_file_assoc', selected: false }),
-      makeEntry({ id: '2', type: 'broken_file_assoc', selected: true }),
-      makeEntry({ id: '3', type: 'invalid_com', selected: false }),
+      makeEntry({ id: '1', type: 'broken', selected: false }),
+      makeEntry({ id: '2', type: 'broken', selected: true }),
+      makeEntry({ id: '3', type: 'invalid', selected: false }),
     ])
 
-    useRegistryStore.getState().toggleCardAll(['broken_file_assoc'])
+    useRegistryStore.getState().toggleCardAll(['broken'])
 
     const entries = useRegistryStore.getState().entries
     expect(entries[0].selected).toBe(true) // toggled on
@@ -69,11 +71,11 @@ describe('registry-store', () => {
 
   it('toggleCardAll deselects all when all are already selected', () => {
     useRegistryStore.getState().setEntries([
-      makeEntry({ id: '1', type: 'broken_file_assoc', selected: true }),
-      makeEntry({ id: '2', type: 'broken_file_assoc', selected: true }),
+      makeEntry({ id: '1', type: 'broken', selected: true }),
+      makeEntry({ id: '2', type: 'broken', selected: true }),
     ])
 
-    useRegistryStore.getState().toggleCardAll(['broken_file_assoc'])
+    useRegistryStore.getState().toggleCardAll(['broken'])
 
     const entries = useRegistryStore.getState().entries
     expect(entries[0].selected).toBe(false)
@@ -82,12 +84,12 @@ describe('registry-store', () => {
 
   it('toggleCardAll works with multiple types', () => {
     useRegistryStore.getState().setEntries([
-      makeEntry({ id: '1', type: 'broken_file_assoc', selected: false }),
-      makeEntry({ id: '2', type: 'invalid_com', selected: false }),
-      makeEntry({ id: '3', type: 'orphan_key', selected: false }),
+      makeEntry({ id: '1', type: 'broken', selected: false }),
+      makeEntry({ id: '2', type: 'invalid', selected: false }),
+      makeEntry({ id: '3', type: 'orphaned', selected: false }),
     ])
 
-    useRegistryStore.getState().toggleCardAll(['broken_file_assoc', 'invalid_com'])
+    useRegistryStore.getState().toggleCardAll(['broken', 'invalid'])
 
     const entries = useRegistryStore.getState().entries
     expect(entries[0].selected).toBe(true)

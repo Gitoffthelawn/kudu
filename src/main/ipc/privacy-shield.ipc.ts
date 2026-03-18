@@ -324,6 +324,19 @@ const SETTINGS: SettingDef[] = [
     apply: () => regSetDword('HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SearchSettings', 'IsDynamicSearchBoxEnabled', 0)
   },
 
+  {
+    id: 'store-search-suggestions',
+    category: 'search',
+    label: 'Store Search Suggestions',
+    description: 'Disable Microsoft Store search suggestions that send queries to Microsoft',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\WindowsStore', 'DisableStoreSearchSuggestions')
+      return val === 1
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\WindowsStore', 'DisableStoreSearchSuggestions', 1)
+  },
+
   // ─── SYNC & CLOUD ───
   {
     id: 'clipboard-sync',
@@ -374,6 +387,89 @@ const SETTINGS: SettingDef[] = [
     apply: () => regSetDword('HKLM\\SOFTWARE\\Microsoft\\MdmCommon\\SettingValues', 'LocationSyncEnabled', 0)
   },
 
+  // ─── AI FEATURES ───
+  {
+    id: 'copilot',
+    category: 'ai',
+    label: 'Microsoft Copilot',
+    description: 'Disable Microsoft Copilot AI assistant across Windows',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsCopilot', 'TurnOffWindowsCopilot')
+      return val === 1
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsCopilot', 'TurnOffWindowsCopilot', 1)
+  },
+  {
+    id: 'windows-recall',
+    category: 'ai',
+    label: 'Windows Recall',
+    description: 'Disable Windows Recall AI screenshot history that captures everything on screen',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'DisableAIDataAnalysis')
+      return val === 1
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'DisableAIDataAnalysis', 1)
+  },
+  {
+    id: 'click-to-do',
+    category: 'ai',
+    label: 'Click To Do',
+    description: 'Disable Click To Do AI text and image analysis on screen content',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'TurnOffSavingSnapshots')
+      return val === 1
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI', 'TurnOffSavingSnapshots', 1)
+  },
+  {
+    id: 'ai-service-autostart',
+    category: 'ai',
+    label: 'AI Service Auto-Start',
+    description: 'Prevent AI services from automatically starting in the background',
+    requiresAdmin: true,
+    check: async () => !(await isServiceEnabled('AiHost')),
+    apply: () => disableService('AiHost')
+  },
+  {
+    id: 'edge-ai-features',
+    category: 'ai',
+    label: 'Edge Compose AI',
+    description: 'Disable Edge AI text composition and rewriting features',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'ComposeInlineEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'ComposeInlineEnabled', 0)
+  },
+  {
+    id: 'paint-ai',
+    category: 'ai',
+    label: 'Paint AI Features',
+    description: 'Disable AI image generation features in Microsoft Paint',
+    requiresAdmin: false,
+    check: async () => {
+      const val = await regQueryDword('HKCU\\SOFTWARE\\Microsoft\\Paint', 'CocreatorEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKCU\\SOFTWARE\\Microsoft\\Paint', 'CocreatorEnabled', 0)
+  },
+  {
+    id: 'notepad-ai',
+    category: 'ai',
+    label: 'Notepad AI Features',
+    description: 'Disable AI text rewriting features in Microsoft Notepad',
+    requiresAdmin: false,
+    check: async () => {
+      const val = await regQueryDword('HKCU\\SOFTWARE\\Microsoft\\Notepad', 'CowriterEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKCU\\SOFTWARE\\Microsoft\\Notepad', 'CowriterEnabled', 0)
+  },
+
   // ─── TELEMETRY SERVICES ───
   {
     id: 'service-diagtrack',
@@ -392,6 +488,18 @@ const SETTINGS: SettingDef[] = [
     requiresAdmin: true,
     check: async () => !(await isServiceEnabled('dmwappushservice')),
     apply: () => disableService('dmwappushservice')
+  },
+  {
+    id: 'service-delivery-optimization',
+    category: 'services',
+    label: 'Delivery Optimization',
+    description: 'Disable Windows Update P2P sharing — stops your PC from uploading update data to other devices',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization', 'DODownloadMode')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization', 'DODownloadMode', 0)
   },
   {
     id: 'service-mapsbroker',
@@ -484,6 +592,170 @@ const SETTINGS: SettingDef[] = [
     requiresAdmin: true,
     check: async () => !(await isTaskActive('\\Microsoft\\Windows\\Maps\\MapsToastTask')),
     apply: () => disableTask('\\Microsoft\\Windows\\Maps\\MapsToastTask')
+  },
+
+  // ─── BROWSER TELEMETRY ───
+
+  // Edge
+  {
+    id: 'edge-metrics',
+    category: 'browser',
+    label: 'Edge Metrics Reporting',
+    description: 'Stop Edge from sending usage and crash metrics to Microsoft',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'MetricsReportingEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'MetricsReportingEnabled', 0)
+  },
+  {
+    id: 'edge-site-info',
+    category: 'browser',
+    label: 'Edge Site Info Collection',
+    description: 'Stop Edge from sending site URLs to Microsoft to improve services',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'SendSiteInfoToImproveServices')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'SendSiteInfoToImproveServices', 0)
+  },
+  {
+    id: 'edge-personalization',
+    category: 'browser',
+    label: 'Edge Personalization Reporting',
+    description: 'Stop Edge from sending browsing history for ad personalization',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'PersonalizationReportingEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'PersonalizationReportingEnabled', 0)
+  },
+  {
+    id: 'edge-copilot-cdp',
+    category: 'browser',
+    label: 'Edge Copilot Page Access (CDP)',
+    description: 'Prevent Copilot from reading your page content via Chrome DevTools Protocol',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'CopilotCDPPageContext')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'CopilotCDPPageContext', 0)
+  },
+  {
+    id: 'edge-copilot-page',
+    category: 'browser',
+    label: 'Edge Copilot Page Context',
+    description: 'Prevent Copilot from accessing page context for content analysis',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'CopilotPageContext')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'CopilotPageContext', 0)
+  },
+  {
+    id: 'edge-discover',
+    category: 'browser',
+    label: 'Edge Discover Page Scanning',
+    description: 'Stop the Discover feature from scanning page content',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'DiscoverPageContextEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'DiscoverPageContextEnabled', 0)
+  },
+  {
+    id: 'edge-sidebar',
+    category: 'browser',
+    label: 'Edge Sidebar',
+    description: 'Disable the Edge sidebar and its background data collection',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'HubsSidebarEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'HubsSidebarEnabled', 0)
+  },
+  {
+    id: 'edge-shopping',
+    category: 'browser',
+    label: 'Edge Shopping Assistant',
+    description: 'Disable the shopping price comparison tracker in Edge',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'EdgeShoppingAssistantEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge', 'EdgeShoppingAssistantEnabled', 0)
+  },
+
+  // Chrome
+  {
+    id: 'chrome-metrics',
+    category: 'browser',
+    label: 'Chrome Metrics Reporting',
+    description: 'Stop Chrome from sending usage and crash metrics to Google',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'MetricsReportingEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'MetricsReportingEnabled', 0)
+  },
+  {
+    id: 'chrome-feedback',
+    category: 'browser',
+    label: 'Chrome User Feedback',
+    description: 'Prevent Chrome from collecting and sending user feedback data',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'UserFeedbackAllowed')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'UserFeedbackAllowed', 0)
+  },
+  {
+    id: 'chrome-extended-reporting',
+    category: 'browser',
+    label: 'Chrome Extended Safe Browsing',
+    description: 'Stop Chrome from sending extended URL and download reports to Google',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'SafeBrowsingExtendedReportingEnabled')
+      return val === 0
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Google\\Chrome', 'SafeBrowsingExtendedReportingEnabled', 0)
+  },
+
+  // Firefox
+  {
+    id: 'firefox-telemetry',
+    category: 'browser',
+    label: 'Firefox Telemetry',
+    description: 'Disable Firefox telemetry data collection and upload to Mozilla',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Mozilla\\Firefox', 'DisableTelemetry')
+      return val === 1
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Mozilla\\Firefox', 'DisableTelemetry', 1)
+  },
+  {
+    id: 'firefox-default-agent',
+    category: 'browser',
+    label: 'Firefox Default Browser Agent',
+    description: 'Disable the background agent that reports browser usage data to Mozilla',
+    requiresAdmin: true,
+    check: async () => {
+      const val = await regQueryDword('HKLM\\SOFTWARE\\Policies\\Mozilla\\Firefox', 'DisableDefaultBrowserAgent')
+      return val === 1
+    },
+    apply: () => regSetDword('HKLM\\SOFTWARE\\Policies\\Mozilla\\Firefox', 'DisableDefaultBrowserAgent', 1)
   }
 ]
 
