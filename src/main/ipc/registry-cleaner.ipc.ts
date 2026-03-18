@@ -1569,10 +1569,15 @@ export async function fixRegistryEntries(
       mkdirSync(backupDir, { recursive: true })
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
       const backupPath = join(backupDir, `registry-backup-${timestamp}.reg`)
-      // Back up both HKLM and HKCU since fix operations modify both
+      // Back up all hives that fix operations may modify
       await execFileAsync('reg', ['export', 'HKLM\\SOFTWARE', backupPath, '/y'], { timeout: 30000 })
       const hkcuBackupPath = join(backupDir, `registry-backup-HKCU-${timestamp}.reg`)
       await execFileAsync('reg', ['export', 'HKCU\\SOFTWARE', hkcuBackupPath, '/y'], { timeout: 30000 }).catch(() => {})
+      // Back up HKLM\SYSTEM (services, event log sources) and HKCR (COM, interfaces, shell extensions)
+      const systemBackupPath = join(backupDir, `registry-backup-SYSTEM-${timestamp}.reg`)
+      await execFileAsync('reg', ['export', 'HKLM\\SYSTEM\\CurrentControlSet\\Services', systemBackupPath, '/y'], { timeout: 60000 }).catch(() => {})
+      const hkcrBackupPath = join(backupDir, `registry-backup-HKCR-${timestamp}.reg`)
+      await execFileAsync('reg', ['export', 'HKCR\\CLSID', hkcrBackupPath, '/y'], { timeout: 60000 }).catch(() => {})
     } catch {
       // Backup failed, but continue
     }
