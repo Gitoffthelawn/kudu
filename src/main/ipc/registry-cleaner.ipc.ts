@@ -96,14 +96,17 @@ function extractExePath(raw: string): string | null {
   if (quotedMatch) return quotedMatch[1].trim()
   // Case 2: no spaces — the whole string is the path
   if (!trimmed.includes(' ')) return trimmed
-  // Case 3: unquoted with spaces — use the Windows CreateProcess algorithm:
-  // try progressively longer prefixes up to each space, returning the first
-  // that exists on disk as a FILE (not a directory).
-  const spacePositions: number[] = []
+  // Build list of candidate split points: each space position, plus the
+  // end of the string (the full string might be the path with no args).
+  const splitPoints: number[] = []
   for (let i = 0; i < trimmed.length; i++) {
-    if (trimmed[i] === ' ') spacePositions.push(i)
+    if (trimmed[i] === ' ') splitPoints.push(i)
   }
-  for (const pos of spacePositions) {
+  splitPoints.push(trimmed.length) // also try the full string
+  // Case 3: try progressively longer prefixes, returning the first that
+  // exists on disk as a FILE (not a directory). This is the Windows
+  // CreateProcess algorithm for resolving ambiguous unquoted command lines.
+  for (const pos of splitPoints) {
     const candidate = trimmed.substring(0, pos)
     if (candidate) {
       try {
@@ -113,18 +116,16 @@ function extractExePath(raw: string): string | null {
     }
   }
   // Case 4: no candidate exists on disk (the exe is missing). Find the
-  // longest prefix up to a space that ends with a known executable extension.
-  // This preserves the full path for orphan detection (e.g. "C:\Program
-  // Files\Vendor\svc.exe -k" → "C:\Program Files\Vendor\svc.exe").
+  // longest prefix that ends with a known executable extension.
   const exeExtRe = /\.(exe|dll|sys|cmd|bat|com|msc|cpl|scr)$/i
-  for (let i = spacePositions.length - 1; i >= 0; i--) {
-    const candidate = trimmed.substring(0, spacePositions[i])
+  for (let i = splitPoints.length - 1; i >= 0; i--) {
+    const candidate = trimmed.substring(0, splitPoints[i])
     if (exeExtRe.test(candidate)) return candidate
   }
-  // Case 5: no extension-bearing candidate either — first token only.
+  // Case 5: no extension-bearing candidate — first token only.
   // Handles PATH-resolved commands like "rundll32.exe helper.dll,Entry"
   // where the exe name has no backslash path.
-  return trimmed.substring(0, spacePositions[0])
+  return trimmed.substring(0, splitPoints[0])
 }
 
 /**
