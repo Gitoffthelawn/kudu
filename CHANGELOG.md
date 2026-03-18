@@ -1,3 +1,16 @@
+# [1.11.0](https://github.com/adventdevinc/kudu/compare/v1.10.0...v1.11.0) (2026-03-18)
+
+
+### Bug Fixes
+
+* **linux:** support libasound2 on older Ubuntu versions ([60b5c0e](https://github.com/adventdevinc/kudu/commit/60b5c0e3e6418a0a81e1971046844c188c5d5053))
+* **linux:** use apt-cache policy for more reliable package detection ([2d6c503](https://github.com/adventdevinc/kudu/commit/2d6c503cb6ec392d7cb693d21b916e08c36a157b))
+* **linux:** use apt-get --dry-run for package detection ([e9e28d6](https://github.com/adventdevinc/kudu/commit/e9e28d625bb50b68949e78f8e777aba0897e7058))
+
+
+### Features
+
+* add database optimizer, shortcut cleaner, and disk repair tools ([301d502](https://github.com/adventdevinc/kudu/commit/301d50229d87ef44ff3b749c980d952a89f178e3))
 # [1.10.0](https://github.com/adventdevinc/kudu/compare/v1.9.0...v1.10.0) (2026-03-17)
 
 
