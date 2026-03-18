@@ -160,29 +160,39 @@ async function clsidExists(clsid: string): Promise<boolean> {
  *   - null if the DLL exists on disk (healthy)
  */
 async function findMissingClsidDll(clsid: string): Promise<string | 'no-inproc' | null> {
-  try {
-    const { stdout } = await execFileAsync('reg', [
-      'query', `HKCR\\CLSID\\${clsid}\\InprocServer32`
-    ], { timeout: 5000 })
-    const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
-    if (dllMatch) {
-      const dllPath = dllMatch[1].trim().replace(/"/g, '')
-      if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
-        return dllPath // Native view DLL is missing
+  // Check both native and WOW6432Node views for InprocServer32/LocalServer32.
+  // A CLSID may only exist in one view (clsidExists checks both), so we must
+  // probe both here too to avoid false 'no-inproc' for 32-bit-only CLSIDs.
+  const prefixes = [
+    `HKCR\\CLSID\\${clsid}`,
+    `HKCR\\WOW6432Node\\CLSID\\${clsid}`
+  ]
+  for (const prefix of prefixes) {
+    // Check InprocServer32
+    try {
+      const { stdout } = await execFileAsync('reg', [
+        'query', `${prefix}\\InprocServer32`
+      ], { timeout: 5000 })
+      const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
+      if (dllMatch) {
+        const dllPath = dllMatch[1].trim().replace(/"/g, '')
+        if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%')) {
+          if (existsSync(dllPath)) return null // DLL exists — healthy
+          return dllPath // DLL missing in this view
+        }
       }
-    }
-    return null // DLL exists or no parseable path
-  } catch {
-    // InprocServer32 subkey doesn't exist — check if the CLSID uses LocalServer32
+      return null // InprocServer32 exists but no parseable path
+    } catch { /* No InprocServer32 in this view */ }
+    // Check LocalServer32 as fallback
     try {
       await execFileAsync('reg', [
-        'query', `HKCR\\CLSID\\${clsid}\\LocalServer32`
+        'query', `${prefix}\\LocalServer32`
       ], { timeout: 5000 })
-      return null // Uses out-of-process server, not broken
-    } catch {
-      return 'no-inproc' // No InprocServer32 and no LocalServer32 — broken registration
-    }
+      return null // Uses out-of-process server — healthy
+    } catch { /* No LocalServer32 in this view either */ }
   }
+  // Neither view has InprocServer32 or LocalServer32
+  return 'no-inproc'
 }
 
 // ── Exported core logic ──
@@ -1631,9 +1641,14 @@ export async function fixRegistryEntries(
       const hkcrMimePath = join(backupDir, `registry-backup-HKCR-MIME-${timestamp}.reg`)
       await execFileAsync('reg', ['export', 'HKCR\\MIME', hkcrMimePath, '/y'], { timeout: 30000 }).catch(() => {})
       // Shell extension handlers are under HKCR\*\shellex, HKCR\Directory\shellex, HKCR\Folder\shellex
-      for (const shellRoot of ['*', 'Directory', 'Folder']) {
-        const shellPath = join(backupDir, `registry-backup-HKCR-${shellRoot}-shellex-${timestamp}.reg`)
-        await execFileAsync('reg', ['export', `HKCR\\${shellRoot}\\shellex`, shellPath, '/y'], { timeout: 30000 }).catch(() => {})
+      const shellRoots = [
+        { key: '*', file: 'AllFileTypes' },
+        { key: 'Directory', file: 'Directory' },
+        { key: 'Folder', file: 'Folder' }
+      ]
+      for (const { key, file } of shellRoots) {
+        const shellPath = join(backupDir, `registry-backup-HKCR-${file}-shellex-${timestamp}.reg`)
+        await execFileAsync('reg', ['export', `HKCR\\${key}\\shellex`, shellPath, '/y'], { timeout: 30000 }).catch(() => {})
       }
     } catch {
       // Backup failed, but continue
