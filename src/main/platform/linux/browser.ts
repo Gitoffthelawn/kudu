@@ -13,6 +13,7 @@ export function createLinuxBrowser(): PlatformBrowser {
         'google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser',
         'msedge', 'brave-browser', 'vivaldi-bin', 'opera', 'firefox', 'firefox-esr',
         'thorium', 'thorium-browser',
+        'supermium', 'helium', 'cromite',
       ]
 
       for (const proc of processes) {
