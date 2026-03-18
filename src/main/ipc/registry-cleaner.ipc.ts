@@ -749,17 +749,34 @@ export async function scanRegistry(): Promise<RegistryEntry[]> {
               uninstallBroken = true
             }
           }
-          // Only flag as orphaned if the uninstall command itself is broken.
-          // If there's no UninstallString at all but InstallLocation is missing,
-          // the entry is also orphaned (no way to uninstall or find the program).
-          let orphaned = false
-          if (uninstallBroken) {
-            orphaned = true
-          } else if (!uninstallStrMatch && installLocMatch) {
+          // A broken uninstaller alone doesn't mean the program is removed — many
+          // installed programs have stale uninstaller paths after auto-updates.
+          // Only flag as orphaned when we can confirm the program is actually gone:
+          // the install directory must also be missing (or not set).
+          let installDirExists = false
+          if (installLocMatch) {
             const installLoc = installLocMatch[1].trim().replace(/"/g, '')
-            if (installLoc && installLoc.length > 3 && installLoc.includes('\\') && !existsSync(installLoc)) {
-              orphaned = true
+            if (installLoc && installLoc.length > 3 && installLoc.includes('\\')) {
+              installDirExists = existsSync(installLoc)
             }
+          }
+          // Also check DisplayIcon as a fallback — it typically points to the main exe
+          if (!installDirExists) {
+            const iconMatch = block.match(/DisplayIcon\s+REG_(?:EXPAND_)?SZ\s+(.+)/i)
+            if (iconMatch) {
+              const iconPath = iconMatch[1].trim().replace(/"/g, '').split(',')[0].trim()
+              if (iconPath && iconPath.includes('\\') && !iconPath.startsWith('%') && existsSync(iconPath)) {
+                installDirExists = true
+              }
+            }
+          }
+
+          let orphaned = false
+          if (uninstallBroken && !installDirExists) {
+            orphaned = true
+          } else if (!uninstallStrMatch && !installDirExists && installLocMatch) {
+            // No UninstallString and install location is gone
+            orphaned = true
           }
           if (orphaned) {
             entries.push({
