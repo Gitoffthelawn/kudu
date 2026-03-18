@@ -141,6 +141,7 @@ export function SettingsPage() {
     if (schedule.enabled && !settings.runAtStartup) {
       save({ runAtStartup: true })
       window.kudu?.applyStartup?.(true).catch(() => {
+        save({ runAtStartup: false })
         toast.error('Failed to enable startup. Scheduled scans may not run after reboot.')
       })
     }
