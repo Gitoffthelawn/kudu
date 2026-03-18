@@ -97,17 +97,21 @@ function extractExePath(raw: string): string | null {
   // Case 2: unquoted — progressively try longer prefixes up to each space,
   // matching how Windows CreateProcess resolves ambiguous command lines.
   // Try each space boundary to find the longest prefix that exists on disk.
-  let searchFrom = 0
-  while (true) {
-    const spaceIdx = trimmed.indexOf(' ', searchFrom)
-    if (spaceIdx === -1) break
-    const candidate = trimmed.substring(0, spaceIdx)
-    if (candidate && existsSync(candidate)) return candidate
-    searchFrom = spaceIdx + 1
+  if (trimmed.includes(' ')) {
+    let searchFrom = 0
+    while (true) {
+      const spaceIdx = trimmed.indexOf(' ', searchFrom)
+      if (spaceIdx === -1) break
+      const candidate = trimmed.substring(0, spaceIdx)
+      if (candidate && existsSync(candidate)) return candidate
+      searchFrom = spaceIdx + 1
+    }
+    // No space-boundary candidate exists on disk — return the first token.
+    // This handles PATH-resolved commands like "rundll32.exe C:\...\helper.dll"
+    // where the exe has no absolute path but the arguments contain backslashes.
+    return trimmed.substring(0, trimmed.indexOf(' '))
   }
-  // Case 3: no candidate matched — return the full string (may be a path
-  // with no args, or a path whose file is missing — the caller's
-  // existsSync check will handle the latter)
+  // Case 3: no spaces at all — the whole string is the path
   return trimmed
 }
 
@@ -135,8 +139,13 @@ async function clsidExists(clsid: string): Promise<boolean> {
 
 /**
  * Check if a CLSID's InprocServer32 DLL exists on disk.
- * Probes both native and WOW6432Node registry views and returns
- * the missing DLL path if found in neither, or null if valid.
+ * Evaluates each registry view (native 64-bit and WOW6432Node) independently
+ * because they are bitness-specific: a surviving 32-bit DLL does not make a
+ * broken 64-bit registration usable, and vice versa.
+ *
+ * Returns the missing DLL path from the first view that has a broken
+ * registration, or null if all registered views are healthy (or if the
+ * CLSID uses LocalServer32 instead).
  */
 async function findMissingClsidDll(clsid: string): Promise<string | null> {
   const views = [
@@ -149,22 +158,14 @@ async function findMissingClsidDll(clsid: string): Promise<string | null> {
       const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
       if (dllMatch) {
         const dllPath = dllMatch[1].trim().replace(/"/g, '')
-        if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && existsSync(dllPath)) {
-          return null // DLL found on disk — not orphaned
+        if (dllPath && dllPath.includes('\\') && !dllPath.startsWith('%') && !existsSync(dllPath)) {
+          return dllPath // This view's DLL is missing — report it
         }
-        // DLL path exists in registry but file missing — continue checking other view
+        // This view's DLL exists on disk — this view is healthy
       }
-    } catch { /* key doesn't exist in this view */ }
+    } catch { /* key doesn't exist in this view — not registered here */ }
   }
-  // Neither view had a valid DLL, return the path from the first match for the issue message
-  for (const key of views) {
-    try {
-      const { stdout } = await execFileAsync('reg', ['query', key], { timeout: 5000 })
-      const dllMatch = stdout.match(/\(Default\)\s+REG_SZ\s+(.+)/i)
-      if (dllMatch) return dllMatch[1].trim().replace(/"/g, '')
-    } catch { /* skip */ }
-  }
-  return null // No InprocServer32 in either view — may use LocalServer32, not orphaned
+  return null // All registered views are healthy, or CLSID uses LocalServer32
 }
 
 // ── Exported core logic ──
