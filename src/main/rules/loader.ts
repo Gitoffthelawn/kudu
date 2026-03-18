@@ -226,6 +226,10 @@ export function buildCleanerPaths(json: RulesJsonSet, platform: 'win32' | 'darwi
         vivaldi: config.vivaldi,
         arc: config.arc,
         chromium: config.chromium,
+        thorium: config.thorium,
+        supermium: config.supermium,
+        helium: config.helium,
+        cromite: config.cromite,
         firefox: firefoxResolved,
         safari: safariResolved,
       } as BrowserPathConfig

@@ -15,7 +15,11 @@
     { "key": "operaGX", "base": "${CONFIG}/opera-gx" },
     { "key": "vivaldi", "base": "${CONFIG}/vivaldi" },
     { "key": "arc", "base": "${CONFIG}/arc/User Data" },
-    { "key": "chromium", "base": "${CONFIG}/chromium" }
+    { "key": "chromium", "base": "${CONFIG}/chromium" },
+    { "key": "thorium", "base": "${CONFIG}/thorium" },
+    { "key": "supermium", "base": "${CONFIG}/supermium" },
+    { "key": "helium", "base": "${CONFIG}/helium" },
+    { "key": "cromite", "base": "${CONFIG}/cromite" }
   ],
   "firefox": {
     "base": "${HOME}/.mozilla/firefox",

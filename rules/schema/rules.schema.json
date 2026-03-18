@@ -66,7 +66,7 @@
       "properties": {
         "key": {
           "type": "string",
-          "enum": ["chrome", "edge", "brave", "opera", "operaGX", "vivaldi", "arc", "chromium"],
+          "enum": ["chrome", "edge", "brave", "opera", "operaGX", "vivaldi", "arc", "chromium", "thorium", "supermium", "helium", "cromite"],
           "description": "Browser identifier matching the BrowserPathConfig keys"
         },
         "base": { "$ref": "#/definitions/TemplatePath" }

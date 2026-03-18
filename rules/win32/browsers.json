@@ -15,7 +15,11 @@
     { "key": "operaGX", "base": "${APPDATA}/Opera Software/Opera GX Stable" },
     { "key": "vivaldi", "base": "${LOCALAPPDATA}/Vivaldi/User Data" },
     { "key": "arc", "base": "${LOCALAPPDATA}/Arc/User Data" },
-    { "key": "chromium", "base": "${LOCALAPPDATA}/Chromium/User Data" }
+    { "key": "chromium", "base": "${LOCALAPPDATA}/Chromium/User Data" },
+    { "key": "thorium", "base": "${LOCALAPPDATA}/Thorium/User Data" },
+    { "key": "supermium", "base": "${LOCALAPPDATA}/Supermium/User Data" },
+    { "key": "helium", "base": "${LOCALAPPDATA}/imput/Helium/User Data" },
+    { "key": "cromite", "base": "${LOCALAPPDATA}/Cromite/User Data" }
   ],
   "firefox": {
     "base": "${APPDATA}/Mozilla/Firefox/Profiles",
