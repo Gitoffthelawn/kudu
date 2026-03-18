@@ -13,7 +13,9 @@ import {
   AlertTriangle,
   Cpu,
   Globe,
-  Lock
+  Lock,
+  Compass,
+  BrainCircuit
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -115,6 +117,24 @@ const categories: CategoryDef[] = [
     color: '#f97316',
     bg: 'rgba(249,115,22,0.08)',
     border: 'rgba(249,115,22,0.15)'
+  },
+  {
+    id: 'ai',
+    label: 'AI Features',
+    description: 'Disable Copilot, Recall, and other AI features that analyze your data',
+    icon: BrainCircuit,
+    color: '#ec4899',
+    bg: 'rgba(236,72,153,0.08)',
+    border: 'rgba(236,72,153,0.15)'
+  },
+  {
+    id: 'browser',
+    label: 'Browser Telemetry',
+    description: 'Stop browsers from reporting usage data to Microsoft, Google, and Mozilla',
+    icon: Compass,
+    color: '#0ea5e9',
+    bg: 'rgba(14,165,233,0.08)',
+    border: 'rgba(14,165,233,0.15)'
   }
 ]
 

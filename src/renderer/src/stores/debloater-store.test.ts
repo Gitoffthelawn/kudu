@@ -7,9 +7,10 @@ function makeApp(overrides: Partial<BloatwareApp> = {}): BloatwareApp {
     id: 'app-1',
     name: 'Xbox Game Bar',
     packageName: 'Microsoft.XboxGamingOverlay',
+    publisher: 'Microsoft',
     description: 'Gaming overlay',
     category: 'gaming',
-    size: 50_000_000,
+    size: '50000000',
     selected: false,
     ...overrides,
   }

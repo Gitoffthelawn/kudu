@@ -33,6 +33,7 @@ export type AllowedScanType =
   | 'network'
   | 'recycle-bin'
   | 'uninstall-leftovers'
+  | 'database'
 
 export type CloudCommand =
   | { type: 'scan'; requestId: string; scanType: AllowedScanType }

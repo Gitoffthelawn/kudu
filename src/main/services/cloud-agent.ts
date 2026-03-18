@@ -1552,6 +1552,7 @@ class CloudAgentService {
     const validScanTypes = new Set<string>([
       'system', 'browser', 'app', 'gaming', 'registry',
       'malware', 'network', 'recycle-bin', 'uninstall-leftovers',
+      'database',
     ])
     if (typeof scanType !== 'string' || !validScanTypes.has(scanType)) {
       await this.postCommandResult(requestId, false, undefined, 'Invalid scan type')
