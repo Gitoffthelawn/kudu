@@ -163,7 +163,7 @@ const api = {
 
   // Scheduled scans
   scheduleNextScan: (): Promise<string | null> => ipcRenderer.invoke(IPC.SCHEDULE_NEXT_SCAN),
-  applyStartup: (enabled: boolean) => ipcRenderer.send(IPC.SETTINGS_APPLY_STARTUP, enabled),
+  applyStartup: (enabled: boolean): Promise<void> => ipcRenderer.invoke(IPC.SETTINGS_APPLY_STARTUP, enabled),
   applyTray: (enabled: boolean) => ipcRenderer.send(IPC.SETTINGS_APPLY_TRAY, enabled),
   onScheduledScanTrigger: (callback: () => void) => {
     const handler = () => callback()
