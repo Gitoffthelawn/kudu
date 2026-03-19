@@ -1,3 +1,9 @@
+# [1.15.0](https://github.com/adventdevinc/kudu/compare/v1.14.0...v1.15.0) (2026-03-19)
+
+
+### Features
+
+* **schedules:** dedicated Schedules page with multi-schedule support ([#26](https://github.com/adventdevinc/kudu/issues/26)) ([c19fa1f](https://github.com/adventdevinc/kudu/commit/c19fa1faf285c5a7079f110e5fff4b974754eff1))
 # [1.14.0](https://github.com/adventdevinc/kudu/compare/v1.13.0...v1.14.0) (2026-03-18)
 
 
