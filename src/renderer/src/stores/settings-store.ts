@@ -29,6 +29,7 @@ const defaultSettings: KuduSettings = {
     day: 1,
     hour: 9
   },
+  schedules: [],
   cloud: {
     apiKey: '',
     serverUrl: '',
@@ -54,15 +55,22 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         ...partial,
         cleaner: { ...s.settings.cleaner, ...(partial.cleaner ?? {}) },
         schedule: { ...s.settings.schedule, ...(partial.schedule ?? {}) },
+        // schedules is an array — replace entirely when provided
+        schedules: partial.schedules ?? s.settings.schedules,
         cloud: { ...s.settings.cloud, ...(partial.cloud ?? {}) }
       }
     }))
 }))
 
+/** Re-fetch settings from main process into the store */
+export function refreshSettings(): void {
+  window.kudu?.settingsGet?.().then((settings) => {
+    useSettingsStore.getState().setSettings(settings)
+  }).catch(() => {})
+}
+
 // Hydrate settings eagerly so pages that depend on them (e.g. ThreatMonitorPage)
 // don't see stale defaults before the user visits Settings.
 if (typeof window !== 'undefined' && window.kudu) {
-  window.kudu.settingsGet?.().then((settings) => {
-    useSettingsStore.getState().setSettings(settings)
-  }).catch(() => {})
+  refreshSettings()
 }
