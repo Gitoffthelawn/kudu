@@ -1,4 +1,5 @@
 import * as si from 'systeminformation'
+import * as os from 'os'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 import { IPC } from '../../shared/channels'
@@ -23,6 +24,10 @@ export class PerfMonitorService {
   // Guards to prevent overlapping async calls from piling up if si hangs
   private snapshotRunning = false
   private processesRunning = false
+  // Cache expensive si.networkStats() — poll every 5s, reuse in between
+  private cachedNetworkStats = { rxBytesPerSec: 0, txBytesPerSec: 0 }
+  private lastNetworkPoll = 0
+  private readonly NETWORK_POLL_INTERVAL_MS = 5000
 
   async getSystemInfo(): Promise<PerfSystemInfo> {
     if (this.cachedSystemInfo) return this.cachedSystemInfo
@@ -213,12 +218,41 @@ export class PerfMonitorService {
     this.snapshotRunning = true
 
     try {
-      const [load, mem, disk, net] = await Promise.all([
+      // Only poll si.networkStats() every 5s — it costs ~320ms per call.
+      const now = Date.now()
+      const needsNetworkPoll = now - this.lastNetworkPoll >= this.NETWORK_POLL_INTERVAL_MS
+
+      // On Windows, si.mem() costs ~290ms per call — use os.totalmem()/os.freemem()
+      // instead (identical values, near-zero cost). On Linux/macOS, si.mem() is cheap
+      // (reads /proc/meminfo or vm_stat) and os.freemem() excludes buffers/cache,
+      // so we must keep si.mem() to avoid overstating memory pressure.
+      const isWindows = process.platform === 'win32'
+
+      const [load, disk, net, mem] = await Promise.all([
         si.currentLoad(),
-        si.mem(),
         si.disksIO(),
-        si.networkStats()
+        needsNetworkPoll ? si.networkStats() : Promise.resolve(null),
+        isWindows ? Promise.resolve(null) : si.mem()
       ])
+
+      if (net) {
+        this.cachedNetworkStats = {
+          rxBytesPerSec: net.reduce((sum, n) => sum + n.rx_sec, 0),
+          txBytesPerSec: net.reduce((sum, n) => sum + n.tx_sec, 0)
+        }
+        this.lastNetworkPoll = now
+      }
+
+      let usedMem: number, totalMem: number, cachedMem: number
+      if (isWindows) {
+        totalMem = os.totalmem()
+        usedMem = totalMem - os.freemem()
+        cachedMem = 0
+      } else {
+        usedMem = mem!.active
+        totalMem = mem!.total
+        cachedMem = mem!.cached
+      }
 
       const snapshot: PerfSnapshot = {
         timestamp: Date.now(),
@@ -227,19 +261,16 @@ export class PerfMonitorService {
           perCore: load.cpus.map((c) => c.load)
         },
         memory: {
-          usedBytes: mem.active,
-          totalBytes: mem.total,
-          cachedBytes: mem.cached,
-          percent: (mem.active / mem.total) * 100
+          usedBytes: usedMem,
+          totalBytes: totalMem,
+          cachedBytes: cachedMem,
+          percent: (usedMem / totalMem) * 100
         },
         disk: {
           readBytesPerSec: disk?.rIO_sec ?? 0,
           writeBytesPerSec: disk?.wIO_sec ?? 0
         },
-        network: {
-          rxBytesPerSec: net.reduce((sum, n) => sum + n.rx_sec, 0),
-          txBytesPerSec: net.reduce((sum, n) => sum + n.tx_sec, 0)
-        },
+        network: this.cachedNetworkStats,
         uptime: si.time().uptime
       }
 
