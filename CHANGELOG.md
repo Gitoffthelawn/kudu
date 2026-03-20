@@ -1,3 +1,14 @@
+# [1.16.0](https://github.com/adventdevinc/kudu/compare/v1.15.0...v1.16.0) (2026-03-20)
+
+
+### Bug Fixes
+
+* **monitor:** skip inbound connections on servers in threat monitor ([#29](https://github.com/adventdevinc/kudu/issues/29)) ([6025e67](https://github.com/adventdevinc/kudu/commit/6025e677a217eef5cd7f7980d4bef6899f0e85fc))
+
+
+### Performance Improvements
+
+* **monitor:** reduce CPU overhead by 90% ([#28](https://github.com/adventdevinc/kudu/issues/28)) ([5cc2f3d](https://github.com/adventdevinc/kudu/commit/5cc2f3dcdf5fa8316340b69b2d9ff94f242992a1))
 # [1.15.0](https://github.com/adventdevinc/kudu/compare/v1.14.0...v1.15.0) (2026-03-19)
 
 
