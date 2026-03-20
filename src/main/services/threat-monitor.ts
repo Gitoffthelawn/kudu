@@ -139,6 +139,13 @@ class ThreatMonitorService {
   private seenConnections: Map<string, number> = new Map()
   private seenDomains: Map<string, number> = new Map()
 
+  // When true, only outbound connections are checked (inbound to listening ports are skipped)
+  private isServerMode = false
+
+  // Guards against start()/reloadBlacklist() resurrecting timers after stop() is called
+  // while the async isServer() call is in flight
+  private stopped = true
+
   // Callback fired immediately when new threats are detected
   private onThreatDetected: ThreatCallback | null = null
 
@@ -147,7 +154,8 @@ class ThreatMonitorService {
     this.onThreatDetected = cb
   }
 
-  start(): void {
+  async start(): Promise<void> {
+    this.stopped = false
     this.loadAndBuildLookups()
 
     if (!this.blacklist) {
@@ -155,10 +163,23 @@ class ThreatMonitorService {
       return
     }
 
+    // Start scanning immediately with current isServerMode (defaults to false, i.e.
+    // flag everything). This avoids a multi-second blind window while isServer()
+    // shells out to systemctl/loginctl on Linux.
     this.startTimers()
+
+    // Detect server mode in the background; subsequent scans pick up the updated value.
+    // Until this resolves, scans flag all connections — the safe direction (no missed threats).
+    const serverMode = await getPlatform().security.isServer()
+    if (this.stopped) return
+    this.isServerMode = serverMode
+    if (this.isServerMode) {
+      logInfo('Threat monitor: server mode detected — only outbound connections will be flagged')
+    }
   }
 
   stop(): void {
+    this.stopped = true
     if (this.connectionTimer) { clearInterval(this.connectionTimer); this.connectionTimer = null }
     if (this.dnsTimer) { clearInterval(this.dnsTimer); this.dnsTimer = null }
     this.flaggedConnections = []
@@ -169,7 +190,7 @@ class ThreatMonitorService {
     this.lastDnsScanAt = null
   }
 
-  reloadBlacklist(): void {
+  async reloadBlacklist(): Promise<void> {
     const wasRunning = this.connectionTimer !== null
     if (wasRunning) {
       if (this.connectionTimer) { clearInterval(this.connectionTimer); this.connectionTimer = null }
@@ -186,8 +207,15 @@ class ThreatMonitorService {
 
     if (this.blacklist) {
       logInfo(`Threat monitor: blacklist reloaded v${this.blacklist.version} (${this.blacklist.domains.length} domains, ${this.blacklist.ips.length} IPs, ${this.blacklist.cidrs.length} CIDRs)`)
+      // Restart scanning immediately with the previous isServerMode value.
+      // This avoids a blind window while isServer() re-probes.
       this.startTimers()
     }
+
+    // Refresh server mode in the background; subsequent scans pick up the updated value
+    const serverMode = await getPlatform().security.isServer()
+    if (this.stopped) return
+    this.isServerMode = serverMode
   }
 
   getThreatSnapshot(): ThreatSnapshot | null {
@@ -246,15 +274,29 @@ class ThreatMonitorService {
     if (this.connectionScanRunning) return
     this.connectionScanRunning = true
     try {
-      const connections = await getPlatform().network.getEstablishedConnections()
+      const platform = getPlatform()
+      const [connections, listeningPortsArr] = await Promise.all([
+        platform.network.getEstablishedConnections(),
+        this.isServerMode ? platform.network.getListeningPorts() : null,
+      ])
       this.lastConnectionScanAt = new Date().toISOString()
       const newFlags: FlaggedConnection[] = []
       const now = Date.now()
+
+      // In server mode, use listening ports to filter out inbound connections
+      const listeningPorts = listeningPortsArr ? new Set(listeningPortsArr) : null
 
       this.evictExpired(this.seenConnections)
 
       for (const conn of connections) {
         if (this.flaggedConnections.length + newFlags.length >= MAX_ACCUMULATED) break
+
+        // On servers, skip inbound connections: the local port matches a port we are
+        // listening on, so this connection was accept()'d from a remote client.
+        // The OS ephemeral port allocator never assigns a port that is already bound
+        // in LISTEN state, so localPort ∈ listeningPorts reliably identifies inbound
+        // traffic without fragile remote-port-range heuristics.
+        if (listeningPorts && listeningPorts.has(conn.localPort)) continue
 
         const dedupKey = `${conn.remoteAddress}:${conn.remotePort}`
         if (this.seenConnections.has(dedupKey)) continue
