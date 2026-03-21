@@ -1,3 +1,9 @@
+## [1.16.1](https://github.com/adventdevinc/kudu/compare/v1.16.0...v1.16.1) (2026-03-21)
+
+
+### Features
+
+* add macOS code signing and notarization to release workflow ([#3](https://github.com/adventdevinc/kudu/issues/3)) ([b244bdd](https://github.com/adventdevinc/kudu/commit/b244bdd29c851d710b98172d1efe435ccdf55800))
 # [1.16.0](https://github.com/adventdevinc/kudu/compare/v1.15.0...v1.16.0) (2026-03-20)
 
 
