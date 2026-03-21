@@ -1,3 +1,16 @@
+# [1.17.0](https://github.com/adventdevinc/kudu/compare/v1.16.2...v1.17.0) (2026-03-21)
+
+
+### Bug Fixes
+
+* **ci:** add notarization debug logging and build timeout ([7bd0558](https://github.com/adventdevinc/kudu/commit/7bd05588500473855bb08053047dfb69e1409df1))
+* **ci:** use wingetcreate URL pipe syntax for architecture and scope overrides ([5332220](https://github.com/adventdevinc/kudu/commit/533222002a39c4a37ec9c91ae95ed792cf0aab3d))
+* **security:** validate cloud remote-access boolean fields in IPC ([#31](https://github.com/adventdevinc/kudu/issues/31)) ([b5d3439](https://github.com/adventdevinc/kudu/commit/b5d3439c209cab9d172a20269e1927cef37bbd2c))
+
+
+### Features
+
+* add i18n with 30 languages ([#30](https://github.com/adventdevinc/kudu/issues/30)) ([9b2f2d0](https://github.com/adventdevinc/kudu/commit/9b2f2d09b5f0200af5cdf8bca16c852e13c585f0))
 ## [1.16.2](https://github.com/adventdevinc/kudu/compare/v1.16.1...v1.16.2) (2026-03-21)
 
 
