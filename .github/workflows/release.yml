@@ -227,6 +227,8 @@ jobs:
   publish-winget:
     needs: build
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Get version from tag
@@ -234,10 +236,18 @@ jobs:
         shell: bash
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
+      - name: Get release notes
+        shell: bash
+        run: |
+          gh release view "v${{ steps.version.outputs.version }}" --repo AdventDevInc/kudu --json body -q .body \
+            | head -c 10000 > release_notes.txt
+
       - name: Update winget manifest
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
           $url = "https://github.com/AdventDevInc/kudu/releases/download/v$version/Kudu-Setup-$version.exe"
+          $releaseNotes = (Get-Content release_notes.txt -Raw).Trim()
+          $releaseNotesUrl = "https://github.com/AdventDevInc/kudu/releases/tag/v$version"
           Invoke-WebRequest -Uri "https://aka.ms/wingetcreate/latest" -OutFile wingetcreate.exe
-          .\wingetcreate.exe update AdventDevelopmentInc.Kudu --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls "$url|x64|machine" --version $version
+          .\wingetcreate.exe update AdventDevelopmentInc.Kudu --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls "$url|x64|machine" --version $version --release-notes "$releaseNotes" --release-notes-url $releaseNotesUrl
