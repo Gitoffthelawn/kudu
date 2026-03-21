@@ -1,3 +1,9 @@
+## [1.16.2](https://github.com/adventdevinc/kudu/compare/v1.16.1...v1.16.2) (2026-03-21)
+
+
+### Bug Fixes
+
+* **ci:** add winget architecture override and disable choco publish ([a84ccf7](https://github.com/adventdevinc/kudu/commit/a84ccf7aefcfc0ecdbaca1d9e8e0f9f8ffd35817))
 ## [1.16.1](https://github.com/adventdevinc/kudu/compare/v1.16.0...v1.16.1) (2026-03-21)
 
 
