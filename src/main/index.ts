@@ -5,6 +5,7 @@ import { join } from 'path'
 
 const execFileAsync = promisify(execFile)
 import { IPC } from '../shared/channels'
+import { t } from './i18n'
 import { registerCleanerIpc } from './ipc'
 import { getSettings } from './services/settings-store'
 import { startScheduler, stopScheduler, getNextScanTime, notifyScheduledScanComplete, completeScheduleRun } from './services/scheduler'
@@ -190,11 +191,11 @@ function createTray(): void {
   }
 
   tray = new Tray(trayIcon)
-  tray.setToolTip('Kudu')
+  tray.setToolTip(t('trayTooltip'))
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Open Kudu',
+      label: t('openKudu'),
       click: () => {
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.show()
@@ -206,7 +207,7 @@ function createTray(): void {
     },
     { type: 'separator' },
     {
-      label: 'Quit',
+      label: t('quit'),
       click: () => {
         // Force quit — don't intercept close
         if (mainWindow && !mainWindow.isDestroyed()) {
@@ -226,6 +227,36 @@ function createTray(): void {
       createWindow()
     }
   })
+}
+
+/** Rebuild the tray context menu (e.g. after a language change) */
+function rebuildTrayMenu(): void {
+  if (!tray) return
+  tray.setToolTip(t('trayTooltip'))
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: t('openKudu'),
+      click: () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.show()
+          mainWindow.focus()
+        } else {
+          createWindow()
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: t('quit'),
+      click: () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.removeAllListeners('close')
+        }
+        app.quit()
+      }
+    }
+  ])
+  tray.setContextMenu(contextMenu)
 }
 
 function destroyTray(): void {
@@ -368,6 +399,11 @@ app.whenReady().then(() => {
     } else if (!getSettings().schedules.some((s) => s.enabled)) {
       destroyTray()
     }
+  })
+
+  // Rebuild tray menu when language changes so labels update immediately
+  app.on('kudu:language-changed' as any, () => {
+    rebuildTrayMenu()
   })
 
   // IPC to get next scan time for the UI
