@@ -240,4 +240,4 @@ jobs:
           $version = "${{ steps.version.outputs.version }}"
           $url = "https://github.com/AdventDevInc/kudu/releases/download/v$version/Kudu-Setup-$version.exe"
           Invoke-WebRequest -Uri "https://aka.ms/wingetcreate/latest" -OutFile wingetcreate.exe
-          .\wingetcreate.exe update AdventDevelopmentInc.Kudu --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version $version --architecture x64 --scope machine
+          .\wingetcreate.exe update AdventDevelopmentInc.Kudu --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls "$url|x64|machine" --version $version
