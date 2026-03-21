@@ -98,6 +98,8 @@ jobs:
           APPLE_ID: ${{ runner.os == 'macOS' && secrets.APPLE_ID || '' }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ runner.os == 'macOS' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
           APPLE_TEAM_ID: ${{ runner.os == 'macOS' && secrets.APPLE_TEAM_ID || '' }}
+          DEBUG: ${{ runner.os == 'macOS' && 'electron-notarize*' || '' }}
+        timeout-minutes: 30
         run: |
           npx electron-vite build
           if [ "$RUNNER_OS" = "Windows" ]; then
