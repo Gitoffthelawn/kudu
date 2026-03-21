@@ -42,7 +42,10 @@ mac:
         - arm64
   icon: resources/icon.png
   category: public.app-categories.utilities
-  identity: null
+  hardenedRuntime: true
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+  notarize: true
   artifactName: Kudu-${version}-${arch}.${ext}
 
 linux:
