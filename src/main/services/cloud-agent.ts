@@ -1137,6 +1137,11 @@ class CloudAgentService {
       const result = await downloadAndUpdateBlacklist(data.url)
       if (result.success) {
         threatMonitor.reloadBlacklist()
+        // Notify renderer so the Threat Monitor page picks up the new version
+        const win = BrowserWindow.getAllWindows()[0]
+        if (win && !win.isDestroyed()) {
+          win.webContents.send(IPC.THREAT_MONITOR_UPDATED, null)
+        }
         cloudLog('INFO', `Initial blacklist loaded (${result.stats!.domains} domains, ${result.stats!.ips} IPs, ${result.stats!.cidrs} CIDRs)`)
       } else {
         cloudLog('ERROR', `Initial blacklist download failed: ${result.error}`)
@@ -2634,6 +2639,11 @@ class CloudAgentService {
 
     if (result.success) {
       threatMonitor.reloadBlacklist()
+      // Notify renderer so the Threat Monitor page picks up the new version
+      const win = BrowserWindow.getAllWindows()[0]
+      if (win && !win.isDestroyed()) {
+        win.webContents.send(IPC.THREAT_MONITOR_UPDATED, null)
+      }
       await this.postCommandResult(requestId, true, {
         domains: result.stats!.domains,
         ips: result.stats!.ips,
