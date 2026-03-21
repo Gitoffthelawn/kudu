@@ -15,7 +15,9 @@ This handles everything: version bump, changelog generation, commit, tag, push, 
 ## Testing
 
 ```
-npm test
+npm test              # run all tests once (vitest run)
+npm run test:watch    # run tests in watch mode
+npm run validate:rules # validate rule JSON files against schema
 ```
 
 ## Development
