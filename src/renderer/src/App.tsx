@@ -26,12 +26,14 @@ import { UninstallerPage } from './pages/UninstallerPage'
 import { ServiceManagerPage } from './pages/ServiceManagerPage'
 import { SoftwareUpdaterPage } from './pages/SoftwareUpdaterPage'
 import { SchedulesPage } from './pages/SchedulesPage'
+import { GameModePage } from './pages/GameModePage'
 import { Onboarding } from './components/Onboarding'
 import { useStatsStore } from './stores/stats-store'
 import { useHistoryStore } from './stores/history-store'
 import { useAppUpdateStore } from './stores/app-update-store'
 import { useBackgroundScans } from './hooks/useBackgroundScans'
 import { usePlatformLoader, PlatformContext } from './hooks/usePlatform'
+import { initGameModeStore } from './stores/game-mode-store'
 
 export function App() {
   const { i18n } = useTranslation()
@@ -80,6 +82,9 @@ export function App() {
     return cleanup
   }, [initAppUpdate])
 
+  // Hydrate Game Mode status so the sidebar badge works on all pages
+  useEffect(() => { initGameModeStore() }, [])
+
   if (!onboardingChecked) return null
 
   return (
@@ -97,6 +102,7 @@ export function App() {
           <Route path="/network" element={<NetworkCleanupPage />} />
           <Route path="/malware" element={<MalwareScannerPage />} />
           <Route path="/threat-monitor" element={<ThreatMonitorPage />} />
+          <Route path="/game-mode" element={<GameModePage />} />
           <Route path="/performance" element={<PerformanceMonitorPage />} />
           <Route path="/uninstaller" element={<UninstallerPage />} />
           <Route path="/history" element={<HistoryPage />} />
