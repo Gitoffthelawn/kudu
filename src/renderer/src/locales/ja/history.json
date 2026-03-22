@@ -1,6 +1,6 @@
 {
   "pageTitle": "スキャン履歴",
-  "pageDescription": "過去のスキャンとクリーンアップの詳細な結果を表示します",
+  "pageDescription": "過去のスキャンおよびクリーンアップの詳細な結果を表示します",
   "viewOverview": "概要",
   "viewTimeline": "タイムライン",
   "viewCloud": "クラウド",
@@ -19,23 +19,23 @@
     "network": "ネットワーク クリーンアップ",
     "drivers": "ドライバー クリーンアップ",
     "malware": "マルウェア スキャン",
-    "privacy": "プライバシー保護",
+    "privacy": "プライバシー シールド",
     "startup": "スタートアップ マネージャー",
     "services": "サービス マネージャー",
     "softwareUpdate": "ソフトウェア更新",
-    "cveScan": "CVE Scan"
+    "cveScan": "CVE スキャン"
   },
   "overview": {
     "totalScans": "合計スキャン数",
     "spaceRecovered": "回復した容量",
     "itemsProcessed": "処理済み項目",
     "avgDuration": "平均所要時間",
-    "spaceRecoveredOverTime": "期間ごとの回復容量",
+    "spaceRecoveredOverTime": "期間別の回復容量",
     "needTwoScansForChart": "傾向グラフの表示には少なくとも 2 回のスキャンが必要です",
-    "scanTypeDistribution": "スキャン種類の分布",
-    "noData": "データなし",
+    "scanTypeDistribution": "スキャンの種類の分布",
+    "noData": "データがありません",
     "topCategoriesBySpace": "容量別の上位カテゴリ",
-    "noCategoryData": "カテゴリ データなし",
+    "noCategoryData": "カテゴリ データがありません",
     "weeklyActivity": "週間アクティビティ",
     "needTwoWeeksData": "少なくとも 2 週間分のデータが必要です",
     "recentScans": "最近のスキャン",
@@ -123,19 +123,19 @@
     "startupToggle": "スタートアップ切り替え",
     "diskHealth": "ディスクの正常性",
     "privacyScan": "プライバシー スキャン",
-    "privacyApply": "プライバシー設定の適用",
+    "privacyApply": "プライバシーの適用",
     "debloaterScan": "Debloater スキャン",
-    "debloaterRemove": "Debloater 削除",
+    "debloaterRemove": "Debloater の削除",
     "serviceScan": "サービス スキャン",
-    "serviceApply": "サービス設定の適用",
+    "serviceApply": "サービスの適用",
     "malwareQuarantine": "隔離",
-    "malwareDelete": "マルウェア削除",
+    "malwareDelete": "マルウェアの削除",
     "registryScan": "レジストリ スキャン",
     "registryFix": "レジストリ修復"
   },
   "duration": {
-    "lessThanOneSecond": "<1秒",
-    "seconds": "{{count}}秒",
-    "minutesAndSeconds": "{{minutes}}分 {{seconds}}秒"
+    "lessThanOneSecond": "<1s",
+    "seconds": "{{count}}s",
+    "minutesAndSeconds": "{{minutes}}m {{seconds}}s"
   }
 }

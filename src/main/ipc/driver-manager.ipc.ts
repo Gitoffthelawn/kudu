@@ -406,8 +406,16 @@ export async function scanDriverUpdates(
         $criteria = "IsInstalled=0 AND Type='Driver'"
         $result = $searcher.Search($criteria)
 
-        # Cache WMI driver table once (expensive query)
-        $wmiDrivers = @(Get-WmiObject Win32_PnPSignedDriver | Select-Object HardWareID, DriverVersion, DriverDate)
+        # Cache installed driver table once (expensive query)
+        # Use Get-CimInstance (works on PS 5.1+/7+), fall back to Get-WmiObject
+        $wmiDrivers = @()
+        try {
+          $wmiDrivers = @(Get-CimInstance Win32_PnPSignedDriver | Select-Object HardWareID, DriverVersion, DriverDate)
+        } catch {
+          try {
+            $wmiDrivers = @(Get-WmiObject Win32_PnPSignedDriver | Select-Object HardWareID, DriverVersion, DriverDate)
+          } catch {}
+        }
 
         foreach ($update in $result.Updates) {
           $driver = $update.DriverModel
@@ -427,15 +435,21 @@ export async function scanDriverUpdates(
             $verStr = $update.DriverVerDate.ToString('yyyy-MM-dd')
           }
 
-          # Look up current installed version from cached WMI data
+          # Look up current installed version from cached driver data
           $currentVer = ''
           $currentDate = ''
-          if ($hwId) {
+          if ($hwId -and $wmiDrivers.Count -gt 0) {
             $installed = $wmiDrivers | Where-Object { $_.HardWareID -eq $hwId } | Select-Object -First 1
             if ($installed) {
               $currentVer = $installed.DriverVersion
               if ($installed.DriverDate) {
-                try { $currentDate = ([Management.ManagementDateTimeConverter]::ToDateTime($installed.DriverDate)).ToString('yyyy-MM-dd') } catch {}
+                try {
+                  if ($installed.DriverDate -is [datetime]) {
+                    $currentDate = $installed.DriverDate.ToString('yyyy-MM-dd')
+                  } else {
+                    $currentDate = ([Management.ManagementDateTimeConverter]::ToDateTime($installed.DriverDate)).ToString('yyyy-MM-dd')
+                  }
+                } catch {}
               }
             }
           }
@@ -506,6 +520,7 @@ export async function scanDriverUpdates(
       }
     } catch (err: any) {
       console.error('Driver update scan failed:', err?.message || err)
+      if (err?.stderr) console.error('PowerShell stderr:', err.stderr)
     }
 
     return {

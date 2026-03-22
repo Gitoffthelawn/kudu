@@ -23,7 +23,7 @@
     "startup": "Manajer Startup",
     "services": "Manajer Layanan",
     "softwareUpdate": "Pembaruan Perangkat Lunak",
-    "cveScan": "CVE Scan"
+    "cveScan": "Pemindaian CVE"
   },
   "overview": {
     "totalScans": "Total Pemindaian",
@@ -31,13 +31,13 @@
     "itemsProcessed": "Item Diproses",
     "avgDuration": "Durasi Rata-rata",
     "spaceRecoveredOverTime": "Ruang Dipulihkan dari Waktu ke Waktu",
-    "needTwoScansForChart": "Perlu setidaknya 2 pemindaian untuk grafik tren",
+    "needTwoScansForChart": "Memerlukan setidaknya 2 pemindaian untuk grafik tren",
     "scanTypeDistribution": "Distribusi Jenis Pemindaian",
     "noData": "Tidak ada data",
     "topCategoriesBySpace": "Kategori Teratas berdasarkan Ruang",
     "noCategoryData": "Tidak ada data kategori",
     "weeklyActivity": "Aktivitas Mingguan",
-    "needTwoWeeksData": "Perlu setidaknya 2 minggu data",
+    "needTwoWeeksData": "Memerlukan setidaknya 2 minggu data",
     "recentScans": "Pemindaian Terbaru",
     "tooltipSpace": "Ruang",
     "tooltipScans": "Pemindaian"
@@ -99,7 +99,7 @@
     "detailError": "Kesalahan"
   },
   "cloudCommandLabels": {
-    "scan": "Pindai",
+    "scan": "Pemindaian",
     "clean": "Bersihkan",
     "softwareUpdateCheck": "Pemeriksaan Pembaruan",
     "softwareUpdateRun": "Pembaruan Perangkat Lunak",

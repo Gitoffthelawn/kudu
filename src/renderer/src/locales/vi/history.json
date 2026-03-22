@@ -1,16 +1,16 @@
 {
   "pageTitle": "Lịch sử quét",
-  "pageDescription": "Xem kết quả chi tiết từ các lần quét và dọn dẹp trước đây",
+  "pageDescription": "Xem kết quả chi tiết từ các lần quét và dọn dẹp trước đó",
   "viewOverview": "Tổng quan",
   "viewTimeline": "Dòng thời gian",
-  "viewCloud": "Cloud",
+  "viewCloud": "Đám mây",
   "clearButton": "Xóa",
   "emptyStateTitle": "Chưa có lịch sử",
   "emptyStateDescription": "Chạy quét từ các trang Cleaner, Registry hoặc Debloater. Kết quả sẽ xuất hiện tại đây.",
-  "confirmClearCloudTitle": "Xóa lịch sử Cloud",
+  "confirmClearCloudTitle": "Xóa lịch sử Đám mây",
   "confirmClearScanTitle": "Xóa lịch sử quét",
-  "confirmClearCloudDescription": "Thao tác này sẽ xóa vĩnh viễn tất cả mục lịch sử hành động trên cloud. Không thể hoàn tác thao tác này.",
-  "confirmClearScanDescription": "Thao tác này sẽ xóa vĩnh viễn tất cả mục lịch sử quét. Không thể hoàn tác thao tác này.",
+  "confirmClearCloudDescription": "Thao tác này sẽ xóa vĩnh viễn tất cả mục lịch sử hành động trên đám mây. Không thể hoàn tác hành động này.",
+  "confirmClearScanDescription": "Thao tác này sẽ xóa vĩnh viễn tất cả mục lịch sử quét. Không thể hoàn tác hành động này.",
   "confirmClearLabel": "Xóa tất cả",
   "typeLabels": {
     "cleaner": "Dọn dẹp hệ thống",
@@ -23,7 +23,7 @@
     "startup": "Trình quản lý khởi động",
     "services": "Trình quản lý dịch vụ",
     "softwareUpdate": "Cập nhật phần mềm",
-    "cveScan": "CVE Scan"
+    "cveScan": "Quét CVE"
   },
   "overview": {
     "totalScans": "Tổng số lần quét",
@@ -36,9 +36,9 @@
     "noData": "Không có dữ liệu",
     "topCategoriesBySpace": "Danh mục hàng đầu theo dung lượng",
     "noCategoryData": "Không có dữ liệu danh mục",
-    "weeklyActivity": "Hoạt động hằng tuần",
+    "weeklyActivity": "Hoạt động hàng tuần",
     "needTwoWeeksData": "Cần ít nhất 2 tuần dữ liệu",
-    "recentScans": "Lần quét gần đây",
+    "recentScans": "Các lần quét gần đây",
     "tooltipSpace": "Dung lượng",
     "tooltipScans": "Lần quét"
   },
@@ -77,8 +77,8 @@
     "itemsSuffix": "mục"
   },
   "cloud": {
-    "emptyStateTitle": "Chưa có hành động cloud",
-    "emptyStateDescription": "Khi nhận được lệnh từ bảng điều khiển cloud, chúng sẽ xuất hiện tại đây.",
+    "emptyStateTitle": "Chưa có hành động đám mây",
+    "emptyStateDescription": "Khi nhận được lệnh từ bảng điều khiển đám mây, chúng sẽ xuất hiện tại đây.",
     "totalCommands": "Tổng số lệnh",
     "succeeded": "Thành công",
     "failed": "Thất bại",

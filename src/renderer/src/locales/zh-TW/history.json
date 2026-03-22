@@ -23,7 +23,7 @@
     "startup": "啟動管理員",
     "services": "服務管理員",
     "softwareUpdate": "軟體更新",
-    "cveScan": "CVE Scan"
+    "cveScan": "CVE 掃描"
   },
   "overview": {
     "totalScans": "掃描總數",
@@ -67,7 +67,7 @@
   },
   "detail": {
     "scheduledBadge": "已排程",
-    "statFound": "找到",
+    "statFound": "已找到",
     "statProcessed": "已處理",
     "statSkipped": "已略過",
     "statSpaceSaved": "已節省空間",
@@ -94,7 +94,7 @@
     "detailStatusSuccess": "成功",
     "detailStatusFailed": "失敗",
     "detailDuration": "耗時",
-    "detailRequestId": "要求 ID",
+    "detailRequestId": "請求 ID",
     "detailSummary": "摘要",
     "detailError": "錯誤"
   },

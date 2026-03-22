@@ -23,7 +23,7 @@
     "startup": "Gestionnaire de démarrage",
     "services": "Gestionnaire de services",
     "softwareUpdate": "Mise à jour des logiciels",
-    "cveScan": "CVE Scan"
+    "cveScan": "Analyse CVE"
   },
   "overview": {
     "totalScans": "Analyses totales",
@@ -43,7 +43,7 @@
     "tooltipScans": "Analyses"
   },
   "timeline": {
-    "filterAll": "Toutes",
+    "filterAll": "Tout",
     "filterCleaner": "Cleaner",
     "filterRegistry": "Registry",
     "filterDebloater": "Debloater",
@@ -66,7 +66,7 @@
     "dateAt": "à"
   },
   "detail": {
-    "scheduledBadge": "Planifié",
+    "scheduledBadge": "Planifiée",
     "statFound": "Trouvés",
     "statProcessed": "Traités",
     "statSkipped": "Ignorés",

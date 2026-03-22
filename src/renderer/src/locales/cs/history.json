@@ -1,6 +1,6 @@
 {
   "pageTitle": "Historie kontrol",
-  "pageDescription": "Zobrazit podrobné výsledky předchozích kontrol a čištění",
+  "pageDescription": "Zobrazte podrobné výsledky předchozích kontrol a čištění",
   "viewOverview": "Přehled",
   "viewTimeline": "Časová osa",
   "viewCloud": "Cloud",
@@ -19,11 +19,11 @@
     "network": "Vyčištění sítě",
     "drivers": "Vyčištění ovladačů",
     "malware": "Kontrola malwaru",
-    "privacy": "Štít soukromí",
+    "privacy": "Ochrana soukromí",
     "startup": "Správce po spuštění",
     "services": "Správce služeb",
     "softwareUpdate": "Aktualizace softwaru",
-    "cveScan": "CVE Scan"
+    "cveScan": "Kontrola CVE"
   },
   "overview": {
     "totalScans": "Celkem kontrol",
@@ -77,8 +77,8 @@
     "itemsSuffix": "položek"
   },
   "cloud": {
-    "emptyStateTitle": "Zatím žádné akce v cloudu",
-    "emptyStateDescription": "Když budou přijaty příkazy z cloudového panelu, zobrazí se zde.",
+    "emptyStateTitle": "Zatím žádné cloudové akce",
+    "emptyStateDescription": "Jakmile budou přijaty příkazy z cloudového dashboardu, zobrazí se zde.",
     "totalCommands": "Celkem příkazů",
     "succeeded": "Úspěšné",
     "failed": "Neúspěšné",
@@ -100,12 +100,12 @@
   },
   "cloudCommandLabels": {
     "scan": "Kontrola",
-    "clean": "Vyčištění",
+    "clean": "Vyčistit",
     "softwareUpdateCheck": "Kontrola aktualizací",
     "softwareUpdateRun": "Aktualizace softwaru",
     "getStatus": "Stav",
     "getSystemInfo": "Informace o systému",
-    "getHealthReport": "Zpráva o stavu",
+    "getHealthReport": "Přehled stavu",
     "ping": "Ping",
     "shutdown": "Vypnutí",
     "restart": "Restartovat",
@@ -115,7 +115,7 @@
     "runDism": "Oprava DISM",
     "getNetworkConfig": "Konfigurace sítě",
     "getEventLog": "Protokol událostí",
-    "getInstalledApps": "Přehled aplikací",
+    "getInstalledApps": "Přehled nainstalovaných aplikací",
     "driverUpdateScan": "Kontrola ovladačů",
     "driverUpdateInstall": "Instalace ovladačů",
     "driverClean": "Vyčištění ovladačů",

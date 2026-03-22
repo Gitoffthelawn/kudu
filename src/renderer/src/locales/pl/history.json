@@ -23,7 +23,7 @@
     "startup": "Menedżer uruchamiania",
     "services": "Menedżer usług",
     "softwareUpdate": "Aktualizacja oprogramowania",
-    "cveScan": "CVE Scan"
+    "cveScan": "Skanowanie CVE"
   },
   "overview": {
     "totalScans": "Łączna liczba skanowań",
@@ -34,7 +34,7 @@
     "needTwoScansForChart": "Do wykresu trendu wymagane są co najmniej 2 skanowania",
     "scanTypeDistribution": "Rozkład typów skanowania",
     "noData": "Brak danych",
-    "topCategoriesBySpace": "Największe kategorie według zajętego miejsca",
+    "topCategoriesBySpace": "Największe kategorie według zajmowanego miejsca",
     "noCategoryData": "Brak danych kategorii",
     "weeklyActivity": "Aktywność tygodniowa",
     "needTwoWeeksData": "Wymagane są co najmniej 2 tygodnie danych",
@@ -61,8 +61,8 @@
     "columnSpace": "Miejsce",
     "columnDuration": "Czas trwania",
     "columnStatus": "Stan",
-    "scheduledBadge": "Harm.",
-    "noEntriesMatchFilter": "Brak wpisów pasujących do tego filtra",
+    "scheduledBadge": "Zaplan.",
+    "noEntriesMatchFilter": "Żadne wpisy nie pasują do tego filtra",
     "dateAt": "o"
   },
   "detail": {
@@ -78,7 +78,7 @@
   },
   "cloud": {
     "emptyStateTitle": "Brak działań w chmurze",
-    "emptyStateDescription": "Gdy polecenia zostaną odebrane z panelu chmurowego, pojawią się tutaj.",
+    "emptyStateDescription": "Gdy polecenia zostaną odebrane z panelu chmury, pojawią się tutaj.",
     "totalCommands": "Łączna liczba poleceń",
     "succeeded": "Zakończone powodzeniem",
     "failed": "Nieudane",
@@ -101,7 +101,7 @@
   "cloudCommandLabels": {
     "scan": "Skanowanie",
     "clean": "Czyszczenie",
-    "softwareUpdateCheck": "Sprawdzanie aktualizacji",
+    "softwareUpdateCheck": "Sprawdzenie aktualizacji",
     "softwareUpdateRun": "Aktualizacja oprogramowania",
     "getStatus": "Stan",
     "getSystemInfo": "Informacje o systemie",
@@ -109,7 +109,7 @@
     "ping": "Ping",
     "shutdown": "Zamknięcie",
     "restart": "Uruchom ponownie",
-    "windowsUpdateCheck": "Sprawdzanie Windows Update",
+    "windowsUpdateCheck": "Sprawdzenie Windows Update",
     "windowsUpdateInstall": "Windows Update",
     "runSfc": "Skanowanie SFC",
     "runDism": "Naprawa DISM",

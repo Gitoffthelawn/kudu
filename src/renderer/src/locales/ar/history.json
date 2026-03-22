@@ -2,11 +2,11 @@
   "pageTitle": "سجل الفحص",
   "pageDescription": "اعرض النتائج التفصيلية لعمليات الفحص والتنظيف السابقة",
   "viewOverview": "نظرة عامة",
-  "viewTimeline": "الخط الزمني",
+  "viewTimeline": "الجدول الزمني",
   "viewCloud": "السحابة",
   "clearButton": "مسح",
   "emptyStateTitle": "لا يوجد سجل بعد",
-  "emptyStateDescription": "شغّل فحصًا من صفحات Cleaner أو Registry أو Debloater. ستظهر النتائج هنا.",
+  "emptyStateDescription": "قم بتشغيل فحص من صفحات Cleaner أو Registry أو Debloater. ستظهر النتائج هنا.",
   "confirmClearCloudTitle": "مسح سجل السحابة",
   "confirmClearScanTitle": "مسح سجل الفحص",
   "confirmClearCloudDescription": "سيؤدي هذا إلى حذف جميع إدخالات سجل إجراءات السحابة نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
@@ -23,7 +23,7 @@
     "startup": "إدارة بدء التشغيل",
     "services": "إدارة الخدمات",
     "softwareUpdate": "تحديث البرامج",
-    "cveScan": "CVE Scan"
+    "cveScan": "فحص CVE"
   },
   "overview": {
     "totalScans": "إجمالي عمليات الفحص",
@@ -67,21 +67,21 @@
   },
   "detail": {
     "scheduledBadge": "مجدول",
-    "statFound": "تم العثور عليه",
-    "statProcessed": "تمت معالجته",
-    "statSkipped": "تم تخطيه",
+    "statFound": "تم العثور على",
+    "statProcessed": "تمت المعالجة",
+    "statSkipped": "تم التخطي",
     "statSpaceSaved": "المساحة الموفرة",
     "errorCount": "{{count}} خطأ",
     "errorCountPlural": "{{count}} أخطاء",
     "categoriesLabel": "الفئات",
-    "itemsSuffix": "عنصر"
+    "itemsSuffix": "عناصر"
   },
   "cloud": {
     "emptyStateTitle": "لا توجد إجراءات سحابية بعد",
-    "emptyStateDescription": "عند استلام أوامر من لوحة التحكم السحابية، ستظهر هنا.",
+    "emptyStateDescription": "عند استلام الأوامر من لوحة التحكم السحابية، ستظهر هنا.",
     "totalCommands": "إجمالي الأوامر",
-    "succeeded": "نجح",
-    "failed": "فشل",
+    "succeeded": "ناجحة",
+    "failed": "فاشلة",
     "avgDuration": "متوسط المدة",
     "columnStatus": "الحالة",
     "columnCommand": "الأمر",
@@ -128,7 +128,7 @@
     "debloaterRemove": "إزالة Debloater",
     "serviceScan": "فحص الخدمات",
     "serviceApply": "تطبيق الخدمات",
-    "malwareQuarantine": "الحجر الصحي",
+    "malwareQuarantine": "الحجر",
     "malwareDelete": "حذف البرامج الضارة",
     "registryScan": "فحص السجل",
     "registryFix": "إصلاح السجل"

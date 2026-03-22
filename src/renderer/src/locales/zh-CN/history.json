@@ -23,7 +23,7 @@
     "startup": "启动项管理",
     "services": "服务管理",
     "softwareUpdate": "软件更新",
-    "cveScan": "CVE Scan"
+    "cveScan": "CVE 扫描"
   },
   "overview": {
     "totalScans": "扫描总数",
@@ -134,7 +134,7 @@
     "registryFix": "注册表修复"
   },
   "duration": {
-    "lessThanOneSecond": "<1秒",
+    "lessThanOneSecond": "<1s",
     "seconds": "{{count}}秒",
     "minutesAndSeconds": "{{minutes}}分 {{seconds}}秒"
   }

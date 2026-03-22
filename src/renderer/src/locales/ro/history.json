@@ -4,17 +4,17 @@
   "viewOverview": "Prezentare generală",
   "viewTimeline": "Cronologie",
   "viewCloud": "Cloud",
-  "clearButton": "Ștergeți",
-  "emptyStateTitle": "Încă nu există istoric",
+  "clearButton": "Șterge",
+  "emptyStateTitle": "Niciun istoric încă",
   "emptyStateDescription": "Rulați o scanare din paginile Cleaner, Registry sau Debloater. Rezultatele vor apărea aici.",
-  "confirmClearCloudTitle": "Ștergeți istoricul Cloud",
-  "confirmClearScanTitle": "Ștergeți istoricul scanărilor",
-  "confirmClearCloudDescription": "Aceasta va șterge definitiv toate intrările din istoricul acțiunilor cloud. Această acțiune nu poate fi anulată.",
-  "confirmClearScanDescription": "Aceasta va șterge definitiv toate intrările din istoricul scanărilor. Această acțiune nu poate fi anulată.",
-  "confirmClearLabel": "Ștergeți tot",
+  "confirmClearCloudTitle": "Șterge istoricul Cloud",
+  "confirmClearScanTitle": "Șterge istoricul scanărilor",
+  "confirmClearCloudDescription": "Aceasta va șterge definitiv toate înregistrările din istoricul acțiunilor cloud. Această acțiune nu poate fi anulată.",
+  "confirmClearScanDescription": "Aceasta va șterge definitiv toate înregistrările din istoricul scanărilor. Această acțiune nu poate fi anulată.",
+  "confirmClearLabel": "Șterge tot",
   "typeLabels": {
     "cleaner": "Curățare sistem",
-    "registry": "Reparare registry",
+    "registry": "Remediere registry",
     "debloater": "Debloater",
     "network": "Curățare rețea",
     "drivers": "Curățare drivere",
@@ -23,7 +23,7 @@
     "startup": "Manager pornire",
     "services": "Manager servicii",
     "softwareUpdate": "Actualizare software",
-    "cveScan": "CVE Scan"
+    "cveScan": "Scanare CVE"
   },
   "overview": {
     "totalScans": "Total scanări",
@@ -33,7 +33,7 @@
     "spaceRecoveredOverTime": "Spațiu recuperat în timp",
     "needTwoScansForChart": "Sunt necesare cel puțin 2 scanări pentru graficul de tendință",
     "scanTypeDistribution": "Distribuția tipurilor de scanare",
-    "noData": "Nu există date",
+    "noData": "Fără date",
     "topCategoriesBySpace": "Categorii principale după spațiu",
     "noCategoryData": "Nu există date despre categorii",
     "weeklyActivity": "Activitate săptămânală",
@@ -54,7 +54,7 @@
     "filterStartup": "Pornire",
     "filterServices": "Servicii",
     "filterUpdates": "Actualizări",
-    "entriesCount": "{{count}} intrări",
+    "entriesCount": "{{count}} înregistrări",
     "columnType": "Tip",
     "columnDate": "Dată",
     "columnItems": "Elemente",
@@ -62,7 +62,7 @@
     "columnDuration": "Durată",
     "columnStatus": "Stare",
     "scheduledBadge": "Prog.",
-    "noEntriesMatchFilter": "Nicio intrare nu corespunde acestui filtru",
+    "noEntriesMatchFilter": "Nicio înregistrare nu corespunde acestui filtru",
     "dateAt": "la"
   },
   "detail": {
@@ -77,7 +77,7 @@
     "itemsSuffix": "elemente"
   },
   "cloud": {
-    "emptyStateTitle": "Încă nu există acțiuni cloud",
+    "emptyStateTitle": "Nicio acțiune cloud încă",
     "emptyStateDescription": "Când sunt primite comenzi din tabloul de bord cloud, acestea vor apărea aici.",
     "totalCommands": "Total comenzi",
     "succeeded": "Reușite",
@@ -131,7 +131,7 @@
     "malwareQuarantine": "Carantină",
     "malwareDelete": "Ștergere malware",
     "registryScan": "Scanare registry",
-    "registryFix": "Reparare registry"
+    "registryFix": "Remediere registry"
   },
   "duration": {
     "lessThanOneSecond": "<1s",

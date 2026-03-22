@@ -23,7 +23,7 @@
     "startup": "Başlangıç Yöneticisi",
     "services": "Hizmet Yöneticisi",
     "softwareUpdate": "Yazılım Güncellemesi",
-    "cveScan": "CVE Scan"
+    "cveScan": "CVE Taraması"
   },
   "overview": {
     "totalScans": "Toplam Tarama",
@@ -66,7 +66,7 @@
     "dateAt": "saat"
   },
   "detail": {
-    "scheduledBadge": "Zamanlandı",
+    "scheduledBadge": "Zamanlanmış",
     "statFound": "Bulundu",
     "statProcessed": "İşlendi",
     "statSkipped": "Atlandı",
@@ -104,8 +104,8 @@
     "softwareUpdateCheck": "Güncelleme Denetimi",
     "softwareUpdateRun": "Yazılım Güncellemesi",
     "getStatus": "Durum",
-    "getSystemInfo": "Sistem Bilgileri",
-    "getHealthReport": "Sistem Durumu Raporu",
+    "getSystemInfo": "Sistem Bilgisi",
+    "getHealthReport": "Durum Raporu",
     "ping": "Ping",
     "shutdown": "Kapat",
     "restart": "Yeniden Başlat",
@@ -117,7 +117,7 @@
     "getEventLog": "Olay Günlüğü",
     "getInstalledApps": "Uygulama Envanteri",
     "driverUpdateScan": "Sürücü Taraması",
-    "driverUpdateInstall": "Sürücü Kurulumu",
+    "driverUpdateInstall": "Sürücü Yükleme",
     "driverClean": "Sürücü Temizliği",
     "startupList": "Başlangıç Listesi",
     "startupToggle": "Başlangıç Geçişi",

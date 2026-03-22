@@ -23,7 +23,7 @@
     "startup": "Диспетчер автозагрузки",
     "services": "Диспетчер служб",
     "softwareUpdate": "Обновление программ",
-    "cveScan": "CVE Scan"
+    "cveScan": "Проверка CVE"
   },
   "overview": {
     "totalScans": "Всего сканирований",
@@ -31,13 +31,13 @@
     "itemsProcessed": "Обработано элементов",
     "avgDuration": "Средняя длительность",
     "spaceRecoveredOverTime": "Освобождение места по времени",
-    "needTwoScansForChart": "Для графика тенденции требуется как минимум 2 сканирования",
+    "needTwoScansForChart": "Для графика тенденции требуется не менее 2 сканирований",
     "scanTypeDistribution": "Распределение типов сканирования",
     "noData": "Нет данных",
     "topCategoriesBySpace": "Основные категории по объёму",
     "noCategoryData": "Нет данных по категориям",
     "weeklyActivity": "Активность по неделям",
-    "needTwoWeeksData": "Требуется как минимум 2 недели данных",
+    "needTwoWeeksData": "Требуется не менее 2 недель данных",
     "recentScans": "Недавние сканирования",
     "tooltipSpace": "Место",
     "tooltipScans": "Сканирования"
@@ -61,7 +61,7 @@
     "columnSpace": "Место",
     "columnDuration": "Длительность",
     "columnStatus": "Состояние",
-    "scheduledBadge": "По расп.",
+    "scheduledBadge": "По расписанию",
     "noEntriesMatchFilter": "Нет записей, соответствующих этому фильтру",
     "dateAt": "в"
   },
@@ -77,7 +77,7 @@
     "itemsSuffix": "элементов"
   },
   "cloud": {
-    "emptyStateTitle": "Действий из облака пока нет",
+    "emptyStateTitle": "Действий в облаке пока нет",
     "emptyStateDescription": "Когда из облачной панели управления будут получены команды, они появятся здесь.",
     "totalCommands": "Всего команд",
     "succeeded": "Успешно",

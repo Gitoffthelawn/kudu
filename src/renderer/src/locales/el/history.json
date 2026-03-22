@@ -23,7 +23,7 @@
     "startup": "Διαχείριση εκκίνησης",
     "services": "Διαχείριση υπηρεσιών",
     "softwareUpdate": "Ενημέρωση λογισμικού",
-    "cveScan": "CVE Scan"
+    "cveScan": "Σάρωση CVE"
   },
   "overview": {
     "totalScans": "Συνολικές σαρώσεις",
@@ -105,7 +105,7 @@
     "softwareUpdateRun": "Ενημέρωση λογισμικού",
     "getStatus": "Κατάσταση",
     "getSystemInfo": "Πληροφορίες συστήματος",
-    "getHealthReport": "Αναφορά κατάστασης",
+    "getHealthReport": "Αναφορά υγείας",
     "ping": "Ping",
     "shutdown": "Τερματισμός λειτουργίας",
     "restart": "Επανεκκίνηση",
@@ -115,13 +115,13 @@
     "runDism": "Επιδιόρθωση DISM",
     "getNetworkConfig": "Ρυθμίσεις δικτύου",
     "getEventLog": "Αρχείο καταγραφής συμβάντων",
-    "getInstalledApps": "Κατάλογος εφαρμογών",
+    "getInstalledApps": "Απογραφή εφαρμογών",
     "driverUpdateScan": "Σάρωση προγραμμάτων οδήγησης",
     "driverUpdateInstall": "Εγκατάσταση προγράμματος οδήγησης",
     "driverClean": "Καθαρισμός προγραμμάτων οδήγησης",
     "startupList": "Λίστα εκκίνησης",
     "startupToggle": "Εναλλαγή εκκίνησης",
-    "diskHealth": "Κατάσταση δίσκου",
+    "diskHealth": "Υγεία δίσκου",
     "privacyScan": "Σάρωση απορρήτου",
     "privacyApply": "Εφαρμογή απορρήτου",
     "debloaterScan": "Σάρωση Debloater",

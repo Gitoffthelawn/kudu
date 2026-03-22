@@ -7,9 +7,9 @@
   "clearButton": "Очистити",
   "emptyStateTitle": "Історія ще відсутня",
   "emptyStateDescription": "Запустіть сканування на сторінках Cleaner, Registry або Debloater. Результати з’являться тут.",
-  "confirmClearCloudTitle": "Очистити хмарну історію",
+  "confirmClearCloudTitle": "Очистити історію хмари",
   "confirmClearScanTitle": "Очистити історію сканувань",
-  "confirmClearCloudDescription": "Усі записи історії хмарних дій буде остаточно видалено. Цю дію неможливо скасувати.",
+  "confirmClearCloudDescription": "Усі записи історії дій у хмарі буде остаточно видалено. Цю дію неможливо скасувати.",
   "confirmClearScanDescription": "Усі записи історії сканувань буде остаточно видалено. Цю дію неможливо скасувати.",
   "confirmClearLabel": "Очистити все",
   "typeLabels": {
@@ -23,7 +23,7 @@
     "startup": "Керування автозапуском",
     "services": "Керування службами",
     "softwareUpdate": "Оновлення програм",
-    "cveScan": "CVE Scan"
+    "cveScan": "Сканування CVE"
   },
   "overview": {
     "totalScans": "Усього сканувань",
@@ -34,7 +34,7 @@
     "needTwoScansForChart": "Для графіка тенденції потрібно щонайменше 2 сканування",
     "scanTypeDistribution": "Розподіл типів сканування",
     "noData": "Немає даних",
-    "topCategoriesBySpace": "Найбільші категорії за обсягом",
+    "topCategoriesBySpace": "Основні категорії за обсягом",
     "noCategoryData": "Немає даних за категоріями",
     "weeklyActivity": "Щотижнева активність",
     "needTwoWeeksData": "Потрібні дані щонайменше за 2 тижні",
@@ -77,7 +77,7 @@
     "itemsSuffix": "елементів"
   },
   "cloud": {
-    "emptyStateTitle": "Хмарних дій ще немає",
+    "emptyStateTitle": "Дій у хмарі ще немає",
     "emptyStateDescription": "Коли з хмарної панелі керування надходитимуть команди, вони з’являтимуться тут.",
     "totalCommands": "Усього команд",
     "succeeded": "Успішно",
@@ -104,13 +104,13 @@
     "softwareUpdateCheck": "Перевірка оновлень",
     "softwareUpdateRun": "Оновлення програм",
     "getStatus": "Стан",
-    "getSystemInfo": "Інформація про систему",
+    "getSystemInfo": "Відомості про систему",
     "getHealthReport": "Звіт про стан",
     "ping": "Ping",
     "shutdown": "Вимкнення",
     "restart": "Перезавантаження",
-    "windowsUpdateCheck": "Перевірка Windows Update",
-    "windowsUpdateInstall": "Windows Update",
+    "windowsUpdateCheck": "Перевірка оновлень Windows",
+    "windowsUpdateInstall": "Оновлення Windows",
     "runSfc": "Сканування SFC",
     "runDism": "Відновлення DISM",
     "getNetworkConfig": "Конфігурація мережі",

@@ -9,11 +9,11 @@
   "emptyStateDescription": "เรียกใช้การสแกนจากหน้า Cleaner, Registry หรือ Debloater ผลลัพธ์จะแสดงที่นี่",
   "confirmClearCloudTitle": "ล้างประวัติ Cloud",
   "confirmClearScanTitle": "ล้างประวัติการสแกน",
-  "confirmClearCloudDescription": "การดำเนินการนี้จะลบรายการประวัติการดำเนินการบน Cloud ทั้งหมดอย่างถาวร และไม่สามารถย้อนกลับได้",
+  "confirmClearCloudDescription": "การดำเนินการนี้จะลบรายการประวัติการดำเนินการของ Cloud ทั้งหมดอย่างถาวร และไม่สามารถย้อนกลับได้",
   "confirmClearScanDescription": "การดำเนินการนี้จะลบรายการประวัติการสแกนทั้งหมดอย่างถาวร และไม่สามารถย้อนกลับได้",
   "confirmClearLabel": "ล้างทั้งหมด",
   "typeLabels": {
-    "cleaner": "ล้างระบบ",
+    "cleaner": "ล้างข้อมูลระบบ",
     "registry": "ซ่อมแซม Registry",
     "debloater": "Debloater",
     "network": "ล้างเครือข่าย",
@@ -23,7 +23,7 @@
     "startup": "ตัวจัดการการเริ่มต้นระบบ",
     "services": "ตัวจัดการบริการ",
     "softwareUpdate": "อัปเดตซอฟต์แวร์",
-    "cveScan": "CVE Scan"
+    "cveScan": "สแกน CVE"
   },
   "overview": {
     "totalScans": "การสแกนทั้งหมด",
@@ -77,7 +77,7 @@
     "itemsSuffix": "รายการ"
   },
   "cloud": {
-    "emptyStateTitle": "ยังไม่มีการดำเนินการบน Cloud",
+    "emptyStateTitle": "ยังไม่มีการดำเนินการของ Cloud",
     "emptyStateDescription": "เมื่อได้รับคำสั่งจากแดชบอร์ด Cloud คำสั่งเหล่านั้นจะแสดงที่นี่",
     "totalCommands": "คำสั่งทั้งหมด",
     "succeeded": "สำเร็จ",
@@ -100,7 +100,7 @@
   },
   "cloudCommandLabels": {
     "scan": "สแกน",
-    "clean": "ล้าง",
+    "clean": "ล้างข้อมูล",
     "softwareUpdateCheck": "ตรวจสอบการอัปเดต",
     "softwareUpdateRun": "อัปเดตซอฟต์แวร์",
     "getStatus": "สถานะ",

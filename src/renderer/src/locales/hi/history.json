@@ -5,7 +5,7 @@
   "viewTimeline": "समयरेखा",
   "viewCloud": "Cloud",
   "clearButton": "साफ़ करें",
-  "emptyStateTitle": "अभी तक कोई इतिहास नहीं है",
+  "emptyStateTitle": "अभी तक कोई इतिहास नहीं",
   "emptyStateDescription": "Cleaner, Registry, या Debloater पृष्ठों से स्कैन चलाएँ। परिणाम यहाँ दिखाई देंगे।",
   "confirmClearCloudTitle": "Cloud इतिहास साफ़ करें",
   "confirmClearScanTitle": "स्कैन इतिहास साफ़ करें",
@@ -14,7 +14,7 @@
   "confirmClearLabel": "सभी साफ़ करें",
   "typeLabels": {
     "cleaner": "सिस्टम सफ़ाई",
-    "registry": "Registry सुधार",
+    "registry": "रजिस्ट्री सुधार",
     "debloater": "Debloater",
     "network": "नेटवर्क सफ़ाई",
     "drivers": "ड्राइवर सफ़ाई",
@@ -23,15 +23,15 @@
     "startup": "स्टार्टअप प्रबंधक",
     "services": "सेवा प्रबंधक",
     "softwareUpdate": "सॉफ़्टवेयर अपडेट",
-    "cveScan": "CVE Scan"
+    "cveScan": "CVE स्कैन"
   },
   "overview": {
     "totalScans": "कुल स्कैन",
     "spaceRecovered": "पुनर्प्राप्त स्थान",
-    "itemsProcessed": "संसाधित आइटम",
+    "itemsProcessed": "प्रसंस्कृत आइटम",
     "avgDuration": "औसत अवधि",
     "spaceRecoveredOverTime": "समय के साथ पुनर्प्राप्त स्थान",
-    "needTwoScansForChart": "रुझान चार्ट के लिए कम से कम 2 स्कैन आवश्यक हैं",
+    "needTwoScansForChart": "ट्रेंड चार्ट के लिए कम से कम 2 स्कैन आवश्यक हैं",
     "scanTypeDistribution": "स्कैन प्रकार वितरण",
     "noData": "कोई डेटा नहीं",
     "topCategoriesBySpace": "स्थान के अनुसार शीर्ष श्रेणियाँ",
@@ -61,14 +61,14 @@
     "columnSpace": "स्थान",
     "columnDuration": "अवधि",
     "columnStatus": "स्थिति",
-    "scheduledBadge": "निर्धा.",
+    "scheduledBadge": "निर्धा",
     "noEntriesMatchFilter": "इस फ़िल्टर से मेल खाने वाली कोई प्रविष्टि नहीं है",
     "dateAt": "पर"
   },
   "detail": {
     "scheduledBadge": "निर्धारित",
     "statFound": "मिले",
-    "statProcessed": "संसाधित",
+    "statProcessed": "प्रसंस्कृत",
     "statSkipped": "छोड़े गए",
     "statSpaceSaved": "बचाया गया स्थान",
     "errorCount": "{{count}} त्रुटि",
@@ -77,8 +77,8 @@
     "itemsSuffix": "आइटम"
   },
   "cloud": {
-    "emptyStateTitle": "अभी तक कोई cloud कार्रवाई नहीं है",
-    "emptyStateDescription": "जब cloud डैशबोर्ड से कमांड प्राप्त होंगे, तो वे यहाँ दिखाई देंगे।",
+    "emptyStateTitle": "अभी तक कोई cloud कार्रवाई नहीं",
+    "emptyStateDescription": "जब cloud dashboard से कमांड प्राप्त होंगे, वे यहाँ दिखाई देंगे।",
     "totalCommands": "कुल कमांड",
     "succeeded": "सफल",
     "failed": "विफल",
@@ -130,8 +130,8 @@
     "serviceApply": "सेवा लागू करें",
     "malwareQuarantine": "क्वारंटीन",
     "malwareDelete": "मैलवेयर हटाएँ",
-    "registryScan": "Registry स्कैन",
-    "registryFix": "Registry सुधार"
+    "registryScan": "रजिस्ट्री स्कैन",
+    "registryFix": "रजिस्ट्री सुधार"
   },
   "duration": {
     "lessThanOneSecond": "<1s",

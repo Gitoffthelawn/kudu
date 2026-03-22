@@ -9,7 +9,7 @@
   "emptyStateDescription": "Kjør en skanning fra sidene Renser, Register eller Debloater. Resultatene vises her.",
   "confirmClearCloudTitle": "Tøm skyhistorikk",
   "confirmClearScanTitle": "Tøm skannelogg",
-  "confirmClearCloudDescription": "Dette vil permanent slette alle oppføringer i skyhandlinghistorikken. Denne handlingen kan ikke angres.",
+  "confirmClearCloudDescription": "Dette vil permanent slette alle oppføringer i handlingshistorikken for skyen. Denne handlingen kan ikke angres.",
   "confirmClearScanDescription": "Dette vil permanent slette alle oppføringer i skanneloggen. Denne handlingen kan ikke angres.",
   "confirmClearLabel": "Tøm alle",
   "typeLabels": {
@@ -23,7 +23,7 @@
     "startup": "Oppstartsbehandling",
     "services": "Tjenestebehandling",
     "softwareUpdate": "Programvareoppdatering",
-    "cveScan": "CVE Scan"
+    "cveScan": "CVE-skanning"
   },
   "overview": {
     "totalScans": "Totalt antall skanninger",
@@ -37,7 +37,7 @@
     "topCategoriesBySpace": "Største kategorier etter plass",
     "noCategoryData": "Ingen kategoridata",
     "weeklyActivity": "Ukentlig aktivitet",
-    "needTwoWeeksData": "Minst 2 ukers data kreves",
+    "needTwoWeeksData": "Minst 2 uker med data kreves",
     "recentScans": "Nylige skanninger",
     "tooltipSpace": "Plass",
     "tooltipScans": "Skanninger"
@@ -99,7 +99,7 @@
     "detailError": "Feil"
   },
   "cloudCommandLabels": {
-    "scan": "Skann",
+    "scan": "Skanning",
     "clean": "Rens",
     "softwareUpdateCheck": "Se etter oppdateringer",
     "softwareUpdateRun": "Programvareoppdatering",
@@ -110,7 +110,7 @@
     "shutdown": "Slå av",
     "restart": "Start på nytt",
     "windowsUpdateCheck": "Se etter Windows-oppdateringer",
-    "windowsUpdateInstall": "Windows Update",
+    "windowsUpdateInstall": "Windows-oppdatering",
     "runSfc": "SFC-skanning",
     "runDism": "DISM-reparasjon",
     "getNetworkConfig": "Nettverkskonfigurasjon",
