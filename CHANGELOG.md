@@ -1,3 +1,19 @@
+# [1.18.0](https://github.com/adventdevinc/kudu/compare/v1.17.0...v1.18.0) (2026-03-22)
+
+
+### Bug Fixes
+
+* **ci:** trigger website deploy on release and add release notes to winget manifest ([caff018](https://github.com/adventdevinc/kudu/commit/caff01865ac6953af1bc9940de34441e26ec995d))
+* **privacy:** disable stealth mode toggle when macOS firewall is off ([#40](https://github.com/adventdevinc/kudu/issues/40)) ([e778766](https://github.com/adventdevinc/kudu/commit/e77876618ec793073b4e960a7d5b4c6d498281b4))
+
+
+### Features
+
+* add duplicate file finder tool ([#43](https://github.com/adventdevinc/kudu/issues/43)) ([6e74a20](https://github.com/adventdevinc/kudu/commit/6e74a202cf4017537160dc5c5f1d9942e3775311))
+* add Game Mode for Windows gaming optimization ([#44](https://github.com/adventdevinc/kudu/issues/44)) ([7d20579](https://github.com/adventdevinc/kudu/commit/7d2057999291311d6e845775ba2060cb07c6714f))
+* **cli:** verbose/quiet modes, granular exit codes, JSON audit, Prometheus metrics ([#39](https://github.com/adventdevinc/kudu/issues/39)) ([e24815e](https://github.com/adventdevinc/kudu/commit/e24815e1d00a54c207c84b01574a567a04556d84))
+* **cloud:** notify renderer when threat blacklist is updated ([53b71c8](https://github.com/adventdevinc/kudu/commit/53b71c84ea3cde622f7e49e720f7de441f3df55e))
+* rework dashboard as Command Center layout ([#45](https://github.com/adventdevinc/kudu/issues/45)) ([cb05a0b](https://github.com/adventdevinc/kudu/commit/cb05a0b4e9826fa27fa77ea6d934a6523e5dbb7a))
 # [1.17.0](https://github.com/adventdevinc/kudu/compare/v1.16.2...v1.17.0) (2026-03-21)
 
 
