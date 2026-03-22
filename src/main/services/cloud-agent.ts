@@ -43,6 +43,7 @@ import type { ScanResult, CloudActionEntry } from '../../shared/types'
 import { addCloudHistoryEntry } from './cloud-history-store'
 import { downloadAndUpdateBlacklist, loadBlacklist } from './threat-blacklist-store'
 import { threatMonitor } from './threat-monitor'
+import { isLikelyFalsePositive, deduplicateCves } from './cve-filter'
 
 const execFileAsync = promisify(execFile)
 const DEFAULT_SERVER_URL = app.isPackaged ? 'https://cloud.usekudu.com' : 'http://localhost:8000'
@@ -209,19 +210,21 @@ class CloudAgentService {
         }
       })
 
-    // Validate summary shape
-    const rawSummary = raw.summary as Record<string, unknown> | undefined
-    const summary = {
-      critical: typeof rawSummary?.critical === 'number' ? rawSummary.critical : 0,
-      high: typeof rawSummary?.high === 'number' ? rawSummary.high : 0,
-      medium: typeof rawSummary?.medium === 'number' ? rawSummary.medium : 0,
-      low: typeof rawSummary?.low === 'number' ? rawSummary.low : 0,
+    // Filter false positives then deduplicate (prefer silence over wrong alerts)
+    const afterFp = vulnerabilities.filter((v) => !isLikelyFalsePositive(v))
+    const clean = deduplicateCves(afterFp)
+
+    // Recompute summary from the filtered results (simpler and more correct
+    // than subtracting from server totals, which break across pagination)
+    const summary = { critical: 0, high: 0, medium: 0, low: 0 }
+    for (const v of clean) {
+      if (v.severity in summary) summary[v.severity as keyof typeof summary]++
     }
 
     return {
-      vulnerabilities,
+      vulnerabilities: clean,
       summary,
-      total: typeof raw.total === 'number' ? raw.total : 0,
+      total: clean.length,
       nextPageUrl: typeof raw.next_page_url === 'string' ? raw.next_page_url : null,
       librarySize: typeof raw.library_size === 'number' ? raw.library_size : 0,
     }
