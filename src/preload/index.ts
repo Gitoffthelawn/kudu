@@ -53,6 +53,15 @@ import type {
   DuplicateScanProgress,
   DuplicateDeleteMode,
   DuplicateDeleteResult,
+  LargeFileScanOptions,
+  LargeFileScanResult,
+  LargeFileScanProgress,
+  LargeFileDeleteMode,
+  LargeFileDeleteResult,
+  EmptyFolderScanOptions,
+  EmptyFolderScanResult,
+  EmptyFolderScanProgress,
+  EmptyFolderDeleteResult,
   GameModeConfig,
   GameModeActivateResult,
   GameModeDeactivateResult,
@@ -354,6 +363,40 @@ const api = {
     const handler = (_event: Electron.IpcRendererEvent, data: DuplicateScanProgress) => callback(data)
     ipcRenderer.on(IPC.DUPLICATES_PROGRESS, handler)
     return () => { ipcRenderer.removeListener(IPC.DUPLICATES_PROGRESS, handler) }
+  },
+
+  // Large File Finder
+  largeFilesSelectDir: (): Promise<string | null> =>
+    ipcRenderer.invoke(IPC.LARGE_FILES_SELECT_DIR),
+  largeFilesScan: (options: LargeFileScanOptions): Promise<LargeFileScanResult> =>
+    ipcRenderer.invoke(IPC.LARGE_FILES_SCAN, options),
+  largeFilesCancel: (): Promise<void> =>
+    ipcRenderer.invoke(IPC.LARGE_FILES_CANCEL),
+  largeFilesDelete: (paths: string[], mode: LargeFileDeleteMode): Promise<LargeFileDeleteResult> =>
+    ipcRenderer.invoke(IPC.LARGE_FILES_DELETE, paths, mode),
+  largeFilesOpenLocation: (filePath: string): Promise<void> =>
+    ipcRenderer.invoke(IPC.LARGE_FILES_OPEN_LOCATION, filePath),
+  onLargeFilesProgress: (callback: (data: LargeFileScanProgress) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: LargeFileScanProgress) => callback(data)
+    ipcRenderer.on(IPC.LARGE_FILES_PROGRESS, handler)
+    return () => { ipcRenderer.removeListener(IPC.LARGE_FILES_PROGRESS, handler) }
+  },
+
+  // Empty Folder Cleaner
+  emptyFoldersSelectDir: (): Promise<string | null> =>
+    ipcRenderer.invoke(IPC.EMPTY_FOLDERS_SELECT_DIR),
+  emptyFoldersScan: (options: EmptyFolderScanOptions): Promise<EmptyFolderScanResult> =>
+    ipcRenderer.invoke(IPC.EMPTY_FOLDERS_SCAN, options),
+  emptyFoldersCancel: (): Promise<void> =>
+    ipcRenderer.invoke(IPC.EMPTY_FOLDERS_CANCEL),
+  emptyFoldersDelete: (paths: string[], mode: string): Promise<EmptyFolderDeleteResult> =>
+    ipcRenderer.invoke(IPC.EMPTY_FOLDERS_DELETE, paths, mode),
+  emptyFoldersOpenLocation: (folderPath: string): Promise<void> =>
+    ipcRenderer.invoke(IPC.EMPTY_FOLDERS_OPEN_LOCATION, folderPath),
+  onEmptyFoldersProgress: (callback: (data: EmptyFolderScanProgress) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: EmptyFolderScanProgress) => callback(data)
+    ipcRenderer.on(IPC.EMPTY_FOLDERS_PROGRESS, handler)
+    return () => { ipcRenderer.removeListener(IPC.EMPTY_FOLDERS_PROGRESS, handler) }
   },
 
   // Threat Monitor

@@ -15,6 +15,8 @@ import { SoftwareUpdaterPage } from './pages/SoftwareUpdaterPage'
 import { DriverManagerPage } from './pages/DriverManagerPage'
 import { DiskAnalyzerPage } from './pages/DiskAnalyzerPage'
 import { DuplicateFinderPage } from './pages/DuplicateFinderPage'
+import { LargeFileFinderPage } from './pages/LargeFileFinderPage'
+import { EmptyFolderCleanerPage } from './pages/EmptyFolderCleanerPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { NetworkCleanupPage } from './pages/NetworkCleanupPage'
 import { MalwareScannerPage } from './pages/MalwareScannerPage'
@@ -100,6 +102,8 @@ export function App() {
           <Route path="/startup" element={<StartupPage />} />
           <Route path="/disk" element={<DiskAnalyzerPage />} />
           <Route path="/duplicates" element={<DuplicateFinderPage />} />
+          <Route path="/large-files" element={<LargeFileFinderPage />} />
+          <Route path="/empty-folders" element={<EmptyFolderCleanerPage />} />
           <Route path="/network" element={<NetworkCleanupPage />} />
           <Route path="/malware" element={<MalwareScannerPage />} />
           <Route path="/threat-monitor" element={<ThreatMonitorPage />} />

@@ -840,6 +840,82 @@ export interface CvePageResult {
   librarySize: number
 }
 
+// ─── Large File Finder ────────────────────────────────────
+
+export interface LargeFileScanOptions {
+  directory: string
+  minFileSize: number
+  maxDepth: number
+  excludePatterns: string[]
+}
+
+export interface LargeFileEntry {
+  path: string
+  name: string
+  size: number
+  lastModified: number
+  extension: string
+}
+
+export interface LargeFileScanResult {
+  files: LargeFileEntry[]
+  totalFilesScanned: number
+  duration: number
+  cancelled: boolean
+}
+
+export interface LargeFileScanProgress {
+  currentPath: string
+  filesScanned: number
+  largeFilesFound: number
+  progress: number
+}
+
+export type LargeFileDeleteMode = 'recycle' | 'permanent'
+
+export interface LargeFileDeleteResult {
+  deleted: number
+  failed: number
+  spaceRecovered: number
+  errors: { path: string; reason: string }[]
+}
+
+// ─── Empty Folder Cleaner ─────────────────────────────────
+
+export interface EmptyFolderScanOptions {
+  directory: string
+  maxDepth: number
+  excludePatterns: string[]
+}
+
+export interface EmptyFolderEntry {
+  path: string
+  name: string
+  depth: number
+}
+
+export interface EmptyFolderScanResult {
+  folders: EmptyFolderEntry[]
+  totalFoldersScanned: number
+  duration: number
+  cancelled: boolean
+}
+
+export interface EmptyFolderScanProgress {
+  currentPath: string
+  foldersScanned: number
+  emptyFound: number
+  progress: number
+}
+
+export type EmptyFolderDeleteMode = 'recycle' | 'permanent'
+
+export interface EmptyFolderDeleteResult {
+  deleted: number
+  failed: number
+  errors: { path: string; reason: string }[]
+}
+
 // ─── Duplicate Finder ─────────────────────────────────────
 
 export interface DuplicateScanOptions {

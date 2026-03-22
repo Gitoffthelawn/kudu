@@ -22,6 +22,8 @@ import {
   Bug,
   ChevronRight,
   CopyCheck,
+  FileUp,
+  FolderX,
   Cpu,
   Package
 } from 'lucide-react'
@@ -97,6 +99,8 @@ const navGroups: NavGroup[] = [
         children: [
           { icon: HardDrive, label: 'Disk Analyzer', path: '/disk' },
           { icon: CopyCheck, label: 'Duplicate Finder', path: '/duplicates' },
+          { icon: FileUp, label: 'Large File Finder', path: '/large-files' },
+          { icon: FolderX, label: 'Empty Folder Cleaner', path: '/empty-folders' },
         ]
       },
     ]

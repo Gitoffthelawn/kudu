@@ -23,6 +23,8 @@ import { registerSoftwareUpdaterIpc } from './software-updater.ipc'
 import { registerShortcutCleanerIpc } from './shortcut-cleaner.ipc'
 import { registerDatabaseOptimizerIpc } from './database-optimizer.ipc'
 import { registerCloudAgentIpc } from './cloud-agent.ipc'
+import { registerLargeFileFinderIpc } from './large-file-finder.ipc'
+import { registerEmptyFolderCleanerIpc } from './empty-folder-cleaner.ipc'
 import { registerGameModeIpc } from './game-mode.ipc'
 import { registerCveScannerIpc } from './cve-scanner.ipc'
 import { getSettings, setSettings, flushSettings, getOnboardingComplete, setOnboardingComplete } from '../services/settings-store'
@@ -48,6 +50,8 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
   registerDebloaterIpc(getWindow)
   registerDiskAnalyzerIpc(getWindow)
   registerDuplicateFinderIpc(getWindow)
+  registerLargeFileFinderIpc(getWindow)
+  registerEmptyFolderCleanerIpc(getWindow)
   registerNetworkCleanupIpc()
   registerMalwareScannerIpc(getWindow)
   registerUninstallLeftoversIpc(getWindow)

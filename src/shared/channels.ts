@@ -177,6 +177,22 @@ export const IPC = {
   HISTORY_CHANGED: 'history:changed',
   CLOUD_HISTORY_CHANGED: 'cloud:history:changed',
 
+  // Large File Finder
+  LARGE_FILES_SCAN: 'large-files:scan',
+  LARGE_FILES_CANCEL: 'large-files:cancel',
+  LARGE_FILES_PROGRESS: 'large-files:progress',
+  LARGE_FILES_SELECT_DIR: 'large-files:select-dir',
+  LARGE_FILES_DELETE: 'large-files:delete',
+  LARGE_FILES_OPEN_LOCATION: 'large-files:open-location',
+
+  // Empty Folder Cleaner
+  EMPTY_FOLDERS_SCAN: 'empty-folders:scan',
+  EMPTY_FOLDERS_CANCEL: 'empty-folders:cancel',
+  EMPTY_FOLDERS_PROGRESS: 'empty-folders:progress',
+  EMPTY_FOLDERS_SELECT_DIR: 'empty-folders:select-dir',
+  EMPTY_FOLDERS_DELETE: 'empty-folders:delete',
+  EMPTY_FOLDERS_OPEN_LOCATION: 'empty-folders:open-location',
+
   // Game Mode
   GAME_MODE_ACTIVATE: 'game-mode:activate',
   GAME_MODE_DEACTIVATE: 'game-mode:deactivate',
