@@ -1,7 +1,7 @@
 {
   "pageTitle": "Sårbarheter",
   "pageDescription": "Vis kjente sårbarheter som er oppdaget i den installerte programvaren",
-  "loading": "Laster inn sårbarheter...",
+  "loading": "Laster sårbarheter...",
   "refetchButton": "Oppdater",
   "cloudNotConfigured": {
     "title": "Cloud Agent kreves",
@@ -9,7 +9,7 @@
   },
   "cloudNotConnected": {
     "title": "Cloud Agent er ikke tilkoblet",
-    "description": "Cloud Agent er ikke tilkoblet for øyeblikket. Kontroller tilkoblingen i Innstillinger → Cloud."
+    "description": "Cloud Agent er for øyeblikket ikke tilkoblet. Kontroller tilkoblingen i Innstillinger → Cloud."
   },
   "emptyState": {
     "title": "Ingen sårbarheter oppdaget",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Først oppdaget: {{date}}",
     "lastScanned": "Sist skannet: {{date}}",
-    "updateViaSoftwareUpdater": "Oppdater via Software Updater"
+    "viewDetails": "Vis CVE-detaljer",
+    "checkForUpdates": "Se etter oppdateringer"
   },
   "pagination": {
     "previous": "Forrige",

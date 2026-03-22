@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "First detected: {{date}}",
     "lastScanned": "Last scanned: {{date}}",
-    "updateViaSoftwareUpdater": "Update via Software Updater"
+    "viewDetails": "View CVE Details",
+    "checkForUpdates": "Check for Updates"
   },
   "pagination": {
     "previous": "Previous",

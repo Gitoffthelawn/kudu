@@ -2,10 +2,10 @@
   "pageTitle": "Vulnerabilități",
   "pageDescription": "Vizualizați vulnerabilitățile cunoscute detectate în software-ul instalat",
   "loading": "Se încarcă vulnerabilitățile...",
-  "refetchButton": "Reîmprospătare",
+  "refetchButton": "Reîmprospătează",
   "cloudNotConfigured": {
     "title": "Cloud Agent necesar",
-    "description": "Scanarea CVE necesită conectarea Cloud Agent. Accesați Setări → Cloud pentru a vă conecta dispozitivul."
+    "description": "Scanarea CVE necesită ca Cloud Agent să fie asociat. Accesați Setări → Cloud pentru a vă conecta dispozitivul."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent nu este conectat",
@@ -24,10 +24,10 @@
   },
   "summary": {
     "total": "Total",
-    "critical": "Critică",
-    "high": "Ridicată",
-    "medium": "Medie",
-    "low": "Scăzută"
+    "critical": "Critice",
+    "high": "Ridicate",
+    "medium": "Medii",
+    "low": "Scăzute"
   },
   "filter": {
     "all": "Toate",
@@ -39,13 +39,14 @@
     "description": "Nu s-au putut prelua datele despre vulnerabilități de la server. Încercați să reîmprospătați sau verificați conexiunea cloud."
   },
   "card": {
-    "installed": "Instalat: {{version}}",
+    "installed": "Instalată: {{version}}",
     "fixAvailable": "Remediere: {{version}}",
     "noFix": "Nicio remediere disponibilă",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Detectată prima dată: {{date}}",
-    "lastScanned": "Scanată ultima dată: {{date}}",
-    "updateViaSoftwareUpdater": "Actualizați prin Software Updater"
+    "lastScanned": "Ultima scanare: {{date}}",
+    "viewDetails": "Vedeți detaliile CVE",
+    "checkForUpdates": "Verificați actualizările"
   },
   "pagination": {
     "previous": "Anterior",

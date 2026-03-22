@@ -1,6 +1,6 @@
 {
   "pageTitle": "Vulnerabilidades",
-  "pageDescription": "Ver las vulnerabilidades conocidas detectadas en el software instalado",
+  "pageDescription": "Ver vulnerabilidades conocidas detectadas en el software instalado",
   "loading": "Cargando vulnerabilidades...",
   "refetchButton": "Actualizar",
   "cloudNotConfigured": {
@@ -36,16 +36,17 @@
   },
   "error": {
     "title": "No se pudieron cargar las vulnerabilidades",
-    "description": "No se pudieron obtener los datos de vulnerabilidades del servidor. Intente actualizar o compruebe su conexión a la nube."
+    "description": "No se pudieron obtener los datos de vulnerabilidades del servidor. Intente actualizar o compruebe su conexión en la nube."
   },
   "card": {
     "installed": "Instalada: {{version}}",
     "fixAvailable": "Corrección: {{version}}",
-    "noFix": "No hay ninguna corrección disponible",
+    "noFix": "No hay corrección disponible",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Detectada por primera vez: {{date}}",
     "lastScanned": "Último análisis: {{date}}",
-    "updateViaSoftwareUpdater": "Actualizar mediante el actualizador de software"
+    "viewDetails": "Ver detalles de la CVE",
+    "checkForUpdates": "Buscar actualizaciones"
   },
   "pagination": {
     "previous": "Anterior",

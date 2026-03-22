@@ -1,7 +1,7 @@
 {
   "pageTitle": "Luki w zabezpieczeniach",
   "pageDescription": "Wyświetl znane luki w zabezpieczeniach wykryte w zainstalowanym oprogramowaniu",
-  "loading": "Ładowanie luk w zabezpieczeniach...",
+  "loading": "Wczytywanie luk w zabezpieczeniach...",
   "refetchButton": "Odśwież",
   "cloudNotConfigured": {
     "title": "Wymagany Cloud Agent",
@@ -24,10 +24,10 @@
   },
   "summary": {
     "total": "Łącznie",
-    "critical": "Krytyczny",
-    "high": "Wysoki",
-    "medium": "Średni",
-    "low": "Niski"
+    "critical": "Krytyczne",
+    "high": "Wysokie",
+    "medium": "Średnie",
+    "low": "Niskie"
   },
   "filter": {
     "all": "Wszystkie",
@@ -35,7 +35,7 @@
     "noResults": "Żadne luki w zabezpieczeniach nie pasują do bieżących filtrów"
   },
   "error": {
-    "title": "Nie udało się załadować luk w zabezpieczeniach",
+    "title": "Nie udało się wczytać luk w zabezpieczeniach",
     "description": "Nie udało się pobrać danych o lukach w zabezpieczeniach z serwera. Spróbuj odświeżyć lub sprawdź połączenie z chmurą."
   },
   "card": {
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Pierwsze wykrycie: {{date}}",
     "lastScanned": "Ostatnie skanowanie: {{date}}",
-    "updateViaSoftwareUpdater": "Zaktualizuj za pomocą Aktualizatora oprogramowania"
+    "viewDetails": "Wyświetl szczegóły CVE",
+    "checkForUpdates": "Sprawdź aktualizacje"
   },
   "pagination": {
     "previous": "Poprzednia",
@@ -53,7 +54,7 @@
     "page": "Strona {{current}}"
   },
   "toast": {
-    "fetchFailed": "Nie udało się załadować danych o lukach w zabezpieczeniach",
+    "fetchFailed": "Nie udało się wczytać danych o lukach w zabezpieczeniach",
     "fetchFailedNotConnected": "Cloud Agent nie jest połączony"
   }
 }

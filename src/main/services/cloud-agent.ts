@@ -203,6 +203,7 @@ class CloudAgentService {
           severity: (typeof item.severity === 'string' && validSeverities.has(item.severity) ? item.severity : 'none') as import('../../shared/types').CveSeverity,
           cvssScore: !isNaN(cvss) ? cvss : null,
           fixedIn: typeof item.fixed_in === 'string' ? item.fixed_in : null,
+          description: typeof item.description === 'string' ? item.description : null,
           firstDetectedAt: typeof item.first_detected_at === 'string' ? item.first_detected_at : '',
           lastScannedAt: typeof item.last_scanned_at === 'string' ? item.last_scanned_at : '',
         }

@@ -23,7 +23,7 @@
     "translate": "node scripts/translate.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "release": "node scripts/release.js",
-    "postinstall": "electron-rebuild -w better-sqlite3",
+    "postinstall": "patch-package && electron-rebuild -w better-sqlite3",
     "prepare": "husky"
   },
   "keywords": [
@@ -62,6 +62,7 @@
     "electron-builder": "^26.8.1",
     "electron-vite": "^5.0.0",
     "husky": "^9.1.7",
+    "patch-package": "^8.0.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwindcss": "^4.2.1",

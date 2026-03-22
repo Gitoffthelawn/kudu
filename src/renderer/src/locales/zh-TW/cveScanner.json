@@ -1,11 +1,11 @@
 {
   "pageTitle": "弱點",
-  "pageDescription": "檢視在已安裝軟體中偵測到的已知弱點",
+  "pageDescription": "檢視已安裝軟體中偵測到的已知弱點",
   "loading": "正在載入弱點...",
   "refetchButton": "重新整理",
   "cloudNotConfigured": {
     "title": "需要 Cloud Agent",
-    "description": "CVE 掃描需要先連結 Cloud Agent。請前往「設定」→「雲端」連線您的裝置。"
+    "description": "CVE 掃描需要先連結 Cloud Agent。請前往「設定」→「雲端」以連線您的裝置。"
   },
   "cloudNotConnected": {
     "title": "Cloud Agent 未連線",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "首次偵測：{{date}}",
     "lastScanned": "上次掃描：{{date}}",
-    "updateViaSoftwareUpdater": "透過 Software Updater 更新"
+    "viewDetails": "檢視 CVE 詳細資料",
+    "checkForUpdates": "檢查更新"
   },
   "pagination": {
     "previous": "上一頁",

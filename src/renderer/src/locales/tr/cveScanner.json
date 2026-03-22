@@ -5,7 +5,7 @@
   "refetchButton": "Yenile",
   "cloudNotConfigured": {
     "title": "Cloud Agent Gerekli",
-    "description": "CVE taraması için Cloud Agent bağlantısının kurulmuş olması gerekir. Cihazınızı bağlamak için Ayarlar → Cloud bölümüne gidin."
+    "description": "CVE taraması için Cloud Agent'ın bağlanmış olması gerekir. Cihazınızı bağlamak için Ayarlar → Cloud bölümüne gidin."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent Bağlı Değil",
@@ -32,20 +32,21 @@
   "filter": {
     "all": "Tümü",
     "searchPlaceholder": "Uygulama adına veya CVE kimliğine göre arayın...",
-    "noResults": "Mevcut filtrelerinizle eşleşen güvenlik açığı yok"
+    "noResults": "Geçerli filtrelerinizle eşleşen güvenlik açığı yok"
   },
   "error": {
     "title": "Güvenlik Açıkları Yüklenemedi",
     "description": "Sunucudan güvenlik açığı verileri alınamadı. Yenilemeyi deneyin veya cloud bağlantınızı kontrol edin."
   },
   "card": {
-    "installed": "Yüklü sürüm: {{version}}",
+    "installed": "Yüklü: {{version}}",
     "fixAvailable": "Düzeltme: {{version}}",
     "noFix": "Düzeltme yok",
     "cvss": "CVSS {{score}}",
-    "firstDetected": "İlk tespit edilme: {{date}}",
+    "firstDetected": "İlk tespit: {{date}}",
     "lastScanned": "Son tarama: {{date}}",
-    "updateViaSoftwareUpdater": "Software Updater ile güncelle"
+    "viewDetails": "CVE Ayrıntılarını Görüntüle",
+    "checkForUpdates": "Güncellemeleri Denetle"
   },
   "pagination": {
     "previous": "Önceki",

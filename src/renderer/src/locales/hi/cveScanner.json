@@ -1,19 +1,19 @@
 {
   "pageTitle": "कमज़ोरियाँ",
   "pageDescription": "अपने इंस्टॉल किए गए सॉफ़्टवेयर में पाई गई ज्ञात कमज़ोरियाँ देखें",
-  "loading": "कमज़ोरियाँ लोड हो रही हैं...",
+  "loading": "कमज़ोरियाँ लोड की जा रही हैं...",
   "refetchButton": "रीफ़्रेश करें",
   "cloudNotConfigured": {
     "title": "Cloud Agent आवश्यक है",
-    "description": "CVE स्कैनिंग के लिए Cloud Agent का लिंक होना आवश्यक है। अपने डिवाइस को कनेक्ट करने के लिए सेटिंग्स → Cloud पर जाएँ।"
+    "description": "CVE स्कैनिंग के लिए Cloud Agent का लिंक होना आवश्यक है। अपने डिवाइस को कनेक्ट करने के लिए Settings → Cloud पर जाएँ।"
   },
   "cloudNotConnected": {
     "title": "Cloud Agent कनेक्ट नहीं है",
-    "description": "Cloud Agent वर्तमान में कनेक्ट नहीं है। सेटिंग्स → Cloud में अपना कनेक्शन जाँचें।"
+    "description": "Cloud Agent वर्तमान में कनेक्ट नहीं है। Settings → Cloud में अपना कनेक्शन जाँचें।"
   },
   "emptyState": {
     "title": "कोई कमज़ोरी नहीं मिली",
-    "description": "आपके इंस्टॉल किए गए सॉफ़्टवेयर में कोई ज्ञात CVE नहीं मिला। आपका सिस्टम सुरक्षित लगता है!"
+    "description": "आपके इंस्टॉल किए गए सॉफ़्टवेयर में कोई ज्ञात CVE नहीं मिला। आपका सिस्टम सुरक्षित प्रतीत होता है!"
   },
   "severity": {
     "critical": "गंभीर",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "पहली बार पता चला: {{date}}",
     "lastScanned": "अंतिम स्कैन: {{date}}",
-    "updateViaSoftwareUpdater": "Software Updater के माध्यम से अपडेट करें"
+    "viewDetails": "CVE विवरण देखें",
+    "checkForUpdates": "अपडेट की जाँच करें"
   },
   "pagination": {
     "previous": "पिछला",

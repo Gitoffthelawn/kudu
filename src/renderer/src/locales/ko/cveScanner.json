@@ -36,16 +36,17 @@
   },
   "error": {
     "title": "취약점을 불러오지 못했습니다",
-    "description": "서버에서 취약점 데이터를 가져올 수 없습니다. 새로 고침을 시도하거나 클라우드 연결을 확인하세요."
+    "description": "서버에서 취약점 데이터를 가져올 수 없습니다. 새로 고침을 시도하거나 Cloud 연결 상태를 확인하세요."
   },
   "card": {
     "installed": "설치됨: {{version}}",
     "fixAvailable": "수정 버전: {{version}}",
-    "noFix": "수정 버전 없음",
+    "noFix": "사용 가능한 수정 사항 없음",
     "cvss": "CVSS {{score}}",
     "firstDetected": "최초 감지: {{date}}",
     "lastScanned": "마지막 검사: {{date}}",
-    "updateViaSoftwareUpdater": "Software Updater를 통해 업데이트"
+    "viewDetails": "CVE 세부 정보 보기",
+    "checkForUpdates": "업데이트 확인"
   },
   "pagination": {
     "previous": "이전",

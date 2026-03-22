@@ -818,6 +818,7 @@ export interface CveVulnerability {
   severity: CveSeverity
   cvssScore: number | null
   fixedIn: string | null
+  description: string | null
   firstDetectedAt: string
   lastScannedAt: string
 }

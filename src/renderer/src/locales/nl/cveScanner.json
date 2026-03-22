@@ -5,7 +5,7 @@
   "refetchButton": "Vernieuwen",
   "cloudNotConfigured": {
     "title": "Cloud Agent vereist",
-    "description": "Voor het scannen op CVE's moet de Cloud Agent gekoppeld zijn. Ga naar Instellingen → Cloud om uw apparaat te verbinden."
+    "description": "Voor CVE-scans moet de Cloud Agent gekoppeld zijn. Ga naar Instellingen → Cloud om uw apparaat te verbinden."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent niet verbonden",
@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "Geen kwetsbaarheden gedetecteerd",
-    "description": "Er zijn geen bekende CVE's gevonden in uw geïnstalleerde software. Uw systeem ziet er veilig uit!"
+    "description": "Er zijn geen bekende CVE's gevonden in uw geïnstalleerde software. Uw systeem lijkt veilig!"
   },
   "severity": {
     "critical": "Kritiek",
@@ -31,12 +31,12 @@
   },
   "filter": {
     "all": "Alle",
-    "searchPlaceholder": "Zoeken op appnaam of CVE-ID...",
+    "searchPlaceholder": "Zoeken op app-naam of CVE-ID...",
     "noResults": "Geen kwetsbaarheden komen overeen met uw huidige filters"
   },
   "error": {
     "title": "Kwetsbaarheden laden mislukt",
-    "description": "De kwetsbaarheidsgegevens konden niet van de server worden opgehaald. Probeer te vernieuwen of controleer uw cloudverbinding."
+    "description": "Kan kwetsbaarheidsgegevens niet van de server ophalen. Probeer te vernieuwen of controleer uw cloudverbinding."
   },
   "card": {
     "installed": "Geïnstalleerd: {{version}}",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Voor het eerst gedetecteerd: {{date}}",
     "lastScanned": "Laatst gescand: {{date}}",
-    "updateViaSoftwareUpdater": "Bijwerken via Software Updater"
+    "viewDetails": "CVE-details bekijken",
+    "checkForUpdates": "Controleren op updates"
   },
   "pagination": {
     "previous": "Vorige",

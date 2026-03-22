@@ -22,12 +22,9 @@ import type { CveVulnerability, CveSeverity } from '@shared/types'
 const severityConfig: Record<string, { color: string; bg: string; border: string }> = {
   critical: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.15)' },
   high:     { color: '#f97316', bg: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.15)' },
-  medium:   { color: '#eab308', bg: 'rgba(234,179,8,0.08)',  border: 'rgba(234,179,8,0.15)' },
-  low:      { color: '#6b7280', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.15)' },
-  none:     { color: '#6b7280', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.15)' },
 }
 
-const severityOrder: CveSeverity[] = ['critical', 'high', 'medium', 'low', 'none']
+const shownSeverities: CveSeverity[] = ['critical', 'high']
 
 function formatDate(iso: string): string {
   try {
@@ -122,8 +119,9 @@ export function CveScannerPage() {
     )
   }
 
-  const totalVulns = summary ? summary.critical + summary.high + summary.medium + summary.low : 0
+  const totalVulns = summary ? summary.critical + summary.high : 0
   const isLoading = status === 'loading'
+  const filteredVulns = vulnerabilities.filter((v) => v.severity === 'critical' || v.severity === 'high')
 
   return (
     <div className="p-8 animate-fade-in">
@@ -149,12 +147,10 @@ export function CveScannerPage() {
 
       {/* Summary cards */}
       {summary && (
-        <div className="mb-6 grid grid-cols-5 gap-3">
+        <div className="mb-6 grid grid-cols-3 gap-3">
           <SummaryCard label={t('summary.total')} count={totalVulns} color="#a1a1aa" />
           <SummaryCard label={t('summary.critical')} count={summary.critical} color="#ef4444" />
           <SummaryCard label={t('summary.high')} count={summary.high} color="#f97316" />
-          <SummaryCard label={t('summary.medium')} count={summary.medium} color="#eab308" />
-          <SummaryCard label={t('summary.low')} count={summary.low} color="#6b7280" />
         </div>
       )}
 
@@ -165,7 +161,7 @@ export function CveScannerPage() {
           className="flex rounded-lg p-0.5"
           style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
         >
-          {(['all', ...severityOrder.filter((s) => s !== 'none')] as const).map((sev) => {
+          {(['all', ...shownSeverities] as const).map((sev) => {
             const isActive = severityFilter === sev
             return (
               <button
@@ -209,8 +205,8 @@ export function CveScannerPage() {
         />
       )}
 
-      {/* No results */}
-      {status === 'done' && vulnerabilities.length === 0 && !error && (
+      {/* No results — use filtered list for display */}
+      {status === 'done' && filteredVulns.length === 0 && !error && (
         <EmptyState
           icon={totalVulns === 0 ? ShieldCheck : Search}
           title={totalVulns === 0 ? t('emptyState.title') : t('filter.noResults')}
@@ -219,14 +215,14 @@ export function CveScannerPage() {
       )}
 
       {/* Vulnerability list */}
-      {vulnerabilities.length > 0 && (
+      {filteredVulns.length > 0 && (
         <div className="space-y-2">
-          {vulnerabilities.map((vuln) => (
+          {filteredVulns.map((vuln) => (
             <VulnerabilityCard
               key={`${vuln.id}-${vuln.cveId}`}
               vuln={vuln}
-              expanded={expandedId === vuln.id}
-              onToggle={() => setExpandedId(expandedId === vuln.id ? null : vuln.id)}
+              expanded={expandedId === vuln.cveId}
+              onToggle={() => setExpandedId(expandedId === vuln.cveId ? null : vuln.cveId)}
               onNavigateUpdater={() => navigate('/updates')}
               t={t}
             />
@@ -301,7 +297,7 @@ function VulnerabilityCard({
   onNavigateUpdater: () => void
   t: (key: string, opts?: Record<string, unknown>) => string
 }) {
-  const config = severityConfig[vuln.severity] || severityConfig.none
+  const config = severityConfig[vuln.severity] || severityConfig.critical
 
   return (
     <div
@@ -348,6 +344,13 @@ function VulnerabilityCard({
       {/* Expanded details */}
       {expanded && (
         <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: config.border }}>
+          {/* Description */}
+          {vuln.description && (
+            <p className="mb-3 text-[12px] leading-relaxed text-zinc-400">
+              {vuln.description}
+            </p>
+          )}
+
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-[12px]">
             {/* Fix version */}
             <div>
@@ -356,6 +359,11 @@ function VulnerabilityCard({
                   ? t('card.fixAvailable', { version: vuln.fixedIn })
                   : t('card.noFix')}
               </span>
+            </div>
+
+            {/* Installed version */}
+            <div className="text-zinc-500">
+              {t('card.installed', { version: vuln.installedVersion })}
             </div>
 
             {/* First detected */}
@@ -369,20 +377,36 @@ function VulnerabilityCard({
             </div>
           </div>
 
-          {/* Action: navigate to updater */}
-          {vuln.fixedIn && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onNavigateUpdater()
-              }}
-              className="mt-3 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium text-zinc-300 transition-colors hover:bg-white/5"
+          {/* Actions */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {/* NVD link — always available */}
+            <a
+              href={`https://nvd.nist.gov/vuln/detail/${vuln.cveId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium text-zinc-300 transition-colors hover:bg-white/5"
               style={{ border: '1px solid rgba(255,255,255,0.08)' }}
             >
               <ExternalLink className="h-3 w-3" />
-              {t('card.updateViaSoftwareUpdater')}
-            </button>
-          )}
+              {t('card.viewDetails')}
+            </a>
+
+            {/* Navigate to updater — only if a fix version exists */}
+            {vuln.fixedIn && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onNavigateUpdater()
+                }}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium text-zinc-300 transition-colors hover:bg-white/5"
+                style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                <RefreshCw className="h-3 w-3" />
+                {t('card.checkForUpdates')}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

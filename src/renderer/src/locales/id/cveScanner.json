@@ -1,6 +1,6 @@
 {
   "pageTitle": "Kerentanan",
-  "pageDescription": "Lihat kerentanan yang diketahui yang terdeteksi pada perangkat lunak terpasang Anda",
+  "pageDescription": "Lihat kerentanan yang diketahui yang terdeteksi pada perangkat lunak terinstal Anda",
   "loading": "Memuat kerentanan...",
   "refetchButton": "Segarkan",
   "cloudNotConfigured": {
@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "Tidak Ada Kerentanan Terdeteksi",
-    "description": "Tidak ditemukan CVE yang diketahui pada perangkat lunak terpasang Anda. Sistem Anda tampak aman!"
+    "description": "Tidak ada CVE yang diketahui ditemukan pada perangkat lunak terinstal Anda. Sistem Anda tampak aman!"
   },
   "severity": {
     "critical": "Kritis",
@@ -32,20 +32,21 @@
   "filter": {
     "all": "Semua",
     "searchPlaceholder": "Cari berdasarkan nama aplikasi atau ID CVE...",
-    "noResults": "Tidak ada kerentanan yang sesuai dengan filter saat ini"
+    "noResults": "Tidak ada kerentanan yang cocok dengan filter saat ini"
   },
   "error": {
     "title": "Gagal Memuat Kerentanan",
     "description": "Tidak dapat mengambil data kerentanan dari server. Coba segarkan atau periksa koneksi cloud Anda."
   },
   "card": {
-    "installed": "Terpasang: {{version}}",
+    "installed": "Terinstal: {{version}}",
     "fixAvailable": "Perbaikan: {{version}}",
     "noFix": "Tidak ada perbaikan yang tersedia",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Pertama kali terdeteksi: {{date}}",
     "lastScanned": "Terakhir dipindai: {{date}}",
-    "updateViaSoftwareUpdater": "Perbarui melalui Software Updater"
+    "viewDetails": "Lihat Detail CVE",
+    "checkForUpdates": "Periksa Pembaruan"
   },
   "pagination": {
     "previous": "Sebelumnya",

@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "Nem észlelhető sérülékenység",
-    "description": "A telepített szoftverekben nem találhatók ismert CVE-k. A rendszer biztonságosnak tűnik."
+    "description": "Nem találhatók ismert CVE-k a telepített szoftverekben. A rendszer biztonságosnak tűnik."
   },
   "severity": {
     "critical": "Kritikus",
@@ -36,16 +36,17 @@
   },
   "error": {
     "title": "Nem sikerült betölteni a sérülékenységeket",
-    "description": "Nem sikerült lekérni a sérülékenységi adatokat a kiszolgálóról. Próbálja meg frissíteni az oldalt, vagy ellenőrizze a felhőkapcsolatot."
+    "description": "Nem sikerült lekérni a sérülékenységi adatokat a kiszolgálóról. Próbálja meg frissíteni, vagy ellenőrizze a felhőkapcsolatot."
   },
   "card": {
     "installed": "Telepítve: {{version}}",
-    "fixAvailable": "Javítás: {{version}}",
+    "fixAvailable": "Javított verzió: {{version}}",
     "noFix": "Nem érhető el javítás",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Első észlelés: {{date}}",
     "lastScanned": "Utolsó vizsgálat: {{date}}",
-    "updateViaSoftwareUpdater": "Frissítés a Szoftverfrissítővel"
+    "viewDetails": "CVE-adatok megtekintése",
+    "checkForUpdates": "Frissítések keresése"
   },
   "pagination": {
     "previous": "Előző",

@@ -21,7 +21,7 @@ const LOCALES_DIR = path.resolve(__dirname, '../src/renderer/src/locales')
 const CHECKSUMS_PATH = path.join(LOCALES_DIR, '.checksums.json')
 const SOURCE_LANG = 'en'
 const MODEL = 'gpt-5.4'
-const MAX_CONCURRENT = 3
+const MAX_CONCURRENT = 10
 const MAX_RETRIES = 3
 
 const TARGET_LANGUAGES = {
@@ -305,17 +305,14 @@ async function main() {
   let translated = 0
   let skipped = 0
 
-  // Process each language sequentially
+  // Build all tasks across all languages and namespaces
+  const tasks = []
+
   for (const [langCode, langName] of languages) {
     const langDir = path.join(LOCALES_DIR, langCode)
     if (!fs.existsSync(langDir)) {
       fs.mkdirSync(langDir, { recursive: true })
     }
-
-    console.log(`\n── ${langName} (${langCode}) ──`)
-
-    // Build tasks for this language (namespaces to translate)
-    const tasks = []
 
     for (const ns of nsFiles) {
       const enPath = path.join(enDir, `${ns}.json`)
@@ -327,14 +324,14 @@ async function main() {
       if (!force && checksums[checksumKey] === enHash) {
         const outPath = path.join(langDir, `${ns}.json`)
         if (fs.existsSync(outPath)) {
-          console.log(`  [skip] ${ns}.json (unchanged)`)
+          console.log(`  [skip] ${langCode}/${ns}.json (unchanged)`)
           skipped++
           continue
         }
       }
 
       if (dryRun) {
-        console.log(`  [would translate] ${ns}.json`)
+        console.log(`  [would translate] ${langCode}/${ns}.json`)
         continue
       }
 
@@ -352,55 +349,57 @@ async function main() {
               // Auto-repair dropped interpolation variables (common with RTL languages)
               const repaired = repairTranslation(englishJson, result)
               if (repaired > 0) {
-                console.log(`  [repair] ${ns}.json — re-inserted ${repaired} dropped variable(s)`)
+                console.log(`  [repair] ${langCode}/${ns}.json — re-inserted ${repaired} dropped variable(s)`)
               }
 
               // Validate
               const errors = validateTranslation(englishJson, result, langCode, ns)
               if (errors.length > 0) {
                 if (attempt < MAX_RETRIES) {
-                  console.log(`  [retry] ${ns}.json — validation errors: ${errors[0]}`)
+                  console.log(`  [retry] ${langCode}/${ns}.json — validation errors: ${errors[0]}`)
                   continue
                 }
-                console.warn(`  [warn] ${ns}.json — validation issues: ${errors.join('; ')}`)
+                console.warn(`  [warn] ${langCode}/${ns}.json — validation issues: ${errors.join('; ')}`)
               }
 
               // Write output
               const outPath = path.join(langDir, `${ns}.json`)
               fs.writeFileSync(outPath, JSON.stringify(result, null, 2) + '\n', 'utf-8')
 
-              // Update checksum
+              // Update checksum (saved to disk after all tasks complete)
               checksums[checksumKey] = enHash
-              saveChecksums(checksums)
 
               const elapsed = ((Date.now() - start) / 1000).toFixed(1)
-              console.log(`  [done] ${ns}.json (${elapsed}s)`)
+              console.log(`  [done] ${langCode}/${ns}.json (${elapsed}s)`)
               translated++
               return
             } catch (err) {
               lastError = err
               if (err.message?.includes('429') && attempt < MAX_RETRIES) {
                 const delay = Math.pow(2, attempt) * 1000
-                console.log(`  [rate-limited] ${ns}.json — retrying in ${delay / 1000}s...`)
+                console.log(`  [rate-limited] ${langCode}/${ns}.json — retrying in ${delay / 1000}s...`)
                 await sleep(delay)
               } else if (attempt < MAX_RETRIES) {
-                console.log(`  [retry] ${ns}.json — ${err.message}`)
+                console.log(`  [retry] ${langCode}/${ns}.json — ${err.message}`)
                 await sleep(1000)
               }
             }
           }
 
-          console.error(`  [FAILED] ${ns}.json — ${lastError?.message}`)
+          console.error(`  [FAILED] ${langCode}/${ns}.json — ${lastError?.message}`)
           failures.push(`${langCode}/${ns}: ${lastError?.message}`)
         })()
       )
     }
-
-    // Run namespace translations concurrently within each language
-    if (tasks.length > 0) {
-      await withConcurrency(tasks, MAX_CONCURRENT)
-    }
   }
+
+  // Run all translations concurrently across all languages and namespaces
+  if (tasks.length > 0) {
+    await withConcurrency(tasks, MAX_CONCURRENT)
+  }
+
+  // Save checksums once after all tasks complete (avoids concurrent file writes)
+  saveChecksums(checksums)
 
   // Summary
   console.log(`\n${'─'.repeat(50)}`)

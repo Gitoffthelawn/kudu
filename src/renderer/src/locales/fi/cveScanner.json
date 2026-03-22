@@ -1,19 +1,19 @@
 {
   "pageTitle": "Haavoittuvuudet",
-  "pageDescription": "Näytä asennetuista ohjelmistoista havaitut tunnetut haavoittuvuudet",
+  "pageDescription": "Tarkastele asennetuista ohjelmistoista havaittuja tunnettuja haavoittuvuuksia",
   "loading": "Ladataan haavoittuvuuksia...",
   "refetchButton": "Päivitä",
   "cloudNotConfigured": {
     "title": "Cloud Agent vaaditaan",
-    "description": "CVE-tarkistus edellyttää, että Cloud Agent on liitetty. Siirry kohtaan Asetukset → Pilvi yhdistääksesi laitteesi."
+    "description": "CVE-tarkistus edellyttää, että Cloud Agent on liitetty. Siirry kohtaan Asetukset → Cloud yhdistääksesi laitteesi."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent ei ole yhdistetty",
-    "description": "Cloud Agent ei ole tällä hetkellä yhdistetty. Tarkista yhteys kohdassa Asetukset → Pilvi."
+    "description": "Cloud Agent ei ole tällä hetkellä yhdistetty. Tarkista yhteys kohdasta Asetukset → Cloud."
   },
   "emptyState": {
     "title": "Haavoittuvuuksia ei havaittu",
-    "description": "Asennetuista ohjelmistoista ei löytynyt tunnettuja CVE-haavoittuvuuksia. Järjestelmäsi näyttää turvalliselta!"
+    "description": "Asennetusta ohjelmistostasi ei löytynyt tunnettuja CVE-haavoittuvuuksia. Järjestelmäsi vaikuttaa turvalliselta!"
   },
   "severity": {
     "critical": "Kriittinen",
@@ -36,7 +36,7 @@
   },
   "error": {
     "title": "Haavoittuvuuksien lataaminen epäonnistui",
-    "description": "Haavoittuvuustietoja ei voitu hakea palvelimelta. Yritä päivittää tai tarkista pilviyhteytesi."
+    "description": "Haavoittuvuustietoja ei voitu noutaa palvelimelta. Yritä päivittää tai tarkista pilviyhteytesi."
   },
   "card": {
     "installed": "Asennettu: {{version}}",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Havaittu ensimmäisen kerran: {{date}}",
     "lastScanned": "Viimeksi tarkistettu: {{date}}",
-    "updateViaSoftwareUpdater": "Päivitä Ohjelmistopäivityksen kautta"
+    "viewDetails": "Näytä CVE-tiedot",
+    "checkForUpdates": "Tarkista päivitykset"
   },
   "pagination": {
     "previous": "Edellinen",

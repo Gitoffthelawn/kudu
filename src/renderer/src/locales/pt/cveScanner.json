@@ -39,13 +39,14 @@
     "description": "Não foi possível obter os dados de vulnerabilidades do servidor. Tente atualizar ou verifique a sua ligação à cloud."
   },
   "card": {
-    "installed": "Instalado: {{version}}",
+    "installed": "Instalada: {{version}}",
     "fixAvailable": "Correção: {{version}}",
     "noFix": "Nenhuma correção disponível",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Primeira deteção: {{date}}",
     "lastScanned": "Última análise: {{date}}",
-    "updateViaSoftwareUpdater": "Atualizar através do Atualizador de Software"
+    "viewDetails": "Ver Detalhes do CVE",
+    "checkForUpdates": "Procurar Atualizações"
   },
   "pagination": {
     "previous": "Anterior",

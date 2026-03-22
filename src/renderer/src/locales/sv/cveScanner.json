@@ -5,11 +5,11 @@
   "refetchButton": "Uppdatera",
   "cloudNotConfigured": {
     "title": "Cloud Agent krävs",
-    "description": "CVE-skanning kräver att Cloud Agent är länkat. Gå till Inställningar → Cloud för att ansluta din enhet."
+    "description": "CVE-skanning kräver att Cloud Agent är länkad. Gå till Inställningar → Cloud för att ansluta din enhet."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent är inte ansluten",
-    "description": "Cloud Agent är för närvarande inte ansluten. Kontrollera anslutningen i Inställningar → Cloud."
+    "description": "Cloud Agent är för närvarande inte ansluten. Kontrollera din anslutning i Inställningar → Cloud."
   },
   "emptyState": {
     "title": "Inga sårbarheter upptäckta",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Först upptäckt: {{date}}",
     "lastScanned": "Senast skannad: {{date}}",
-    "updateViaSoftwareUpdater": "Uppdatera via Programuppdateraren"
+    "viewDetails": "Visa CVE-detaljer",
+    "checkForUpdates": "Sök efter uppdateringar"
   },
   "pagination": {
     "previous": "Föregående",

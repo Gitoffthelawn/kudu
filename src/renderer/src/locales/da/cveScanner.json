@@ -1,10 +1,10 @@
 {
   "pageTitle": "Sårbarheder",
-  "pageDescription": "Se kendte sårbarheder fundet i din installerede software",
+  "pageDescription": "Se kendte sårbarheder, der er registreret i din installerede software",
   "loading": "Indlæser sårbarheder...",
   "refetchButton": "Opdater",
   "cloudNotConfigured": {
-    "title": "Cloud Agent kræves",
+    "title": "Cloud Agent påkrævet",
     "description": "CVE-scanning kræver, at Cloud Agent er tilknyttet. Gå til Indstillinger → Cloud for at forbinde din enhed."
   },
   "cloudNotConnected": {
@@ -12,7 +12,7 @@
     "description": "Cloud Agent er ikke forbundet i øjeblikket. Kontrollér din forbindelse under Indstillinger → Cloud."
   },
   "emptyState": {
-    "title": "Ingen sårbarheder fundet",
+    "title": "Ingen sårbarheder registreret",
     "description": "Der blev ikke fundet nogen kendte CVE'er i din installerede software. Dit system ser sikkert ud!"
   },
   "severity": {
@@ -43,9 +43,10 @@
     "fixAvailable": "Rettelse: {{version}}",
     "noFix": "Ingen rettelse tilgængelig",
     "cvss": "CVSS {{score}}",
-    "firstDetected": "Først fundet: {{date}}",
+    "firstDetected": "Først registreret: {{date}}",
     "lastScanned": "Senest scannet: {{date}}",
-    "updateViaSoftwareUpdater": "Opdater via Software Updater"
+    "viewDetails": "Vis CVE-detaljer",
+    "checkForUpdates": "Søg efter opdateringer"
   },
   "pagination": {
     "previous": "Forrige",

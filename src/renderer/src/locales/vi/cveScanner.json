@@ -5,7 +5,7 @@
   "refetchButton": "Làm mới",
   "cloudNotConfigured": {
     "title": "Yêu cầu Cloud Agent",
-    "description": "Việc quét CVE yêu cầu Cloud Agent được liên kết. Đi tới Cài đặt → Cloud để kết nối thiết bị của bạn."
+    "description": "Quét CVE yêu cầu Cloud Agent phải được liên kết. Đi tới Cài đặt → Cloud để kết nối thiết bị của bạn."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent chưa kết nối",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Phát hiện lần đầu: {{date}}",
     "lastScanned": "Quét lần cuối: {{date}}",
-    "updateViaSoftwareUpdater": "Cập nhật qua Trình cập nhật phần mềm"
+    "viewDetails": "Xem chi tiết CVE",
+    "checkForUpdates": "Kiểm tra bản cập nhật"
   },
   "pagination": {
     "previous": "Trước",

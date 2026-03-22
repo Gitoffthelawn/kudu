@@ -5,7 +5,7 @@
   "refetchButton": "Obnovit",
   "cloudNotConfigured": {
     "title": "Vyžadován Cloud Agent",
-    "description": "Skenování CVE vyžaduje propojený Cloud Agent. Přejděte do Nastavení → Cloud a připojte své zařízení."
+    "description": "Kontrola CVE vyžaduje propojený Cloud Agent. Přejděte do Nastavení → Cloud a připojte své zařízení."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent není připojen",
@@ -44,8 +44,9 @@
     "noFix": "Není k dispozici žádná oprava",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Poprvé zjištěno: {{date}}",
-    "lastScanned": "Naposledy skenováno: {{date}}",
-    "updateViaSoftwareUpdater": "Aktualizovat pomocí Aktualizace softwaru"
+    "lastScanned": "Naposledy zkontrolováno: {{date}}",
+    "viewDetails": "Zobrazit podrobnosti CVE",
+    "checkForUpdates": "Zkontrolovat aktualizace"
   },
   "pagination": {
     "previous": "Předchozí",

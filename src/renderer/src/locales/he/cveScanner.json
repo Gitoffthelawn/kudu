@@ -23,7 +23,7 @@
     "none": "ללא"
   },
   "summary": {
-    "total": "סה״כ",
+    "total": "סה\"כ",
     "critical": "קריטית",
     "high": "גבוהה",
     "medium": "בינונית",
@@ -31,7 +31,7 @@
   },
   "filter": {
     "all": "הכול",
-    "searchPlaceholder": "חפש לפי שם היישום או מזהה CVE...",
+    "searchPlaceholder": "חפש לפי שם יישום או מזהה CVE...",
     "noResults": "אין פגיעויות התואמות למסננים הנוכחיים"
   },
   "error": {
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "זוהה לראשונה: {{date}}",
     "lastScanned": "נסרק לאחרונה: {{date}}",
-    "updateViaSoftwareUpdater": "עדכן באמצעות Software Updater"
+    "viewDetails": "הצג פרטי CVE",
+    "checkForUpdates": "בדוק אם קיימים עדכונים"
   },
   "pagination": {
     "previous": "הקודם",

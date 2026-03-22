@@ -1,15 +1,15 @@
 {
   "pageTitle": "Ευπάθειες",
-  "pageDescription": "Προβάλετε γνωστές ευπάθειες που εντοπίστηκαν στο εγκατεστημένο λογισμικό σας",
+  "pageDescription": "Προβολή γνωστών ευπαθειών που εντοπίστηκαν στο εγκατεστημένο λογισμικό σας",
   "loading": "Φόρτωση ευπαθειών...",
   "refetchButton": "Ανανέωση",
   "cloudNotConfigured": {
     "title": "Απαιτείται Cloud Agent",
-    "description": "Η σάρωση CVE απαιτεί να έχει συνδεθεί το Cloud Agent. Μεταβείτε στις Ρυθμίσεις → Cloud για να συνδέσετε τη συσκευή σας."
+    "description": "Η σάρωση CVE απαιτεί να έχει συνδεθεί ο Cloud Agent. Μεταβείτε στις Ρυθμίσεις → Cloud για να συνδέσετε τη συσκευή σας."
   },
   "cloudNotConnected": {
-    "title": "Το Cloud Agent δεν είναι συνδεδεμένο",
-    "description": "Το Cloud Agent δεν είναι συνδεδεμένο αυτή τη στιγμή. Ελέγξτε τη σύνδεσή σας στις Ρυθμίσεις → Cloud."
+    "title": "Ο Cloud Agent δεν είναι συνδεδεμένος",
+    "description": "Ο Cloud Agent δεν είναι συνδεδεμένος αυτήν τη στιγμή. Ελέγξτε τη σύνδεσή σας στις Ρυθμίσεις → Cloud."
   },
   "emptyState": {
     "title": "Δεν εντοπίστηκαν ευπάθειες",
@@ -36,16 +36,17 @@
   },
   "error": {
     "title": "Αποτυχία φόρτωσης ευπαθειών",
-    "description": "Δεν ήταν δυνατή η ανάκτηση των δεδομένων ευπαθειών από τον διακομιστή. Δοκιμάστε να κάνετε ανανέωση ή ελέγξτε τη σύνδεσή σας στο cloud."
+    "description": "Δεν ήταν δυνατή η ανάκτηση δεδομένων ευπαθειών από τον διακομιστή. Δοκιμάστε να κάνετε ανανέωση ή ελέγξτε τη σύνδεσή σας στο cloud."
   },
   "card": {
-    "installed": "Εγκατεστημένη έκδοση: {{version}}",
+    "installed": "Εγκατεστημένη: {{version}}",
     "fixAvailable": "Διόρθωση: {{version}}",
     "noFix": "Δεν υπάρχει διαθέσιμη διόρθωση",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Πρώτος εντοπισμός: {{date}}",
     "lastScanned": "Τελευταία σάρωση: {{date}}",
-    "updateViaSoftwareUpdater": "Ενημέρωση μέσω του Software Updater"
+    "viewDetails": "Προβολή λεπτομερειών CVE",
+    "checkForUpdates": "Έλεγχος για ενημερώσεις"
   },
   "pagination": {
     "previous": "Προηγούμενη",
@@ -54,6 +55,6 @@
   },
   "toast": {
     "fetchFailed": "Αποτυχία φόρτωσης δεδομένων ευπαθειών",
-    "fetchFailedNotConnected": "Το Cloud Agent δεν είναι συνδεδεμένο"
+    "fetchFailedNotConnected": "Ο Cloud Agent δεν είναι συνδεδεμένος"
   }
 }

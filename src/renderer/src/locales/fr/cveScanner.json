@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Première détection : {{date}}",
     "lastScanned": "Dernière analyse : {{date}}",
-    "updateViaSoftwareUpdater": "Mettre à jour via le programme de mise à jour des logiciels"
+    "viewDetails": "Voir les détails de la CVE",
+    "checkForUpdates": "Rechercher des mises à jour"
   },
   "pagination": {
     "previous": "Précédent",

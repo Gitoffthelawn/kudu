@@ -1,6 +1,6 @@
 {
   "pageTitle": "Kerentanan",
-  "pageDescription": "Lihat kerentanan yang diketahui yang dikesan dalam perisian anda yang dipasang",
+  "pageDescription": "Lihat kerentanan yang diketahui yang dikesan dalam perisian yang dipasang",
   "loading": "Memuatkan kerentanan...",
   "refetchButton": "Muat semula",
   "cloudNotConfigured": {
@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "Tiada Kerentanan Dikesan",
-    "description": "Tiada CVE yang diketahui ditemui dalam perisian anda yang dipasang. Sistem anda kelihatan selamat!"
+    "description": "Tiada CVE yang diketahui ditemui dalam perisian yang dipasang. Sistem anda kelihatan selamat!"
   },
   "severity": {
     "critical": "Kritikal",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Mula dikesan: {{date}}",
     "lastScanned": "Imbasan terakhir: {{date}}",
-    "updateViaSoftwareUpdater": "Kemas kini melalui Pengemas Kini Perisian"
+    "viewDetails": "Lihat Butiran CVE",
+    "checkForUpdates": "Semak Kemas Kini"
   },
   "pagination": {
     "previous": "Sebelumnya",

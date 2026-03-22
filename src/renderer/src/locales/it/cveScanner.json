@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "Nessuna vulnerabilità rilevata",
-    "description": "Non sono stati trovati CVE noti nel software installato. Il sistema sembra sicuro!"
+    "description": "Non sono stati trovati CVE noti nel software installato. Il sistema sembra sicuro."
   },
   "severity": {
     "critical": "Critica",
@@ -45,7 +45,8 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Rilevata per la prima volta: {{date}}",
     "lastScanned": "Ultima scansione: {{date}}",
-    "updateViaSoftwareUpdater": "Aggiorna tramite Software Updater"
+    "viewDetails": "Visualizza dettagli CVE",
+    "checkForUpdates": "Controlla aggiornamenti"
   },
   "pagination": {
     "previous": "Precedente",
@@ -54,6 +55,6 @@
   },
   "toast": {
     "fetchFailed": "Impossibile caricare i dati sulle vulnerabilità",
-    "fetchFailedNotConnected": "Il Cloud Agent non è connesso"
+    "fetchFailedNotConnected": "Cloud Agent non è connesso"
   }
 }
