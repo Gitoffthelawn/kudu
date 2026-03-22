@@ -28,11 +28,14 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }} onClick={onCancel} />
+      <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)' }} onClick={onCancel} />
 
       <div
-        className="relative w-full max-w-md animate-scale-in rounded-2xl p-6"
-        style={{ background: '#18181c', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}
+        className="glass-card relative w-full max-w-md animate-scale-in rounded-2xl p-6"
+        style={{
+          background: 'rgba(20, 20, 28, 0.85)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)'
+        }}
       >
         <div className="mb-5 flex items-start gap-4">
           {variant !== 'default' && (
@@ -77,10 +80,11 @@ export function ConfirmDialog({
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-colors"
+            className="rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
             style={{
-              background: variant === 'danger' ? 'rgba(239,68,68,0.12)' : variant === 'warning' ? 'rgba(245,158,11,0.12)' : '#f59e0b',
-              color: variant === 'danger' ? '#ef4444' : variant === 'warning' ? '#f59e0b' : '#1a0a00'
+              background: variant === 'danger' ? 'rgba(239,68,68,0.12)' : variant === 'warning' ? 'rgba(245,158,11,0.12)' : 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+              color: variant === 'danger' ? '#ef4444' : variant === 'warning' ? '#f59e0b' : '#1a0a00',
+              boxShadow: variant === 'default' ? '0 0 16px rgba(245,158,11,0.2)' : undefined
             }}
           >
             {confirmLabel ?? t('confirm')}

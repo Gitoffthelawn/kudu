@@ -3,15 +3,27 @@ import { AdminBanner } from './AdminBanner'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0c0c0e' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: '#0a0a10' }}>
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex flex-1 flex-col overflow-hidden">
+        {/* Ambient background glow */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute -top-[100px] left-[80px] h-[500px] w-[500px] rounded-full blur-[180px]"
+            style={{ background: 'rgba(245,158,11,0.025)' }}
+          />
+          <div
+            className="absolute bottom-[0] right-[40px] h-[400px] w-[400px] rounded-full blur-[160px]"
+            style={{ background: 'rgba(59,130,246,0.02)' }}
+          />
+        </div>
+
         {/* Invisible drag region for moving window (top edge) */}
         <div className="drag-region h-8 shrink-0" />
         {/* Window controls float in top right */}
         <WindowControls />
         <AdminBanner />
-        <main className="flex-1 overflow-y-auto px-10 pb-10 pt-2">
+        <main className="relative flex-1 overflow-y-auto px-10 pb-10 pt-2">
           {children}
         </main>
       </div>

@@ -179,8 +179,8 @@ export function DuplicateFinderPage() {
     <div className="flex h-full flex-col overflow-y-auto px-8 py-7">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-[22px] font-bold text-white">{t('pageTitle')}</h1>
-        <p className="mt-1 text-[13px]" style={{ color: '#6e6e76' }}>{t('pageDescription')}</p>
+        <h1 className="text-[24px] font-bold tracking-tight text-white">{t('pageTitle')}</h1>
+        <p className="mt-1.5 text-[13px] animate-fade-in" style={{ color: '#5e5e68' }}>{t('pageDescription')}</p>
       </div>
 
       {/* Directory selector + scan button */}

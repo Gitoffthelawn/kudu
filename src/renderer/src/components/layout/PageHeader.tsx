@@ -11,9 +11,9 @@ export function PageHeader({ title, description, action, className }: PageHeader
   return (
     <div className={cn('mb-8 flex items-end justify-between', className)}>
       <div>
-        <h1 className="text-[22px] font-semibold tracking-tight text-white">{title}</h1>
+        <h1 className="text-[24px] font-bold tracking-tight text-white">{title}</h1>
         {description && (
-          <p className="mt-1.5 text-[13px]" style={{ color: '#6e6e76' }}>
+          <p className="mt-1.5 text-[13px] animate-fade-in" style={{ color: '#5e5e68' }}>
             {description}
           </p>
         )}

@@ -435,8 +435,7 @@ export function DashboardPage() {
         <div className="grid grid-cols-2 gap-4">
           {/* Health Score Card */}
           <div
-            className="flex flex-col items-center justify-center rounded-2xl px-6 py-6"
-            style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
+            className="glass-card flex flex-col items-center justify-center rounded-2xl px-6 py-6"
           >
             <HealthScore score={healthScore} size="md" />
             <div className="mt-4 flex items-center gap-2">
@@ -475,12 +474,14 @@ export function DashboardPage() {
           {features.gameMode ? (
             <button
               onClick={() => navigate('/game-mode')}
-              className="group relative flex flex-col items-center justify-center rounded-2xl px-6 py-6 text-center transition-all"
+              className={cn(
+                'glass-card glass-card-hover group relative flex flex-col items-center justify-center rounded-2xl px-6 py-6 text-center transition-all',
+              )}
               style={{
                 background: gameModeActive
                   ? 'linear-gradient(180deg, rgba(6,182,212,0.08) 0%, rgba(139,92,246,0.04) 100%)'
-                  : '#16161a',
-                border: `1px solid ${gameModeActive ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.05)'}`,
+                  : undefined,
+                borderColor: gameModeActive ? 'rgba(6,182,212,0.2)' : undefined,
                 animation: gameModeActive ? 'game-mode-pulse 2.5s ease-in-out infinite' : undefined,
               }}
             >
@@ -519,8 +520,7 @@ export function DashboardPage() {
           ) : (
             /* Non-Windows: Status block instead of Game Mode */
             <div
-              className="flex flex-col justify-center rounded-2xl px-5 py-4"
-              style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
+              className="glass-card flex flex-col justify-center rounded-2xl px-5 py-4"
             >
               <h3 className="mb-3 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
                 {t('statusHeading')}
@@ -555,14 +555,15 @@ export function DashboardPage() {
             onClick={() => setShowQuickConfirm(true)}
             disabled={isRunning}
             className={cn(
-              'group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60',
-              !isRunning && 'hover:border-amber-500/20'
+              'glass-card glass-card-hover glow-amber group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60',
             )}
-            style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
           >
             <div
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-              style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                boxShadow: '0 0 20px rgba(245,158,11,0.2)'
+              }}
             >
               <Sparkles className="h-5 w-5" style={{ color: '#1a0a00' }} strokeWidth={2.2} />
             </div>
@@ -579,14 +580,15 @@ export function DashboardPage() {
             onClick={() => setShowFullConfirm(true)}
             disabled={isRunning}
             className={cn(
-              'group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60',
-              !isRunning && 'hover:border-blue-500/20'
+              'glass-card glass-card-hover glow-blue group relative flex items-center gap-4 rounded-2xl p-5 text-left transition-all disabled:opacity-60',
             )}
-            style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
           >
             <div
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-              style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                boxShadow: '0 0 20px rgba(59,130,246,0.2)'
+              }}
             >
               <Shield className="h-5 w-5 text-white" strokeWidth={2.2} />
             </div>
@@ -602,8 +604,8 @@ export function DashboardPage() {
         {/* ── Progress / result banner ─────────────────── */}
         {isRunning && (
           <div
-            className="rounded-2xl px-5 py-4"
-            style={{ background: '#16161a', border: '1px solid rgba(245,158,11,0.15)' }}
+            className="glass-card rounded-2xl px-5 py-4"
+            style={{ borderColor: 'rgba(245,158,11,0.15)' }}
           >
             <div className="flex items-center gap-3">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin text-amber-400" strokeWidth={2} />
@@ -627,8 +629,8 @@ export function DashboardPage() {
 
         {phase === 'done' && result && (
           <div
-            className="rounded-2xl p-4"
-            style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.1)' }}
+            className="glass-card rounded-2xl p-4"
+            style={{ background: 'rgba(34,197,94,0.04)', borderColor: 'rgba(34,197,94,0.12)' }}
           >
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" strokeWidth={1.8} />
@@ -671,8 +673,7 @@ export function DashboardPage() {
 
         {/* ── Storage Overview ─────────────────────────── */}
         <div
-          className="rounded-2xl p-5"
-          style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
+          className="glass-card rounded-2xl p-5"
         >
           <h3 className="mb-5 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
             {t('storageOverviewHeading')}
@@ -728,17 +729,23 @@ function MiniGauge({ icon: Icon, label, percent, detail }: {
   const R = (SIZE - STROKE * 2) / 2
   const C = 2 * Math.PI * R
   const offset = C - (clamped / 100) * C
+  const gradientId = `mini-gauge-${label.replace(/\s+/g, '-')}`
 
   return (
     <div
-      className="flex items-center gap-3.5 rounded-xl px-4 py-3.5"
-      style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
+      className="glass-card glass-card-hover flex items-center gap-3.5 rounded-xl px-4 py-3.5"
     >
       <div className="relative inline-flex shrink-0 items-center justify-center">
         <svg width={SIZE} height={SIZE} className="-rotate-90">
+          <defs>
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={color} stopOpacity="1" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.5" />
+            </linearGradient>
+          </defs>
           <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={STROKE} />
           <circle
-            cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke={color} strokeWidth={STROKE}
+            cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke={`url(#${gradientId})`} strokeWidth={STROKE}
             strokeLinecap="round" strokeDasharray={C} strokeDashoffset={offset}
             style={{ transition: 'stroke-dashoffset 0.6s cubic-bezier(0.16,1,0.3,1)' }}
           />
@@ -775,7 +782,11 @@ function DriveBar({ drive, platform }: { drive: DriveInfo; platform: string }) {
       <div className="h-[5px] overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
         <div
           className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${usedPercent}%`, background: barColor }}
+          style={{
+            width: `${usedPercent}%`,
+            background: `linear-gradient(90deg, ${barColor}, ${barColor}cc)`,
+            boxShadow: `0 0 8px ${barColor}30`
+          }}
         />
       </div>
     </div>

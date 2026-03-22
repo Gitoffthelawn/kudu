@@ -12,14 +12,12 @@
   "registry": "Реестр",
   "startup": "Автозагрузка",
   "network": "Сеть",
-  "uninstaller": "Удаление программ",
-  "updates": "Обновления",
+  "software": "Программы",
   "schedules": "Расписания",
   "toolsHeading": "ИНСТРУМЕНТЫ",
   "performance": "Производительность",
-  "diskAnalyzer": "Анализ диска",
-  "duplicateFinder": "Поиск дубликатов",
-  "history": "История",
+  "diskTools": "Дисковые инструменты",
+  "history": "Журнал",
   "settings": "Параметры",
   "gameMode": "Игровой режим"
 }

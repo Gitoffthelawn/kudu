@@ -11,7 +11,8 @@ import { RegistryPage } from './pages/RegistryPage'
 import { StartupPage } from './pages/StartupPage'
 import { DebloaterPage } from './pages/DebloaterPage'
 import { SystemHardeningPage } from './pages/SystemHardeningPage'
-import { UpdatesPage } from './pages/UpdatesPage'
+import { SoftwareUpdaterPage } from './pages/SoftwareUpdaterPage'
+import { DriverManagerPage } from './pages/DriverManagerPage'
 import { DiskAnalyzerPage } from './pages/DiskAnalyzerPage'
 import { DuplicateFinderPage } from './pages/DuplicateFinderPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -20,14 +21,13 @@ import { MalwareScannerPage } from './pages/MalwareScannerPage'
 import { ThreatMonitorPage } from './pages/ThreatMonitorPage'
 import { PrivacyShieldPage } from './pages/PrivacyShieldPage'
 import { HistoryPage } from './pages/HistoryPage'
-import { DriverManagerPage } from './pages/DriverManagerPage'
 import { PerformanceMonitorPage } from './pages/PerformanceMonitorPage'
 import { UninstallerPage } from './pages/UninstallerPage'
 import { ServiceManagerPage } from './pages/ServiceManagerPage'
-import { SoftwareUpdaterPage } from './pages/SoftwareUpdaterPage'
 import { SchedulesPage } from './pages/SchedulesPage'
 import { GameModePage } from './pages/GameModePage'
 import { CveScannerPage } from './pages/CveScannerPage'
+import { AboutPage } from './pages/AboutPage'
 import { Onboarding } from './components/Onboarding'
 import { useStatsStore } from './stores/stats-store'
 import { useHistoryStore } from './stores/history-store'
@@ -109,16 +109,17 @@ export function App() {
           <Route path="/uninstaller" element={<UninstallerPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/about" element={<AboutPage />} />
           {/* Consolidated pages */}
           <Route path="/hardening" element={<SystemHardeningPage />} />
-          <Route path="/updates" element={<UpdatesPage />} />
+          <Route path="/updates" element={<SoftwareUpdaterPage />} />
           <Route path="/schedules" element={<SchedulesPage />} />
           {/* Legacy routes — redirect to consolidated pages */}
           <Route path="/privacy" element={<SystemHardeningPage />} />
           <Route path="/debloater" element={<SystemHardeningPage />} />
           <Route path="/services" element={<SystemHardeningPage />} />
-          <Route path="/updater" element={<UpdatesPage />} />
-          <Route path="/drivers" element={<UpdatesPage />} />
+          <Route path="/updater" element={<SoftwareUpdaterPage />} />
+          <Route path="/drivers" element={<DriverManagerPage />} />
         </Routes>
       </AppShell>
       <Toaster
@@ -126,9 +127,12 @@ export function App() {
         theme="dark"
         toastOptions={{
           style: {
-            background: '#18181b',
-            border: '1px solid #3f3f46',
-            color: '#fafafa'
+            background: 'rgba(20, 20, 28, 0.85)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#fafafa',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)'
           }
         }}
       />

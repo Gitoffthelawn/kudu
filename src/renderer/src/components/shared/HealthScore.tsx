@@ -14,10 +14,10 @@ const sizeConfig = {
   lg: { width: 190, strokeWidth: 8, fontSize: 'text-[44px]', labelSize: 'text-[12px]' }
 }
 
-function getScoreColor(score: number): string {
-  if (score >= 71) return '#22c55e'
-  if (score >= 41) return '#f59e0b'
-  return '#ef4444'
+function getScoreColors(score: number): { start: string; end: string; glow: string } {
+  if (score >= 71) return { start: '#22c55e', end: '#10b981', glow: '#22c55e' }
+  if (score >= 41) return { start: '#fbbf24', end: '#f59e0b', glow: '#f59e0b' }
+  return { start: '#ef4444', end: '#f43f5e', glow: '#ef4444' }
 }
 
 export function HealthScore({ score, size = 'md', className }: HealthScoreProps) {
@@ -26,7 +26,7 @@ export function HealthScore({ score, size = 'md', className }: HealthScoreProps)
   const config = sizeConfig[size]
   const radius = (config.width - config.strokeWidth * 2) / 2
   const circumference = 2 * Math.PI * radius
-  const color = getScoreColor(score)
+  const colors = getScoreColors(score)
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimatedScore(score), 150)
@@ -37,17 +37,23 @@ export function HealthScore({ score, size = 'md', className }: HealthScoreProps)
 
   return (
     <div className={cn('relative inline-flex items-center justify-center', className)}>
-      {/* Glow */}
+      {/* Outer glow */}
       <div
-        className="absolute rounded-full opacity-15 blur-2xl"
+        className="absolute rounded-full opacity-20 blur-3xl"
         style={{
-          width: config.width * 0.6,
-          height: config.width * 0.6,
-          backgroundColor: color
+          width: config.width * 0.75,
+          height: config.width * 0.75,
+          backgroundColor: colors.glow
         }}
       />
 
       <svg width={config.width} height={config.width} className="-rotate-90">
+        <defs>
+          <linearGradient id="health-arc-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={colors.start} />
+            <stop offset="100%" stopColor={colors.end} />
+          </linearGradient>
+        </defs>
         {/* Track */}
         <circle
           cx={config.width / 2}
@@ -63,17 +69,23 @@ export function HealthScore({ score, size = 'md', className }: HealthScoreProps)
           cy={config.width / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke="url(#health-arc-gradient)"
           strokeWidth={config.strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1)' }}
+          style={{
+            transition: 'stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1)',
+            filter: `drop-shadow(0 0 6px ${colors.glow}40)`
+          }}
         />
       </svg>
 
       <div className="absolute flex flex-col items-center">
-        <span className={cn(config.fontSize, 'font-bold tracking-tight text-white')}>
+        <span
+          className={cn(config.fontSize, 'font-bold tracking-tight text-white')}
+          style={{ textShadow: `0 0 20px ${colors.glow}30` }}
+        >
           {Math.round(animatedScore)}
         </span>
         {size !== 'sm' && (

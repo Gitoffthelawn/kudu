@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 import { Download, Cpu } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { cn } from '@/lib/utils'
@@ -24,7 +25,8 @@ const PM_DESCRIPTION_KEYS: Record<string, string> = {
 export function UpdatesPage() {
   const { t } = useTranslation('updates')
   const { platform, features } = usePlatform()
-  const [activeTab, setActiveTab] = useState('software')
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.pathname === '/drivers' ? 'drivers' : 'software')
 
   const visibleTabs = useMemo(() => {
     const softwareTab: TabDef = {

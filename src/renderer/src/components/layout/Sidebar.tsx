@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -9,6 +10,7 @@ import {
   Settings,
   Wifi,
   History,
+  Info,
   ShieldAlert,
   Shield,
   Radar,
@@ -16,9 +18,12 @@ import {
   Trash2,
   Download,
   CalendarClock,
-  CopyCheck,
   Gamepad2,
-  Bug
+  Bug,
+  ChevronRight,
+  CopyCheck,
+  Cpu,
+  Package
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
@@ -32,10 +37,18 @@ import { useCveStore } from '@/stores/cve-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { usePlatform } from '@/hooks/usePlatform'
 
+interface SubItemDef {
+  icon: LucideIcon
+  label: string
+  path: string
+  badge?: boolean
+}
+
 interface NavItemDef {
   icon: LucideIcon
   labelKey: string
   path: string
+  children?: SubItemDef[]
 }
 
 interface NavGroup {
@@ -63,8 +76,14 @@ const navGroups: NavGroup[] = [
       { icon: Database, labelKey: 'registry', path: '/registry' },
       { icon: Zap, labelKey: 'startup', path: '/startup' },
       { icon: Wifi, labelKey: 'network', path: '/network' },
-      { icon: Trash2, labelKey: 'uninstaller', path: '/uninstaller' },
-      { icon: Download, labelKey: 'updates', path: '/updates' },
+      {
+        icon: Package, labelKey: 'software', path: '/software',
+        children: [
+          { icon: Download, label: 'Software Updates', path: '/updates' },
+          { icon: Cpu, label: 'Driver Updates', path: '/drivers' },
+          { icon: Trash2, label: 'Uninstaller', path: '/uninstaller' },
+        ]
+      },
       { icon: CalendarClock, labelKey: 'schedules', path: '/schedules' }
     ]
   },
@@ -73,16 +92,32 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: Gamepad2, labelKey: 'gameMode', path: '/game-mode' },
       { icon: Activity, labelKey: 'performance', path: '/performance' },
-      { icon: HardDrive, labelKey: 'diskAnalyzer', path: '/disk' },
-      { icon: CopyCheck, labelKey: 'duplicateFinder', path: '/duplicates' },
-      { icon: History, labelKey: 'history', path: '/history' }
+      {
+        icon: HardDrive, labelKey: 'diskTools', path: '/disk',
+        children: [
+          { icon: HardDrive, label: 'Disk Analyzer', path: '/disk' },
+          { icon: CopyCheck, label: 'Duplicate Finder', path: '/duplicates' },
+        ]
+      },
     ]
   }
 ]
 
-const bottomNavItems: NavItemDef[] = [
-  { icon: Settings, labelKey: 'settings', path: '/settings' }
-]
+function useBottomNavItems(): NavItemDef[] {
+  const updateState = useAppUpdateStore((s) => s.status.state)
+  const showUpdateBadge = updateState === 'available' || updateState === 'downloaded'
+
+  return [
+    {
+      icon: Settings, labelKey: 'settings', path: '/settings',
+      children: [
+        { icon: Settings, label: 'Preferences', path: '/settings' },
+        { icon: History, label: 'History', path: '/history' },
+        { icon: Info, label: 'About & Updates', path: '/about', badge: showUpdateBadge },
+      ]
+    }
+  ]
+}
 
 // Map nav paths to badge counts from stores
 function useBadgeCounts(): Record<string, number> {
@@ -93,8 +128,12 @@ function useBadgeCounts(): Record<string, number> {
   const gameModeActive = useGameModeStore((s) => s.active)
   const cveTotal = useCveStore((s) => s.total)
 
+  const updatesCount = updaterApps.length + driverUpdates.length
+
   return {
-    '/updates': updaterApps.length + driverUpdates.length,
+    '/updates': updatesCount,
+    '/software': updatesCount,
+    '/drivers': driverUpdates.length,
     '/threat-monitor': threatCount,
     '/game-mode': gameModeActive ? 1 : 0,
     '/cve': cveTotal,
@@ -103,11 +142,13 @@ function useBadgeCounts(): Record<string, number> {
 
 export function Sidebar() {
   const { t } = useTranslation('sidebar')
+  const location = useLocation()
   const badgeCounts = useBadgeCounts()
   const { features } = usePlatform()
   const threatMonitorLoaded = useThreatMonitorStore((s) => s.loaded)
   const threatBlacklistActive = useThreatMonitorStore((s) => s.snapshot) !== null
   const isCloudLinked = !!useSettingsStore((s) => s.settings.cloud.apiKey)
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
 
   // Filter nav items based on platform features and cloud state
   const filteredNavGroups = navGroups.map((group) => ({
@@ -121,37 +162,67 @@ export function Sidebar() {
     }),
   }))
 
+  const isPathActive = (item: NavItemDef) => {
+    if (item.children) {
+      return item.children.some((c) => c.path === location.pathname)
+    }
+    return location.pathname === item.path
+  }
+
+  const submenuProps = {
+    openSubmenu,
+    onToggleSubmenu: (path: string) => setOpenSubmenu((prev) => prev === path ? null : path),
+    onCloseSubmenu: () => setOpenSubmenu(null),
+  }
+
   return (
     <div
       className="flex h-full w-[240px] shrink-0 flex-col"
-      style={{ background: '#111114', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+      style={{
+        background: 'linear-gradient(180deg, #0f0f16 0%, #0c0c12 100%)',
+        borderRight: '1px solid rgba(255,255,255,0.06)'
+      }}
     >
       {/* Logo — doubles as drag region */}
-      <div className="drag-region flex items-center gap-3 px-5 pb-4 pt-6">
-        <img src={logoSrc} alt="Kudu" className="h-9 w-9 shrink-0 rounded-xl" />
+      <div className="drag-region relative flex items-center gap-3 px-5 pb-4 pt-5">
+        <div
+          className="absolute left-5 top-5 h-8 w-8 rounded-xl opacity-25 blur-xl"
+          style={{ background: '#f59e0b' }}
+        />
+        <img src={logoSrc} alt="Kudu" className="relative h-8 w-8 shrink-0 rounded-xl" />
         <div>
-          <div className="text-[14px] font-semibold text-white">{t('appName')}</div>
-          <div className="text-[10px] font-medium tracking-wide" style={{ color: '#636369' }}>
+          <div className="text-[13px] font-semibold text-white">{t('appName')}</div>
+          <div className="text-[9px] font-medium tracking-wide" style={{ color: '#54545c' }}>
             {t('subtitle')}
           </div>
         </div>
       </div>
 
       {/* Nav items */}
-      <nav className="mt-2 min-h-0 flex-1 overflow-y-auto px-3">
+      <nav className="mt-1 min-h-0 flex-1 overflow-y-auto px-3">
         {filteredNavGroups.map((group, gi) => (
-          <div key={gi} className={gi > 0 ? 'mt-4' : ''}>
+          <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
             {group.headingKey && (
-              <div
-                className="mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest"
-                style={{ color: '#4e4e56' }}
-              >
-                {t(group.headingKey)}
+              <div className="mb-2 flex items-center gap-2.5 px-3 pt-0.5">
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-[0.15em]"
+                  style={{ color: '#3e3e48' }}
+                >
+                  {t(group.headingKey)}
+                </span>
+                <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.04)' }} />
               </div>
             )}
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {group.items.map((item) => (
-                <NavItem key={item.path} item={item} badgeCount={badgeCounts[item.path]} />
+                <NavItem
+                  key={item.path}
+                  item={item}
+                  badgeCount={badgeCounts[item.path]}
+                  isActive={isPathActive(item)}
+                  submenuOpen={openSubmenu === item.path}
+                  {...submenuProps}
+                />
               ))}
             </div>
           </div>
@@ -159,63 +230,214 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <BottomNav />
+      <BottomNav submenuProps={submenuProps} openSubmenu={openSubmenu} isPathActive={isPathActive} badgeCounts={badgeCounts} />
     </div>
   )
 }
 
-function BottomNav() {
-  const updateState = useAppUpdateStore((s) => s.status.state)
-  const showBadge = updateState === 'available' || updateState === 'downloaded'
+function BottomNav({ submenuProps, openSubmenu, isPathActive, badgeCounts }: {
+  submenuProps: { openSubmenu: string | null; onToggleSubmenu: (path: string) => void; onCloseSubmenu: () => void }
+  openSubmenu: string | null
+  isPathActive: (item: NavItemDef) => boolean
+  badgeCounts: Record<string, number>
+}) {
+  const bottomNavItems = useBottomNavItems()
 
   return (
-    <div className="px-3 pb-4 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+    <div className="px-3 pb-3 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
       {bottomNavItems.map((item) => (
-        <NavItem key={item.path} item={item} badge={showBadge} />
+        <NavItem
+          key={item.path}
+          item={item}
+          badgeCount={badgeCounts[item.path]}
+          isActive={isPathActive(item)}
+          submenuOpen={openSubmenu === item.path}
+          {...submenuProps}
+        />
       ))}
     </div>
   )
 }
 
-function NavItem({ item, badge, badgeCount }: { item: NavItemDef; badge?: boolean; badgeCount?: number }) {
+function NavItem({
+  item,
+  badge,
+  badgeCount,
+  isActive: isActiveProp,
+  submenuOpen,
+  onToggleSubmenu,
+  onCloseSubmenu,
+}: {
+  item: NavItemDef
+  badge?: boolean
+  badgeCount?: number
+  isActive?: boolean
+  submenuOpen?: boolean
+  openSubmenu?: string | null
+  onToggleSubmenu?: (path: string) => void
+  onCloseSubmenu?: () => void
+}) {
   const { t } = useTranslation('sidebar')
   const location = useLocation()
   const navigate = useNavigate()
-  const isActive = location.pathname === item.path
+  const isActive = isActiveProp ?? location.pathname === item.path
+  const hasChildren = item.children && item.children.length > 0
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
+
+  // Close popover on click outside
+  useEffect(() => {
+    if (!submenuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (
+        popoverRef.current && !popoverRef.current.contains(e.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(e.target as Node)
+      ) {
+        onCloseSubmenu?.()
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [submenuOpen, onCloseSubmenu])
+
+  const handleClick = () => {
+    if (hasChildren) {
+      onToggleSubmenu?.(item.path)
+    } else {
+      navigate(item.path)
+    }
+  }
 
   return (
-    <button
-      onClick={() => navigate(item.path)}
-      className={cn(
-        'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-150',
-        isActive
-          ? 'text-amber-400'
-          : 'text-zinc-500 hover:text-zinc-300'
-      )}
-      style={isActive ? { background: 'rgba(245,158,11,0.08)' } : undefined}
-    >
-      {isActive && (
-        <div
-          className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full"
-          style={{ background: '#f59e0b' }}
-        />
-      )}
-      <item.icon
+    <div className="relative">
+      <button
+        ref={buttonRef}
+        onClick={handleClick}
         className={cn(
-          'h-[17px] w-[17px] shrink-0 transition-colors',
-          isActive ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'
+          'group relative flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-200',
+          isActive
+            ? 'text-white'
+            : 'text-zinc-500 hover:bg-white/[0.03] hover:text-zinc-300'
         )}
-        strokeWidth={isActive ? 2.2 : 1.8}
-      />
-      <span>{t(item.labelKey)}</span>
-      {(badge || (badgeCount != null && badgeCount > 0)) && (
-        <span
-          className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none"
-          style={{ background: '#f59e0b', color: '#09090b' }}
-        >
-          {badgeCount ?? 1}
-        </span>
-      )}
-    </button>
+        style={isActive ? {
+          background: 'rgba(245,158,11,0.08)',
+          boxShadow: '0 0 20px rgba(245,158,11,0.05)'
+        } : undefined}
+      >
+        {isActive && (
+          <div
+            className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full"
+            style={{
+              background: 'linear-gradient(180deg, #fbbf24, #f59e0b)',
+              boxShadow: '0 0 8px rgba(245,158,11,0.4)'
+            }}
+          />
+        )}
+        <item.icon
+          className={cn(
+            'h-[15px] w-[15px] shrink-0 transition-colors duration-200',
+            isActive ? 'text-amber-400' : 'text-zinc-600 group-hover:text-zinc-400'
+          )}
+          strokeWidth={isActive ? 2 : 1.7}
+        />
+        <span className="flex-1 text-left">{t(item.labelKey)}</span>
+        {(badge || (badgeCount != null && badgeCount > 0)) && (
+          <span
+            className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold leading-none"
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              color: '#0a0600',
+              boxShadow: '0 0 8px rgba(245,158,11,0.3)'
+            }}
+          >
+            {badgeCount ?? 1}
+          </span>
+        )}
+        {hasChildren && (
+          <ChevronRight
+            className={cn(
+              'h-3.5 w-3.5 transition-all duration-200',
+              submenuOpen ? 'rotate-90 text-zinc-400' : 'text-zinc-600'
+            )}
+            strokeWidth={1.7}
+          />
+        )}
+      </button>
+
+      {/* Flyout submenu — rendered fixed to escape sidebar overflow */}
+      {hasChildren && submenuOpen && <FlyoutMenu buttonRef={buttonRef} popoverRef={popoverRef} items={item.children!} onSelect={(path) => { navigate(path); onCloseSubmenu?.() }} />}
+    </div>
+  )
+}
+
+function FlyoutMenu({ buttonRef, popoverRef, items, onSelect }: {
+  buttonRef: React.RefObject<HTMLButtonElement | null>
+  popoverRef: React.RefObject<HTMLDivElement | null>
+  items: SubItemDef[]
+  onSelect: (path: string) => void
+}) {
+  const location = useLocation()
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (!buttonRef.current) return
+    const rect = buttonRef.current.getBoundingClientRect()
+    // If near the bottom of the screen, open upward
+    const spaceBelow = window.innerHeight - rect.top
+    const menuHeight = items.length * 36 + 12 // approx
+    const top = spaceBelow < menuHeight + 20 ? rect.bottom - menuHeight : rect.top
+    setPos({ top, left: rect.right + 6 })
+  }, [buttonRef, items.length])
+
+  return (
+    <div
+      ref={popoverRef}
+      className="fixed z-[200] animate-scale-in"
+      style={{ top: pos.top, left: pos.left, transformOrigin: 'left top' }}
+    >
+      <div
+        className="glass-card w-48 rounded-xl py-1.5"
+        style={{
+          background: 'rgba(18, 18, 26, 0.92)',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
+        }}
+      >
+        {items.map((child) => {
+          const isChildActive = location.pathname === child.path
+          return (
+            <button
+              key={child.path}
+              onClick={() => onSelect(child.path)}
+              className={cn(
+                'flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[12.5px] font-medium transition-all duration-150',
+                isChildActive
+                  ? 'text-amber-400'
+                  : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200'
+              )}
+              style={isChildActive ? { background: 'rgba(245,158,11,0.08)' } : undefined}
+            >
+              <child.icon
+                className="h-[14px] w-[14px] shrink-0"
+                style={{ color: isChildActive ? '#f59e0b' : '#52525b' }}
+                strokeWidth={isChildActive ? 2 : 1.7}
+              />
+              <span className="flex-1">{child.label}</span>
+              {child.badge && (
+                <span
+                  className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[8px] font-bold leading-none"
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    color: '#0a0600',
+                    boxShadow: '0 0 6px rgba(245,158,11,0.3)'
+                  }}
+                >
+                  NEW
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
