@@ -28,6 +28,7 @@ export function SettingsPage() {
   const [cloudLinking, setCloudLinking] = useState(false)
   const [cloudUnlinking, setCloudUnlinking] = useState(false)
   const [cloudReconnecting, setCloudReconnecting] = useState(false)
+  const [cveSummary, setCveSummary] = useState<{ total: number; critical: number; high: number; medium: number; low: number; librarySize: number } | null>(null)
 
   const isLinked = !!settings.cloud.apiKey
 
@@ -39,11 +40,19 @@ export function SettingsPage() {
 
   // Poll cloud status when linked
   useEffect(() => {
-    if (!isLinked) { setCloudStatus(null); return }
+    if (!isLinked) { setCloudStatus(null); setCveSummary(null); return }
     refreshCloudStatus()
     const timer = setInterval(refreshCloudStatus, 5000)
     return () => clearInterval(timer)
   }, [isLinked, refreshCloudStatus])
+
+  // Fetch CVE summary once when cloud becomes connected
+  useEffect(() => {
+    if (cloudStatus?.status !== 'connected') return
+    window.kudu?.cveFetch?.({ page: 1 })
+      .then((r) => setCveSummary({ total: r.total, librarySize: r.librarySize, ...r.summary }))
+      .catch(() => {})
+  }, [cloudStatus?.status])
 
   const handleCloudLink = async () => {
     if (!cloudApiKey.trim() || cloudApiKey.length < 10) return
@@ -314,6 +323,15 @@ export function SettingsPage() {
                 </span>
               ) : (
                 <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>{t('cloudThreatListNotLoaded')}</span>
+              )}
+            </Row>
+            <Row label={t('cloudCveMonitorLabel')} desc={cveSummary && cveSummary.total > 0 ? t('cloudCveDescLoaded', { findings: cveSummary.total, critical: cveSummary.critical, high: cveSummary.high, medium: cveSummary.medium, low: cveSummary.low }) : t('cloudCveMonitorDesc')}>
+              {cveSummary && cveSummary.librarySize > 0 ? (
+                <span className="text-[11px] tabular-nums" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  {t('cloudCveLibrarySize', { count: cveSummary.librarySize.toLocaleString() })}
+                </span>
+              ) : (
+                <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>{cveSummary ? t('cloudCveNoFindings') : t('cloudCveNotScanned')}</span>
               )}
             </Row>
             <Row label={t('cloudRemotePowerLabel')} desc={t('cloudRemotePowerDesc')}>

@@ -6,6 +6,7 @@
   "malwareScanner": "Сканер вредоносных программ",
   "threatMonitor": "Монитор угроз",
   "systemHardening": "Укрепление системы",
+  "cveScanner": "Vulnerabilities",
   "maintainHeading": "ОБСЛУЖИВАНИЕ",
   "cleaner": "Очистка",
   "registry": "Реестр",
@@ -18,7 +19,7 @@
   "performance": "Производительность",
   "diskAnalyzer": "Анализ диска",
   "duplicateFinder": "Поиск дубликатов",
-  "history": "Журнал",
+  "history": "История",
   "settings": "Параметры",
   "gameMode": "Игровой режим"
 }

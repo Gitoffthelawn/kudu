@@ -169,6 +169,63 @@ class CloudAgentService {
     }
   }
 
+  async getVulnerabilities(
+    page?: number,
+    severity?: string,
+    search?: string,
+  ): Promise<import('../../shared/types').CvePageResult> {
+    if (this.status !== 'connected') throw new Error('Cloud agent not connected')
+    const params = new URLSearchParams()
+    if (page && page > 1) params.set('page', String(page))
+    if (severity && severity !== 'all') params.set('severity', severity)
+    if (search) params.set('search', search.slice(0, 100))
+    const qs = params.toString()
+    const path = `/devices/${encodeURIComponent(this.deviceId)}/vulnerabilities${qs ? `?${qs}` : ''}`
+    const raw = (await this.getApi(path)) as Record<string, unknown>
+
+    // Validate and sanitize each vulnerability row from the API
+    // Server sends snake_case fields (cve_id, app_name, installed_version, etc.)
+    const validSeverities = new Set(['critical', 'high', 'medium', 'low', 'none'])
+    const rawItems = Array.isArray(raw.data) ? raw.data : []
+    const vulnerabilities = rawItems
+      .filter((item: unknown): item is Record<string, unknown> =>
+        item !== null && typeof item === 'object' && !Array.isArray(item) &&
+        typeof (item as Record<string, unknown>).cve_id === 'string' &&
+        typeof (item as Record<string, unknown>).app_name === 'string'
+      )
+      .map((item) => {
+        const cvss = item.cvss_score != null ? parseFloat(String(item.cvss_score)) : NaN
+        return {
+          id: typeof item.id === 'number' ? item.id : 0,
+          cveId: String(item.cve_id),
+          appName: String(item.app_name),
+          installedVersion: typeof item.installed_version === 'string' ? item.installed_version : '',
+          severity: (typeof item.severity === 'string' && validSeverities.has(item.severity) ? item.severity : 'none') as import('../../shared/types').CveSeverity,
+          cvssScore: !isNaN(cvss) ? cvss : null,
+          fixedIn: typeof item.fixed_in === 'string' ? item.fixed_in : null,
+          firstDetectedAt: typeof item.first_detected_at === 'string' ? item.first_detected_at : '',
+          lastScannedAt: typeof item.last_scanned_at === 'string' ? item.last_scanned_at : '',
+        }
+      })
+
+    // Validate summary shape
+    const rawSummary = raw.summary as Record<string, unknown> | undefined
+    const summary = {
+      critical: typeof rawSummary?.critical === 'number' ? rawSummary.critical : 0,
+      high: typeof rawSummary?.high === 'number' ? rawSummary.high : 0,
+      medium: typeof rawSummary?.medium === 'number' ? rawSummary.medium : 0,
+      low: typeof rawSummary?.low === 'number' ? rawSummary.low : 0,
+    }
+
+    return {
+      vulnerabilities,
+      summary,
+      total: typeof raw.total === 'number' ? raw.total : 0,
+      nextPageUrl: typeof raw.next_page_url === 'string' ? raw.next_page_url : null,
+      librarySize: typeof raw.library_size === 'number' ? raw.library_size : 0,
+    }
+  }
+
   async link(apiKey: string): Promise<{ success: boolean; error?: string }> {
     try {
       // Stop any existing connection before re-linking
@@ -1273,6 +1330,7 @@ class CloudAgentService {
     'service-scan', 'service-apply',
     'malware-quarantine', 'malware-delete', 'registry-scan', 'registry-fix',
     'update-threat-blacklist', 'get-threat-status',
+    'cve-scan',
   ])
 
   /** Commands that only read data and can safely run in parallel */
@@ -1469,6 +1527,10 @@ class CloudAgentService {
         case 'get-threat-status':
           await this.handleGetThreatStatus(cmd.requestId)
           break
+        // Phase 5: CVE scanning
+        case 'cve-scan':
+          await this.handleCveScan(cmd.requestId)
+          break
       }
       if (!timedOut) {
         this.logCloudAction(cmd, startedAt, true)
@@ -1547,6 +1609,7 @@ class CloudAgentService {
       case 'registry-fix': return `Fix ${cmd.entryIds?.length ?? 0} registry entries`
       case 'update-threat-blacklist': return 'Update threat blacklist'
       case 'get-threat-status': return 'Get threat status'
+      case 'cve-scan': return 'CVE vulnerability scan'
       default: return (cmd as CloudCommand).type
     }
   }
@@ -1778,10 +1841,11 @@ class CloudAgentService {
         }
         // Windows: COM-based recycle bin query
         try {
+          const rbScript = `$shell = New-Object -ComObject Shell.Application; $rb = $shell.NameSpace(0x0a); $items = $rb.Items(); $count = $items.Count; $size = ($items | Measure-Object -Property Size -Sum).Sum; Write-Output "$count|$size"`
+          const rbEncoded = Buffer.from(rbScript, 'utf16le').toString('base64')
           const { stdout } = await execFileAsync('powershell.exe', [
-            '-NoProfile', '-Command',
-            `$shell = New-Object -ComObject Shell.Application; $rb = $shell.NameSpace(0x0a); $items = $rb.Items(); $count = $items.Count; $size = ($items | Measure-Object -Property Size -Sum).Sum; Write-Output "$count|$size"`
-          ])
+            '-NoProfile', '-EncodedCommand', rbEncoded
+          ], { windowsHide: true })
           const [countStr, sizeStr] = stdout.trim().split('|')
           const count = parseInt(countStr) || 0
           const size = parseInt(sizeStr) || 0
@@ -2677,6 +2741,40 @@ class CloudAgentService {
       blacklistVersion: snapshot.blacklistVersion,
       lastConnectionScanAt: snapshot.lastConnectionScanAt,
       lastDnsScanAt: snapshot.lastDnsScanAt,
+    })
+  }
+
+  // ─── CVE Scanning ──────────────────────────────────────
+
+  private async handleCveScan(requestId: string): Promise<void> {
+    cloudLog('INFO', 'CVE scan requested — submitting installed apps and fetching vulnerabilities')
+
+    // Step 1: Submit fresh installed apps so server can re-match
+    const apps = await getPlatform().commands.getInstalledApps()
+    await this.postApi(`/devices/${encodeURIComponent(this.deviceId)}/command-result`, {
+      requestId: `${requestId}-apps`,
+      success: true,
+      data: { apps, totalCount: apps.length },
+    })
+
+    // Step 2: Brief pause for server-side CVE matching
+    await new Promise((r) => setTimeout(r, 3000))
+
+    // Step 3: Fetch vulnerability results
+    const result = await this.getVulnerabilities()
+
+    // Step 4: Notify renderer so the CVE page updates live
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win && !win.isDestroyed()) {
+      win.webContents.send(IPC.CVE_UPDATED, result)
+    }
+
+    // Step 5: Return results to server as command result
+    await this.postCommandResult(requestId, true, {
+      vulnerabilities: result.vulnerabilities.length,
+      summary: result.summary,
+      total: result.total,
+      librarySize: result.librarySize,
     })
   }
 }

@@ -6,6 +6,7 @@
   "malwareScanner": "Scanner malware",
   "threatMonitor": "Monitor minacce",
   "systemHardening": "Protezione avanzata del sistema",
+  "cveScanner": "Vulnerabilities",
   "maintainHeading": "MANUTENZIONE",
   "cleaner": "Pulizia",
   "registry": "Registro di sistema",

@@ -1,0 +1,59 @@
+{
+  "pageTitle": "Vulnerabilities",
+  "pageDescription": "Wyświetl znane luki wykryte w zainstalowanym oprogramowaniu",
+  "loading": "Ładowanie luk...",
+  "refetchButton": "Odśwież",
+  "cloudNotConfigured": {
+    "title": "Wymagany Cloud Agent",
+    "description": "Skanowanie CVE wymaga połączenia z Cloud Agent. Przejdź do Ustawienia → Chmura, aby połączyć urządzenie."
+  },
+  "cloudNotConnected": {
+    "title": "Cloud Agent nie jest połączony",
+    "description": "Cloud Agent nie jest obecnie połączony. Sprawdź połączenie w Ustawienia → Chmura."
+  },
+  "emptyState": {
+    "title": "Nie wykryto luk",
+    "description": "Nie znaleziono żadnych znanych CVE w zainstalowanym oprogramowaniu. Twój system wygląda na bezpieczny!"
+  },
+  "severity": {
+    "critical": "Krytyczny",
+    "high": "Wysoki",
+    "medium": "Średni",
+    "low": "Niski",
+    "none": "Brak"
+  },
+  "summary": {
+    "total": "Łącznie",
+    "critical": "Krytyczne",
+    "high": "Wysokie",
+    "medium": "Średnie",
+    "low": "Niskie"
+  },
+  "filter": {
+    "all": "Wszystkie",
+    "searchPlaceholder": "Szukaj według nazwy aplikacji lub identyfikatora CVE...",
+    "noResults": "Żadne luki nie pasują do bieżących filtrów"
+  },
+  "error": {
+    "title": "Nie udało się załadować luk",
+    "description": "Nie można pobrać danych o lukach z serwera. Spróbuj odświeżyć lub sprawdź połączenie z chmurą."
+  },
+  "card": {
+    "installed": "Zainstalowano: {{version}}",
+    "fixAvailable": "Poprawka: {{version}}",
+    "noFix": "Brak dostępnej poprawki",
+    "cvss": "CVSS {{score}}",
+    "firstDetected": "Wykryto po raz pierwszy: {{date}}",
+    "lastScanned": "Ostatnie skanowanie: {{date}}",
+    "updateViaSoftwareUpdater": "Zaktualizuj przez Aktualizator oprogramowania"
+  },
+  "pagination": {
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "page": "Strona {{current}}"
+  },
+  "toast": {
+    "fetchFailed": "Nie udało się załadować danych o lukach",
+    "fetchFailedNotConnected": "Cloud Agent nie jest połączony"
+  }
+}
