@@ -1,3 +1,9 @@
+## [1.19.1](https://github.com/adventdevinc/kudu/compare/v1.19.0...v1.19.1) (2026-03-22)
+
+
+### Features
+
+* **cve:** show only critical/high vulns, add descriptions and NVD links ([bb72b4d](https://github.com/adventdevinc/kudu/commit/bb72b4d55ef88b8a6e17b06537e714a1c7e4161a))
 # [1.19.0](https://github.com/adventdevinc/kudu/compare/v1.18.0...v1.19.0) (2026-03-22)
 
 
