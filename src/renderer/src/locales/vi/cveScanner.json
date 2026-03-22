@@ -1,18 +1,18 @@
 {
-  "pageTitle": "Vulnerabilities",
-  "pageDescription": "Xem các lỗ hổng đã biết được phát hiện trong phần mềm đã cài đặt của bạn",
-  "loading": "Đang tải các lỗ hổng...",
+  "pageTitle": "Lỗ hổng bảo mật",
+  "pageDescription": "Xem các lỗ hổng bảo mật đã biết được phát hiện trong phần mềm đã cài đặt của bạn",
+  "loading": "Đang tải lỗ hổng bảo mật...",
   "refetchButton": "Làm mới",
   "cloudNotConfigured": {
     "title": "Yêu cầu Cloud Agent",
-    "description": "Quét CVE yêu cầu Cloud Agent phải được liên kết. Đi tới Cài đặt → Cloud để kết nối thiết bị của bạn."
+    "description": "Việc quét CVE yêu cầu Cloud Agent được liên kết. Đi tới Cài đặt → Cloud để kết nối thiết bị của bạn."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent chưa kết nối",
     "description": "Cloud Agent hiện chưa được kết nối. Hãy kiểm tra kết nối của bạn trong Cài đặt → Cloud."
   },
   "emptyState": {
-    "title": "Không phát hiện lỗ hổng",
+    "title": "Không phát hiện lỗ hổng bảo mật",
     "description": "Không tìm thấy CVE đã biết nào trong phần mềm đã cài đặt của bạn. Hệ thống của bạn có vẻ an toàn!"
   },
   "severity": {
@@ -32,11 +32,11 @@
   "filter": {
     "all": "Tất cả",
     "searchPlaceholder": "Tìm theo tên ứng dụng hoặc ID CVE...",
-    "noResults": "Không có lỗ hổng nào khớp với bộ lọc hiện tại của bạn"
+    "noResults": "Không có lỗ hổng bảo mật nào khớp với bộ lọc hiện tại của bạn"
   },
   "error": {
-    "title": "Không thể tải lỗ hổng",
-    "description": "Không thể lấy dữ liệu lỗ hổng từ máy chủ. Hãy thử làm mới hoặc kiểm tra kết nối cloud của bạn."
+    "title": "Không thể tải lỗ hổng bảo mật",
+    "description": "Không thể lấy dữ liệu lỗ hổng bảo mật từ máy chủ. Hãy thử làm mới hoặc kiểm tra kết nối cloud của bạn."
   },
   "card": {
     "installed": "Đã cài đặt: {{version}}",
@@ -53,7 +53,7 @@
     "page": "Trang {{current}}"
   },
   "toast": {
-    "fetchFailed": "Không thể tải dữ liệu lỗ hổng",
+    "fetchFailed": "Không thể tải dữ liệu lỗ hổng bảo mật",
     "fetchFailedNotConnected": "Cloud Agent chưa được kết nối"
   }
 }

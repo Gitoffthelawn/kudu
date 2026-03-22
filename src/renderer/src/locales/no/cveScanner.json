@@ -1,6 +1,6 @@
 {
-  "pageTitle": "Vulnerabilities",
-  "pageDescription": "Vis kjente sårbarheter som er oppdaget i den installerte programvaren din",
+  "pageTitle": "Sårbarheter",
+  "pageDescription": "Vis kjente sårbarheter som er oppdaget i den installerte programvaren",
   "loading": "Laster inn sårbarheter...",
   "refetchButton": "Oppdater",
   "cloudNotConfigured": {
@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "Ingen sårbarheter oppdaget",
-    "description": "Ingen kjente CVE-er ble funnet i den installerte programvaren din. Systemet ditt ser sikkert ut!"
+    "description": "Ingen kjente CVE-er ble funnet i den installerte programvaren. Systemet ditt ser sikkert ut!"
   },
   "severity": {
     "critical": "Kritisk",
@@ -45,7 +45,7 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Først oppdaget: {{date}}",
     "lastScanned": "Sist skannet: {{date}}",
-    "updateViaSoftwareUpdater": "Oppdater via programvareoppdatering"
+    "updateViaSoftwareUpdater": "Oppdater via Software Updater"
   },
   "pagination": {
     "previous": "Forrige",

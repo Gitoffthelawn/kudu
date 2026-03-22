@@ -1,15 +1,15 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "الثغرات الأمنية",
   "pageDescription": "اعرض الثغرات الأمنية المعروفة المكتشفة في البرامج المثبتة لديك",
   "loading": "جارٍ تحميل الثغرات الأمنية...",
   "refetchButton": "تحديث",
   "cloudNotConfigured": {
     "title": "يلزم Cloud Agent",
-    "description": "يتطلب فحص CVE ربط Cloud Agent. انتقل إلى الإعدادات ← السحابة لتوصيل جهازك."
+    "description": "يتطلب فحص CVE ربط Cloud Agent. انتقل إلى الإعدادات → السحابة لتوصيل جهازك."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent غير متصل",
-    "description": "Cloud Agent غير متصل حاليًا. تحقق من اتصالك في الإعدادات ← السحابة."
+    "description": "Cloud Agent غير متصل حاليًا. تحقق من الاتصال في الإعدادات → السحابة."
   },
   "emptyState": {
     "title": "لم يتم اكتشاف أي ثغرات أمنية",
@@ -17,7 +17,7 @@
   },
   "severity": {
     "critical": "حرجة",
-    "high": "عالية",
+    "high": "مرتفعة",
     "medium": "متوسطة",
     "low": "منخفضة",
     "none": "لا يوجد"
@@ -25,7 +25,7 @@
   "summary": {
     "total": "الإجمالي",
     "critical": "حرجة",
-    "high": "عالية",
+    "high": "مرتفعة",
     "medium": "متوسطة",
     "low": "منخفضة"
   },

@@ -1,11 +1,11 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "Kwetsbaarheden",
   "pageDescription": "Bekijk bekende kwetsbaarheden die zijn gedetecteerd in uw geïnstalleerde software",
   "loading": "Kwetsbaarheden laden...",
   "refetchButton": "Vernieuwen",
   "cloudNotConfigured": {
     "title": "Cloud Agent vereist",
-    "description": "Voor CVE-scans moet de Cloud Agent gekoppeld zijn. Ga naar Instellingen → Cloud om uw apparaat te verbinden."
+    "description": "Voor het scannen op CVE's moet de Cloud Agent gekoppeld zijn. Ga naar Instellingen → Cloud om uw apparaat te verbinden."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent niet verbonden",
@@ -36,7 +36,7 @@
   },
   "error": {
     "title": "Kwetsbaarheden laden mislukt",
-    "description": "Kan kwetsbaarheidsgegevens niet ophalen van de server. Probeer te vernieuwen of controleer uw cloudverbinding."
+    "description": "De kwetsbaarheidsgegevens konden niet van de server worden opgehaald. Probeer te vernieuwen of controleer uw cloudverbinding."
   },
   "card": {
     "installed": "Geïnstalleerd: {{version}}",

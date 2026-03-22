@@ -1,5 +1,5 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "פגיעויות",
   "pageDescription": "הצג פגיעויות מוכרות שזוהו בתוכנות המותקנות שלך",
   "loading": "טוען פגיעויות...",
   "refetchButton": "רענן",
@@ -32,7 +32,7 @@
   "filter": {
     "all": "הכול",
     "searchPlaceholder": "חפש לפי שם היישום או מזהה CVE...",
-    "noResults": "אין פגיעויות התואמות למסננים הנוכחיים שלך"
+    "noResults": "אין פגיעויות התואמות למסננים הנוכחיים"
   },
   "error": {
     "title": "טעינת הפגיעויות נכשלה",
@@ -45,7 +45,7 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "זוהה לראשונה: {{date}}",
     "lastScanned": "נסרק לאחרונה: {{date}}",
-    "updateViaSoftwareUpdater": "עדכן באמצעות מעדכן התוכנה"
+    "updateViaSoftwareUpdater": "עדכן באמצעות Software Updater"
   },
   "pagination": {
     "previous": "הקודם",

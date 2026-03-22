@@ -1,6 +1,6 @@
 {
-  "pageTitle": "Vulnerabilities",
-  "pageDescription": "Ver vulnerabilidades conocidas detectadas en el software instalado",
+  "pageTitle": "Vulnerabilidades",
+  "pageDescription": "Ver las vulnerabilidades conocidas detectadas en el software instalado",
   "loading": "Cargando vulnerabilidades...",
   "refetchButton": "Actualizar",
   "cloudNotConfigured": {
@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "No se detectaron vulnerabilidades",
-    "description": "No se encontraron CVE conocidos en el software instalado. ¡Su sistema parece seguro!"
+    "description": "No se encontraron CVE conocidas en el software instalado. ¡Su sistema parece seguro!"
   },
   "severity": {
     "critical": "Crítica",
@@ -39,11 +39,11 @@
     "description": "No se pudieron obtener los datos de vulnerabilidades del servidor. Intente actualizar o compruebe su conexión a la nube."
   },
   "card": {
-    "installed": "Instalado: {{version}}",
+    "installed": "Instalada: {{version}}",
     "fixAvailable": "Corrección: {{version}}",
-    "noFix": "No hay corrección disponible",
+    "noFix": "No hay ninguna corrección disponible",
     "cvss": "CVSS {{score}}",
-    "firstDetected": "Detectado por primera vez: {{date}}",
+    "firstDetected": "Detectada por primera vez: {{date}}",
     "lastScanned": "Último análisis: {{date}}",
     "updateViaSoftwareUpdater": "Actualizar mediante el actualizador de software"
   },

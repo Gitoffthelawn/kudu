@@ -1,11 +1,11 @@
 {
-  "pageTitle": "Vulnerabilities",
-  "pageDescription": "Переглядайте відомі вразливості, виявлені у встановленому програмному забезпеченні",
+  "pageTitle": "Вразливості",
+  "pageDescription": "Перегляньте відомі вразливості, виявлені у встановленому програмному забезпеченні",
   "loading": "Завантаження вразливостей...",
   "refetchButton": "Оновити",
   "cloudNotConfigured": {
     "title": "Потрібен Cloud Agent",
-    "description": "Для сканування CVE потрібно прив’язати Cloud Agent. Перейдіть у Налаштування → Cloud, щоб підключити пристрій."
+    "description": "Для сканування CVE потрібно прив’язати Cloud Agent. Перейдіть до Налаштування → Cloud, щоб підключити свій пристрій."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent не підключено",
@@ -44,7 +44,7 @@
     "noFix": "Виправлення недоступне",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Вперше виявлено: {{date}}",
-    "lastScanned": "Востаннє скановано: {{date}}",
+    "lastScanned": "Останнє сканування: {{date}}",
     "updateViaSoftwareUpdater": "Оновити через Засіб оновлення програм"
   },
   "pagination": {

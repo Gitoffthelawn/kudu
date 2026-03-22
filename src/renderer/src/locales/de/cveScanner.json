@@ -1,11 +1,11 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "Schwachstellen",
   "pageDescription": "Bekannte Schwachstellen anzeigen, die in Ihrer installierten Software erkannt wurden",
   "loading": "Schwachstellen werden geladen...",
   "refetchButton": "Aktualisieren",
   "cloudNotConfigured": {
     "title": "Cloud Agent erforderlich",
-    "description": "Für den CVE-Scan muss der Cloud Agent verknüpft sein. Gehen Sie zu Einstellungen → Cloud, um Ihr Gerät zu verbinden."
+    "description": "Für das CVE-Scannen muss der Cloud Agent verknüpft sein. Gehen Sie zu Einstellungen → Cloud, um Ihr Gerät zu verbinden."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent nicht verbunden",

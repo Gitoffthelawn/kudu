@@ -1,7 +1,7 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "Vulnerabilità",
   "pageDescription": "Visualizza le vulnerabilità note rilevate nel software installato",
-  "loading": "Caricamento delle vulnerabilità...",
+  "loading": "Caricamento vulnerabilità...",
   "refetchButton": "Aggiorna",
   "cloudNotConfigured": {
     "title": "Cloud Agent richiesto",
@@ -13,7 +13,7 @@
   },
   "emptyState": {
     "title": "Nessuna vulnerabilità rilevata",
-    "description": "Non sono stati trovati CVE noti nel software installato. Il sistema sembra sicuro."
+    "description": "Non sono stati trovati CVE noti nel software installato. Il sistema sembra sicuro!"
   },
   "severity": {
     "critical": "Critica",

@@ -1,11 +1,11 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "Sårbarheter",
   "pageDescription": "Visa kända sårbarheter som har upptäckts i din installerade programvara",
   "loading": "Läser in sårbarheter...",
   "refetchButton": "Uppdatera",
   "cloudNotConfigured": {
     "title": "Cloud Agent krävs",
-    "description": "CVE-skanning kräver att Cloud Agent är länkad. Gå till Inställningar → Cloud för att ansluta din enhet."
+    "description": "CVE-skanning kräver att Cloud Agent är länkat. Gå till Inställningar → Cloud för att ansluta din enhet."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent är inte ansluten",
@@ -45,7 +45,7 @@
     "cvss": "CVSS {{score}}",
     "firstDetected": "Först upptäckt: {{date}}",
     "lastScanned": "Senast skannad: {{date}}",
-    "updateViaSoftwareUpdater": "Uppdatera via Software Updater"
+    "updateViaSoftwareUpdater": "Uppdatera via Programuppdateraren"
   },
   "pagination": {
     "previous": "Föregående",

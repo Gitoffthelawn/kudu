@@ -1,18 +1,18 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "Vulnerabilidades",
   "pageDescription": "Veja vulnerabilidades conhecidas detetadas no software instalado",
   "loading": "A carregar vulnerabilidades...",
   "refetchButton": "Atualizar",
   "cloudNotConfigured": {
-    "title": "Cloud Agent necessário",
+    "title": "Cloud Agent Necessário",
     "description": "A análise de CVE requer que o Cloud Agent esteja associado. Vá a Definições → Cloud para ligar o seu dispositivo."
   },
   "cloudNotConnected": {
-    "title": "Cloud Agent não ligado",
+    "title": "Cloud Agent Não Ligado",
     "description": "O Cloud Agent não está atualmente ligado. Verifique a sua ligação em Definições → Cloud."
   },
   "emptyState": {
-    "title": "Nenhuma vulnerabilidade detetada",
+    "title": "Nenhuma Vulnerabilidade Detetada",
     "description": "Não foram encontrados CVEs conhecidos no software instalado. O seu sistema parece seguro!"
   },
   "severity": {
@@ -35,7 +35,7 @@
     "noResults": "Nenhuma vulnerabilidade corresponde aos filtros atuais"
   },
   "error": {
-    "title": "Falha ao carregar vulnerabilidades",
+    "title": "Falha ao Carregar Vulnerabilidades",
     "description": "Não foi possível obter os dados de vulnerabilidades do servidor. Tente atualizar ou verifique a sua ligação à cloud."
   },
   "card": {

@@ -1,19 +1,19 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "Sérülékenységek",
   "pageDescription": "Az telepített szoftverekben észlelt ismert sérülékenységek megtekintése",
   "loading": "Sérülékenységek betöltése...",
   "refetchButton": "Frissítés",
   "cloudNotConfigured": {
     "title": "Cloud Agent szükséges",
-    "description": "A CVE-ellenőrzéshez a Cloud Agent összekapcsolása szükséges. Az eszköz csatlakoztatásához lépjen a Beállítások → Cloud menübe."
+    "description": "A CVE-vizsgálathoz a Cloud Agent összekapcsolása szükséges. Az eszköz csatlakoztatásához lépjen a Beállítások → Cloud menüpontra."
   },
   "cloudNotConnected": {
     "title": "A Cloud Agent nincs csatlakoztatva",
-    "description": "A Cloud Agent jelenleg nincs csatlakoztatva. Ellenőrizze a kapcsolatot a Beállítások → Cloud menüben."
+    "description": "A Cloud Agent jelenleg nincs csatlakoztatva. Ellenőrizze a kapcsolatot a Beállítások → Cloud menüpontban."
   },
   "emptyState": {
-    "title": "Nem észleltünk sérülékenységeket",
-    "description": "Nem találtunk ismert CVE-ket a telepített szoftverekben. A rendszer biztonságosnak tűnik!"
+    "title": "Nem észlelhető sérülékenység",
+    "description": "A telepített szoftverekben nem találhatók ismert CVE-k. A rendszer biztonságosnak tűnik."
   },
   "severity": {
     "critical": "Kritikus",
@@ -44,7 +44,7 @@
     "noFix": "Nem érhető el javítás",
     "cvss": "CVSS {{score}}",
     "firstDetected": "Első észlelés: {{date}}",
-    "lastScanned": "Utolsó ellenőrzés: {{date}}",
+    "lastScanned": "Utolsó vizsgálat: {{date}}",
     "updateViaSoftwareUpdater": "Frissítés a Szoftverfrissítővel"
   },
   "pagination": {

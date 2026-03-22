@@ -1,11 +1,11 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "Kerentanan",
   "pageDescription": "Lihat kerentanan yang diketahui yang terdeteksi pada perangkat lunak terpasang Anda",
   "loading": "Memuat kerentanan...",
   "refetchButton": "Segarkan",
   "cloudNotConfigured": {
     "title": "Cloud Agent Diperlukan",
-    "description": "Pemindaian CVE memerlukan Cloud Agent yang telah ditautkan. Buka Pengaturan → Cloud untuk menghubungkan perangkat Anda."
+    "description": "Pemindaian CVE memerlukan Cloud Agent yang ditautkan. Buka Pengaturan → Cloud untuk menghubungkan perangkat Anda."
   },
   "cloudNotConnected": {
     "title": "Cloud Agent Tidak Terhubung",
@@ -32,7 +32,7 @@
   "filter": {
     "all": "Semua",
     "searchPlaceholder": "Cari berdasarkan nama aplikasi atau ID CVE...",
-    "noResults": "Tidak ada kerentanan yang cocok dengan filter saat ini"
+    "noResults": "Tidak ada kerentanan yang sesuai dengan filter saat ini"
   },
   "error": {
     "title": "Gagal Memuat Kerentanan",
@@ -43,7 +43,7 @@
     "fixAvailable": "Perbaikan: {{version}}",
     "noFix": "Tidak ada perbaikan yang tersedia",
     "cvss": "CVSS {{score}}",
-    "firstDetected": "Pertama terdeteksi: {{date}}",
+    "firstDetected": "Pertama kali terdeteksi: {{date}}",
     "lastScanned": "Terakhir dipindai: {{date}}",
     "updateViaSoftwareUpdater": "Perbarui melalui Software Updater"
   },

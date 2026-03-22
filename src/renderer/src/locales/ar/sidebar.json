@@ -6,7 +6,7 @@
   "malwareScanner": "فاحص البرامج الضارة",
   "threatMonitor": "مراقبة التهديدات",
   "systemHardening": "تقوية النظام",
-  "cveScanner": "Vulnerabilities",
+  "cveScanner": "الثغرات الأمنية",
   "maintainHeading": "الصيانة",
   "cleaner": "المنظف",
   "registry": "السجل",

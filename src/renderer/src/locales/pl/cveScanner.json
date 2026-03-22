@@ -1,7 +1,7 @@
 {
-  "pageTitle": "Vulnerabilities",
-  "pageDescription": "Wyświetl znane luki wykryte w zainstalowanym oprogramowaniu",
-  "loading": "Ładowanie luk...",
+  "pageTitle": "Luki w zabezpieczeniach",
+  "pageDescription": "Wyświetl znane luki w zabezpieczeniach wykryte w zainstalowanym oprogramowaniu",
+  "loading": "Ładowanie luk w zabezpieczeniach...",
   "refetchButton": "Odśwież",
   "cloudNotConfigured": {
     "title": "Wymagany Cloud Agent",
@@ -12,7 +12,7 @@
     "description": "Cloud Agent nie jest obecnie połączony. Sprawdź połączenie w Ustawienia → Chmura."
   },
   "emptyState": {
-    "title": "Nie wykryto luk",
+    "title": "Nie wykryto luk w zabezpieczeniach",
     "description": "Nie znaleziono żadnych znanych CVE w zainstalowanym oprogramowaniu. Twój system wygląda na bezpieczny!"
   },
   "severity": {
@@ -24,28 +24,28 @@
   },
   "summary": {
     "total": "Łącznie",
-    "critical": "Krytyczne",
-    "high": "Wysokie",
-    "medium": "Średnie",
-    "low": "Niskie"
+    "critical": "Krytyczny",
+    "high": "Wysoki",
+    "medium": "Średni",
+    "low": "Niski"
   },
   "filter": {
     "all": "Wszystkie",
     "searchPlaceholder": "Szukaj według nazwy aplikacji lub identyfikatora CVE...",
-    "noResults": "Żadne luki nie pasują do bieżących filtrów"
+    "noResults": "Żadne luki w zabezpieczeniach nie pasują do bieżących filtrów"
   },
   "error": {
-    "title": "Nie udało się załadować luk",
-    "description": "Nie można pobrać danych o lukach z serwera. Spróbuj odświeżyć lub sprawdź połączenie z chmurą."
+    "title": "Nie udało się załadować luk w zabezpieczeniach",
+    "description": "Nie udało się pobrać danych o lukach w zabezpieczeniach z serwera. Spróbuj odświeżyć lub sprawdź połączenie z chmurą."
   },
   "card": {
     "installed": "Zainstalowano: {{version}}",
     "fixAvailable": "Poprawka: {{version}}",
     "noFix": "Brak dostępnej poprawki",
     "cvss": "CVSS {{score}}",
-    "firstDetected": "Wykryto po raz pierwszy: {{date}}",
+    "firstDetected": "Pierwsze wykrycie: {{date}}",
     "lastScanned": "Ostatnie skanowanie: {{date}}",
-    "updateViaSoftwareUpdater": "Zaktualizuj przez Aktualizator oprogramowania"
+    "updateViaSoftwareUpdater": "Zaktualizuj za pomocą Aktualizatora oprogramowania"
   },
   "pagination": {
     "previous": "Poprzednia",
@@ -53,7 +53,7 @@
     "page": "Strona {{current}}"
   },
   "toast": {
-    "fetchFailed": "Nie udało się załadować danych o lukach",
+    "fetchFailed": "Nie udało się załadować danych o lukach w zabezpieczeniach",
     "fetchFailedNotConnected": "Cloud Agent nie jest połączony"
   }
 }

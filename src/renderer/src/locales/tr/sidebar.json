@@ -6,7 +6,7 @@
   "malwareScanner": "Kötü Amaçlı Yazılım Tarayıcısı",
   "threatMonitor": "Tehdit İzleyicisi",
   "systemHardening": "Sistem Güçlendirme",
-  "cveScanner": "Vulnerabilities",
+  "cveScanner": "Güvenlik Açıkları",
   "maintainHeading": "BAKIM",
   "cleaner": "Temizleyici",
   "registry": "Kayıt Defteri",
@@ -18,7 +18,7 @@
   "toolsHeading": "ARAÇLAR",
   "performance": "Performans",
   "diskAnalyzer": "Disk Çözümleyicisi",
-  "duplicateFinder": "Yinelenen Dosya Bulucu",
+  "duplicateFinder": "Yinelenen Bulucu",
   "history": "Geçmiş",
   "settings": "Ayarlar",
   "gameMode": "Oyun Modu"

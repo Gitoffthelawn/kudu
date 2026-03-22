@@ -1,6 +1,6 @@
 {
-  "pageTitle": "Vulnerabilities",
-  "pageDescription": "Consultez les vulnérabilités connues détectées dans vos logiciels installés",
+  "pageTitle": "Vulnérabilités",
+  "pageDescription": "Afficher les vulnérabilités connues détectées dans vos logiciels installés",
   "loading": "Chargement des vulnérabilités...",
   "refetchButton": "Actualiser",
   "cloudNotConfigured": {

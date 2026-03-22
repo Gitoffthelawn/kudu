@@ -1,5 +1,5 @@
 {
-  "pageTitle": "Vulnerabilities",
+  "pageTitle": "漏洞",
   "pageDescription": "查看在已安装软件中检测到的已知漏洞",
   "loading": "正在加载漏洞...",
   "refetchButton": "刷新",
@@ -41,7 +41,7 @@
   "card": {
     "installed": "已安装：{{version}}",
     "fixAvailable": "修复版本：{{version}}",
-    "noFix": "暂无修复方案",
+    "noFix": "无可用修复",
     "cvss": "CVSS {{score}}",
     "firstDetected": "首次检测到：{{date}}",
     "lastScanned": "上次扫描：{{date}}",

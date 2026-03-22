@@ -1,15 +1,15 @@
 {
-  "pageTitle": "Vulnerabilities",
-  "pageDescription": "Προβολή γνωστών ευπαθειών που εντοπίστηκαν στο εγκατεστημένο λογισμικό σας",
+  "pageTitle": "Ευπάθειες",
+  "pageDescription": "Προβάλετε γνωστές ευπάθειες που εντοπίστηκαν στο εγκατεστημένο λογισμικό σας",
   "loading": "Φόρτωση ευπαθειών...",
   "refetchButton": "Ανανέωση",
   "cloudNotConfigured": {
     "title": "Απαιτείται Cloud Agent",
-    "description": "Η σάρωση CVE απαιτεί να είναι συνδεδεμένος ο Cloud Agent. Μεταβείτε στις Ρυθμίσεις → Cloud για να συνδέσετε τη συσκευή σας."
+    "description": "Η σάρωση CVE απαιτεί να έχει συνδεθεί το Cloud Agent. Μεταβείτε στις Ρυθμίσεις → Cloud για να συνδέσετε τη συσκευή σας."
   },
   "cloudNotConnected": {
-    "title": "Ο Cloud Agent δεν είναι συνδεδεμένος",
-    "description": "Ο Cloud Agent δεν είναι συνδεδεμένος αυτήν τη στιγμή. Ελέγξτε τη σύνδεσή σας στις Ρυθμίσεις → Cloud."
+    "title": "Το Cloud Agent δεν είναι συνδεδεμένο",
+    "description": "Το Cloud Agent δεν είναι συνδεδεμένο αυτή τη στιγμή. Ελέγξτε τη σύνδεσή σας στις Ρυθμίσεις → Cloud."
   },
   "emptyState": {
     "title": "Δεν εντοπίστηκαν ευπάθειες",
@@ -30,7 +30,7 @@
     "low": "Χαμηλή"
   },
   "filter": {
-    "all": "Όλα",
+    "all": "Όλες",
     "searchPlaceholder": "Αναζήτηση με όνομα εφαρμογής ή αναγνωριστικό CVE...",
     "noResults": "Καμία ευπάθεια δεν αντιστοιχεί στα τρέχοντα φίλτρα σας"
   },
@@ -54,6 +54,6 @@
   },
   "toast": {
     "fetchFailed": "Αποτυχία φόρτωσης δεδομένων ευπαθειών",
-    "fetchFailedNotConnected": "Ο Cloud Agent δεν είναι συνδεδεμένος"
+    "fetchFailedNotConnected": "Το Cloud Agent δεν είναι συνδεδεμένο"
   }
 }
