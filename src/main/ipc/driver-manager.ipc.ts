@@ -194,7 +194,7 @@ async function getActiveDriverNames(): Promise<Set<string>> {
   const active = new Set<string>()
   try {
     const script = `
-      Get-WmiObject Win32_PnPSignedDriver |
+      Get-CimInstance Win32_PnPSignedDriver |
         Where-Object { $_.InfName -like 'oem*.inf' } |
         Select-Object -ExpandProperty InfName |
         Sort-Object -Unique
@@ -521,6 +521,7 @@ export async function scanDriverUpdates(
     } catch (err: any) {
       console.error('Driver update scan failed:', err?.message || err)
       if (err?.stderr) console.error('PowerShell stderr:', err.stderr)
+      throw new Error(err?.stderr || err?.message || 'Driver update scan failed')
     }
 
     return {
