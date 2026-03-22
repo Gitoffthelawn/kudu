@@ -1,3 +1,16 @@
+# [1.20.0](https://github.com/adventdevinc/kudu/compare/v1.19.1...v1.20.0) (2026-03-22)
+
+
+### Bug Fixes
+
+* **ci:** remove unsupported --release-notes flag from wingetcreate ([83b61fc](https://github.com/adventdevinc/kudu/commit/83b61fc4a05d9441da86a1aadf8676bd50fe0986))
+
+
+### Features
+
+* **cve:** add client-side false positive filter and deduplication ([0571dfb](https://github.com/adventdevinc/kudu/commit/0571dfba54751afab708e296cf806c10cd9567df))
+* **disk-tools:** add Large File Finder and Empty Folder Cleaner ([08403eb](https://github.com/adventdevinc/kudu/commit/08403eb1b3d7f14355d367eab074888c1c70c2c1))
+* **ui:** update sidebar, dashboard, components, and locale translations ([38e1683](https://github.com/adventdevinc/kudu/commit/38e1683d033cc51b9a62dfbfd00e6fb81c79eda9))
 ## [1.19.1](https://github.com/adventdevinc/kudu/compare/v1.19.0...v1.19.1) (2026-03-22)
 
 
