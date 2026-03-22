@@ -99,7 +99,7 @@ English, Spanish, French, German, Portuguese, Italian, Japanese, Korean, Chinese
 
 ## Disclaimer
 
-Kudu is intended for **advanced users** who understand system maintenance. You are responsible for reviewing items before removal. We accept no liability for data loss or system instability. Create backups before cleaning — especially for registry and debloat operations. This software is provided **"as is"** without warranty.
+Kudu by design removes files from your system. You are responsible for reviewing items before removal. We accept no liability for data loss or system instability. This software is provided "as is" without warranty.
 
 ## Contributing
 
