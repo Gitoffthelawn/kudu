@@ -1,3 +1,14 @@
+# [1.19.0](https://github.com/adventdevinc/kudu/compare/v1.18.0...v1.19.0) (2026-03-22)
+
+
+### Bug Fixes
+
+* use Get-CimInstance for driver scans and propagate update errors ([ba47ee7](https://github.com/adventdevinc/kudu/commit/ba47ee795ab9ee093fb3d20bd61b1da2b948e8db))
+
+
+### Features
+
+* add CVE vulnerability scanner (cloud-powered) ([#46](https://github.com/adventdevinc/kudu/issues/46)) ([68a786b](https://github.com/adventdevinc/kudu/commit/68a786b3a02c5dc29b19c826936427afe50ca019))
 # [1.18.0](https://github.com/adventdevinc/kudu/compare/v1.17.0...v1.18.0) (2026-03-22)
 
 
