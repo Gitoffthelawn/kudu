@@ -78,11 +78,10 @@ function getTrayIconPath(): string {
 const TASK_NAME = 'KuduStartup'
 
 async function applyAutoLaunchWin32(enabled: boolean): Promise<void> {
-  // Use Task Scheduler with RunLevel Highest so the app starts elevated at
-  // logon — this avoids the Windows restriction that silently skips Run-key
-  // entries whose exe manifest requires (or previously required) admin.
-  // A scheduled task with Highest run-level triggers a one-time admin consent
-  // when created but then launches silently at every logon.
+  // Use Task Scheduler with RunLevel HighestAvailable so the app starts
+  // elevated at logon. The HKCU Run key is NOT a viable fallback because
+  // the exe manifest is requireAdministrator — Windows silently skips
+  // Run-key entries for executables with an admin manifest.
   const exePath = app.getPath('exe')
 
   if (enabled) {
@@ -155,7 +154,7 @@ async function applyAutoLaunchWin32(enabled: boolean): Promise<void> {
     } catch { /* task may not exist */ }
   }
 
-  // Also clear any leftover Electron Run-key entry so it doesn't conflict
+  // Clear any leftover Electron Run-key entry so it doesn't conflict
   app.setLoginItemSettings({ openAtLogin: false })
 }
 
