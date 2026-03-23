@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { RTL_LANGUAGES } from './lib/languages'
 import { useScheduledScan } from './hooks/useScheduledScan'
@@ -93,6 +93,7 @@ export function App() {
   return (
     <PlatformContext value={platformInfo}>
     <HashRouter>
+      <PageTitleUpdater />
       {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
       <AppShell>
         <Routes>
@@ -144,4 +145,51 @@ export function App() {
     </HashRouter>
     </PlatformContext>
   )
+}
+
+// Maps routes to page titles for the window/tab title.
+// Uses sidebar i18n keys where possible; nested routes use plain strings
+// so each page gets its own distinct title for screen readers / OS window switcher.
+const ROUTE_TITLES: Record<string, { key: string; ns?: string } | string> = {
+  '/': { key: 'dashboard' },
+  '/cleaner': { key: 'cleaner' },
+  '/registry': { key: 'registry' },
+  '/startup': { key: 'startup' },
+  '/disk': 'Disk Analyzer',
+  '/duplicates': 'Duplicate Finder',
+  '/large-files': 'Large File Finder',
+  '/empty-folders': 'Empty Folder Cleaner',
+  '/file-shredder': 'File Shredder',
+  '/network': { key: 'network' },
+  '/malware': { key: 'malwareScanner' },
+  '/threat-monitor': { key: 'threatMonitor' },
+  '/cve': { key: 'cveScanner' },
+  '/game-mode': { key: 'gameMode' },
+  '/performance': { key: 'performance' },
+  '/uninstaller': 'Uninstaller',
+  '/history': { key: 'history' },
+  '/settings': { key: 'settings' },
+  '/about': 'About',
+  '/privacy': 'Privacy',
+  '/services': 'Services',
+  '/debloater': 'Bloatware Remover',
+  '/updates': 'Software Updates',
+  '/schedules': { key: 'schedules' },
+  '/drivers': 'Driver Updates',
+}
+
+function PageTitleUpdater() {
+  const location = useLocation()
+  const { t } = useTranslation('sidebar')
+  useEffect(() => {
+    const entry = ROUTE_TITLES[location.pathname]
+    let name: string | null = null
+    if (typeof entry === 'string') {
+      name = entry
+    } else if (entry) {
+      name = t(entry.key)
+    }
+    document.title = name ? `${name} - Kudu` : 'Kudu'
+  }, [location.pathname, t])
+  return null
 }
