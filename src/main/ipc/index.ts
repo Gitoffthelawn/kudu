@@ -132,14 +132,18 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
       child.on('spawn', () => { child.unref(); app.exit(0) })
       child.on('error', () => { /* user declined — don't quit */ })
     } else if (process.platform === 'darwin') {
-      // Use quoted form of POSIX path to safely handle special characters in the path
-      const script = `do shell script quoted form of "${exePath.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}" with administrator privileges`
-      const child = spawn('osascript', ['-e', script], {
-        detached: true,
-        stdio: 'ignore',
+      // Run the binary directly as root for proper privilege elevation.
+      // Background the process (&) so `do shell script` returns once the
+      // binary has been started, then use execFile to wait for osascript to
+      // complete (including the password prompt) before exiting.  The old
+      // spawn-and-immediately-exit approach caused a race: the current app
+      // would exit before the elevated process started, and macOS could
+      // re-open the old registered copy via LaunchServices.
+      const escaped = exePath.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+      const script = `do shell script quoted form of "${escaped}" & " > /dev/null 2>&1 &" with administrator privileges`
+      execFile('osascript', ['-e', script], (err) => {
+        if (!err) app.exit(0)
       })
-      child.on('spawn', () => { child.unref(); app.exit(0) })
-      child.on('error', () => { /* user declined — don't quit */ })
     }
   })
 
