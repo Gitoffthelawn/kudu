@@ -164,7 +164,22 @@ export function Sidebar() {
   const threatMonitorLoaded = useThreatMonitorStore((s) => s.loaded)
   const threatBlacklistActive = useThreatMonitorStore((s) => s.snapshot) !== null
   const isCloudLinked = !!useSettingsStore((s) => s.settings.cloud.apiKey)
+  const [cloudConnected, setCloudConnected] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
+
+  // Poll cloud connection status so CVE item hides when disconnected
+  useEffect(() => {
+    if (!isCloudLinked) { setCloudConnected(false); return }
+    let cancelled = false
+    const check = () => {
+      window.kudu?.cloudGetStatus?.().then((s) => {
+        if (!cancelled) setCloudConnected(s.status === 'connected')
+      }).catch(() => { if (!cancelled) setCloudConnected(false) })
+    }
+    check()
+    const id = setInterval(check, 10_000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [isCloudLinked])
 
   // Filter nav items based on platform features and cloud state
   const filteredNavGroups = navGroups.map((group) => ({
@@ -173,7 +188,7 @@ export function Sidebar() {
       if (item.path === '/registry' && !features.registry) return false
       if (item.path === '/game-mode' && !features.gameMode) return false
       if (item.path === '/threat-monitor' && !(threatMonitorLoaded && threatBlacklistActive)) return false
-      if (item.path === '/cve' && !isCloudLinked) return false
+      if (item.path === '/cve' && !cloudConnected) return false
       return true
     }).map((item) => {
       if (!item.children) return item
