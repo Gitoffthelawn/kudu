@@ -1,3 +1,9 @@
+# [1.21.0](https://github.com/adventdevinc/kudu/compare/v1.20.0...v1.21.0) (2026-03-23)
+
+
+### Features
+
+* **cloud:** add firewallStatus to Linux health reports ([#47](https://github.com/adventdevinc/kudu/issues/47)) ([3eaab1d](https://github.com/adventdevinc/kudu/commit/3eaab1d3b877f2412883bd5dad6799517e40d787))
 # [1.20.0](https://github.com/adventdevinc/kudu/compare/v1.19.1...v1.20.0) (2026-03-22)
 
 
