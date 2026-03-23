@@ -145,7 +145,7 @@ function useBadgeCounts(): Record<string, number> {
   const updatesCount = updaterApps.length + driverUpdates.length
 
   return {
-    '/updates': updatesCount,
+    '/updates': updaterApps.length,
     '/software': updatesCount,
     '/drivers': driverUpdates.length,
     '/threat-monitor': threatCount,
@@ -240,6 +240,7 @@ export function Sidebar() {
                   key={item.path}
                   item={item}
                   badgeCount={badgeCounts[item.path]}
+                  badgeCounts={badgeCounts}
                   isActive={isPathActive(item)}
                   submenuOpen={openSubmenu === item.path}
                   {...submenuProps}
@@ -271,6 +272,7 @@ function BottomNav({ submenuProps, openSubmenu, isPathActive, badgeCounts }: {
           key={item.path}
           item={item}
           badgeCount={badgeCounts[item.path]}
+          badgeCounts={badgeCounts}
           isActive={isPathActive(item)}
           submenuOpen={openSubmenu === item.path}
           {...submenuProps}
@@ -284,6 +286,7 @@ function NavItem({
   item,
   badge,
   badgeCount,
+  badgeCounts,
   isActive: isActiveProp,
   submenuOpen,
   onToggleSubmenu,
@@ -292,6 +295,7 @@ function NavItem({
   item: NavItemDef
   badge?: boolean
   badgeCount?: number
+  badgeCounts?: Record<string, number>
   isActive?: boolean
   submenuOpen?: boolean
   openSubmenu?: string | null
@@ -386,15 +390,16 @@ function NavItem({
       </button>
 
       {/* Flyout submenu — rendered fixed to escape sidebar overflow */}
-      {hasChildren && submenuOpen && <FlyoutMenu buttonRef={buttonRef} popoverRef={popoverRef} items={item.children!} onSelect={(path) => { navigate(path); onCloseSubmenu?.() }} />}
+      {hasChildren && submenuOpen && <FlyoutMenu buttonRef={buttonRef} popoverRef={popoverRef} items={item.children!} badgeCounts={badgeCounts} onSelect={(path) => { navigate(path); onCloseSubmenu?.() }} />}
     </div>
   )
 }
 
-function FlyoutMenu({ buttonRef, popoverRef, items, onSelect }: {
+function FlyoutMenu({ buttonRef, popoverRef, items, badgeCounts, onSelect }: {
   buttonRef: React.RefObject<HTMLButtonElement | null>
   popoverRef: React.RefObject<HTMLDivElement | null>
   items: SubItemDef[]
+  badgeCounts?: Record<string, number>
   onSelect: (path: string) => void
 }) {
   const location = useLocation()
@@ -443,6 +448,18 @@ function FlyoutMenu({ buttonRef, popoverRef, items, onSelect }: {
                 strokeWidth={isChildActive ? 2 : 1.7}
               />
               <span className="flex-1">{child.label}</span>
+              {(badgeCounts?.[child.path] ?? 0) > 0 && (
+                <span
+                  className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold leading-none"
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    color: '#0a0600',
+                    boxShadow: '0 0 6px rgba(245,158,11,0.3)'
+                  }}
+                >
+                  {badgeCounts![child.path]}
+                </span>
+              )}
               {child.badge && (
                 <span
                   className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[8px] font-bold leading-none"
