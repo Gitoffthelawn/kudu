@@ -14,6 +14,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   Shield,
+  Zap,
+  Timer,
+  Activity,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -62,14 +65,16 @@ interface CategoryDef {
   labelKey: string
   descKey: string
   icon: LucideIcon
+  color: string
+  glow: string
 }
 
 const CATEGORIES: CategoryDef[] = [
-  { id: 'services', labelKey: 'categoryServices', descKey: 'categoryServicesDesc', icon: Server },
-  { id: 'processes', labelKey: 'categoryProcesses', descKey: 'categoryProcessesDesc', icon: Cpu },
-  { id: 'memory', labelKey: 'categoryMemory', descKey: 'categoryMemoryDesc', icon: MemoryStick },
-  { id: 'system', labelKey: 'categorySystem', descKey: 'categorySystemDesc', icon: Monitor },
-  { id: 'network', labelKey: 'categoryNetwork', descKey: 'categoryNetworkDesc', icon: Wifi },
+  { id: 'services', labelKey: 'categoryServices', descKey: 'categoryServicesDesc', icon: Server, color: '#06b6d4', glow: 'rgba(6,182,212,0.12)' },
+  { id: 'processes', labelKey: 'categoryProcesses', descKey: 'categoryProcessesDesc', icon: Cpu, color: '#8b5cf6', glow: 'rgba(139,92,246,0.12)' },
+  { id: 'memory', labelKey: 'categoryMemory', descKey: 'categoryMemoryDesc', icon: MemoryStick, color: '#22c55e', glow: 'rgba(34,197,94,0.12)' },
+  { id: 'system', labelKey: 'categorySystem', descKey: 'categorySystemDesc', icon: Monitor, color: '#f59e0b', glow: 'rgba(245,158,11,0.12)' },
+  { id: 'network', labelKey: 'categoryNetwork', descKey: 'categoryNetworkDesc', icon: Wifi, color: '#ec4899', glow: 'rgba(236,72,153,0.12)' },
 ]
 
 // ── Colors ───────────────────────────────────────────────────
@@ -87,6 +92,85 @@ function formatElapsed(ms: number): string {
   const m = Math.floor((totalSec % 3600) / 60)
   const s = totalSec % 60
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+// ── Animated Ring ────────────────────────────────────────────
+
+function OrbitRing({ radius, duration, delay, active }: { radius: number; duration: number; delay: number; active: boolean }) {
+  return (
+    <motion.div
+      className="pointer-events-none absolute rounded-full"
+      style={{
+        width: radius * 2,
+        height: radius * 2,
+        top: '50%',
+        left: '50%',
+        marginTop: -radius,
+        marginLeft: -radius,
+        border: `1px solid ${active ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.03)'}`,
+      }}
+      animate={active ? {
+        scale: [1, 1.05, 1],
+        opacity: [0.4, 0.8, 0.4],
+      } : {
+        scale: 1,
+        opacity: 0.3,
+      }}
+      transition={active ? {
+        duration,
+        delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      } : { duration: 0.5 }}
+    >
+      {active && (
+        <motion.div
+          className="absolute h-1.5 w-1.5 rounded-full"
+          style={{
+            background: CYAN,
+            boxShadow: `0 0 6px 2px ${CYAN}`,
+            top: -3,
+            left: '50%',
+            marginLeft: -3,
+          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: duration * 1.5, repeat: Infinity, ease: 'linear', delay }}
+          // orbit around center
+        />
+      )}
+    </motion.div>
+  )
+}
+
+// ── Hex Grid Background ─────────────────────────────────────
+
+function HexGrid({ active }: { active: boolean }) {
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+      style={{ opacity: active ? 0.6 : 0.2 }}
+    >
+      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="hex-grid" width="56" height="100" patternUnits="userSpaceOnUse" patternTransform="scale(0.5)">
+            <path
+              d="M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100"
+              fill="none"
+              stroke={active ? 'rgba(6,182,212,0.08)' : 'rgba(255,255,255,0.03)'}
+              strokeWidth="0.5"
+            />
+            <path
+              d="M28 0L56 16L56 50L28 66L0 50L0 16Z"
+              fill="none"
+              stroke={active ? 'rgba(6,182,212,0.08)' : 'rgba(255,255,255,0.03)'}
+              strokeWidth="0.5"
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#hex-grid)" />
+      </svg>
+    </div>
+  )
 }
 
 // ── Component ────────────────────────────────────────────────
@@ -211,6 +295,8 @@ export function GameModePage() {
   }, [config.customProcessKillList])
 
   const enabledSet = new Set(config.enabledOptimizations)
+  const enabledCount = config.enabledOptimizations.length
+  const serviceCount = OPTIMIZATIONS.filter((o) => o.category === 'services' && enabledSet.has(o.id)).length
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
@@ -219,74 +305,162 @@ export function GameModePage() {
       <div className="flex-1 space-y-5 px-6 pb-8">
         {/* ── Hero Toggle ─────────────────────────────── */}
         <div
-          className="relative flex flex-col items-center gap-4 rounded-2xl py-8"
+          className="relative overflow-hidden rounded-2xl"
           style={{
             background: active
-              ? 'linear-gradient(180deg, rgba(6,182,212,0.06) 0%, rgba(139,92,246,0.03) 100%)'
+              ? 'linear-gradient(180deg, rgba(6,182,212,0.05) 0%, rgba(139,92,246,0.03) 50%, rgba(6,182,212,0.02) 100%)'
               : 'rgba(255,255,255,0.02)',
-            border: `1px solid ${active ? CYAN_BORDER : 'rgba(255,255,255,0.06)'}`,
+            border: active ? 'none' : '1px solid rgba(255,255,255,0.06)',
           }}
         >
-          {/* Toggle button */}
-          <motion.button
-            onClick={active ? handleDeactivate : handleActivate}
-            disabled={isBusy}
-            className="relative flex h-20 w-20 items-center justify-center rounded-full transition-all disabled:opacity-50"
-            style={{
-              background: active
-                ? `linear-gradient(135deg, ${CYAN}, ${PURPLE})`
-                : 'rgba(255,255,255,0.05)',
-              border: `2px solid ${active ? CYAN : 'rgba(255,255,255,0.1)'}`,
-              animation: active ? 'game-mode-pulse 2.5s ease-in-out infinite' : undefined,
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isBusy ? (
-              <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-white/30 border-t-white" />
-            ) : (
-              <Gamepad2
-                className="h-8 w-8"
-                style={{ color: active ? '#fff' : '#6e6e76' }}
-                strokeWidth={2}
-              />
-            )}
-          </motion.button>
-
-          {/* Status label */}
-          <div className="text-center">
+          {/* Animated gradient border when active */}
+          {active && (
             <div
-              className="text-xs font-bold tracking-[0.2em]"
-              style={{ color: active ? CYAN : '#6e6e76' }}
-            >
-              {active ? t('activeLabel') : t('inactiveLabel')}
+              className="pointer-events-none absolute inset-0 rounded-2xl"
+              style={{
+                padding: '1px',
+                background: 'linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899, #8b5cf6, #06b6d4)',
+                backgroundSize: '300% 100%',
+                animation: 'game-mode-border-flow 3s linear infinite',
+                WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+              }}
+            />
+          )}
+
+          <HexGrid active={active} />
+
+          {/* Radial glow behind the button */}
+          {active && (
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              style={{
+                width: 300,
+                height: 300,
+                background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, rgba(139,92,246,0.05) 40%, transparent 70%)',
+              }}
+            />
+          )}
+
+          <div className="relative flex flex-col items-center gap-5 py-10">
+            {/* Orbit rings */}
+            <div className="relative flex h-28 w-28 items-center justify-center">
+              <OrbitRing radius={56} duration={3} delay={0} active={active} />
+              <OrbitRing radius={72} duration={4} delay={0.5} active={active} />
+              <OrbitRing radius={88} duration={5} delay={1} active={active} />
+
+              {/* Toggle button */}
+              <motion.button
+                onClick={active ? handleDeactivate : handleActivate}
+                disabled={isBusy}
+                className="relative z-10 flex h-24 w-24 items-center justify-center rounded-full transition-all disabled:opacity-50"
+                style={{
+                  background: active
+                    ? `linear-gradient(135deg, ${CYAN}, ${PURPLE})`
+                    : 'rgba(255,255,255,0.04)',
+                  border: `2px solid ${active ? 'transparent' : 'rgba(255,255,255,0.08)'}`,
+                  boxShadow: active
+                    ? `0 0 30px 4px rgba(6,182,212,0.3), 0 0 80px 8px rgba(139,92,246,0.15), inset 0 0 20px rgba(255,255,255,0.1)`
+                    : '0 0 0 0 transparent',
+                  animation: active ? 'game-mode-pulse 2.5s ease-in-out infinite' : undefined,
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {isBusy ? (
+                  <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-white/30 border-t-white" />
+                ) : (
+                  <Gamepad2
+                    className="h-9 w-9"
+                    style={{ color: active ? '#fff' : '#4a4a52' }}
+                    strokeWidth={1.8}
+                  />
+                )}
+              </motion.button>
             </div>
 
-            {/* Timer */}
-            {active && activatedAt && (
-              <div
-                className="mt-1 font-mono text-xl font-semibold tabular-nums"
-                style={{ color: CYAN }}
+            {/* Status label */}
+            <div className="text-center">
+              <motion.div
+                className="text-xs font-bold tracking-[0.25em]"
+                style={{ color: active ? CYAN : '#4a4a52' }}
+                animate={active ? { textShadow: [`0 0 8px rgba(6,182,212,0.4)`, `0 0 16px rgba(6,182,212,0.6)`, `0 0 8px rgba(6,182,212,0.4)`] } : { textShadow: '0 0 0 transparent' }}
+                transition={active ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
               >
-                {formatElapsed(elapsed)}
-              </div>
+                {active ? t('activeLabel') : t('inactiveLabel')}
+              </motion.div>
+
+              {/* Timer */}
+              {active && activatedAt && (
+                <motion.div
+                  className="mt-1.5 font-mono text-2xl font-bold tabular-nums"
+                  style={{ color: CYAN, textShadow: '0 0 20px rgba(6,182,212,0.3)' }}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {formatElapsed(elapsed)}
+                </motion.div>
+              )}
+            </div>
+
+            {/* Action button */}
+            {!isBusy && (
+              <motion.button
+                onClick={active ? handleDeactivate : handleActivate}
+                className="relative overflow-hidden rounded-lg px-6 py-2.5 text-xs font-bold tracking-widest transition-colors"
+                style={{
+                  background: active ? 'rgba(239,68,68,0.1)' : 'rgba(6,182,212,0.1)',
+                  color: active ? '#ef4444' : CYAN,
+                  border: `1px solid ${active ? 'rgba(239,68,68,0.2)' : 'rgba(6,182,212,0.2)'}`,
+                }}
+                whileHover={{
+                  boxShadow: active
+                    ? '0 0 20px rgba(239,68,68,0.15)'
+                    : '0 0 20px rgba(6,182,212,0.15)',
+                }}
+                whileTap={{ scale: 0.97 }}
+              >
+                {active ? t('deactivateButton') : t('activateButton')}
+              </motion.button>
             )}
           </div>
-
-          {/* Action text */}
-          {!isBusy && (
-            <button
-              onClick={active ? handleDeactivate : handleActivate}
-              className="rounded-lg px-5 py-2 text-xs font-semibold tracking-wide transition-colors"
-              style={{
-                background: active ? 'rgba(239,68,68,0.1)' : CYAN_BG,
-                color: active ? '#ef4444' : CYAN,
-                border: `1px solid ${active ? 'rgba(239,68,68,0.2)' : CYAN_BORDER}`,
-              }}
-            >
-              {active ? t('deactivateButton') : t('activateButton')}
-            </button>
-          )}
         </div>
+
+        {/* ── Live Stats Bar ─────────────────────────── */}
+        <AnimatePresence>
+          {active && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -10, height: 0 }}
+              className="grid grid-cols-3 gap-3"
+            >
+              {[
+                { icon: Zap, label: t('statOptimizationsActive'), value: String(enabledCount), color: CYAN },
+                { icon: Activity, label: t('statServicesDisabled'), value: String(serviceCount), color: PURPLE },
+                { icon: Timer, label: t('statSessionTimer'), value: formatElapsed(elapsed), color: '#22c55e' },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: `1px solid rgba(255,255,255,0.05)`,
+                  }}
+                >
+                  <stat.icon className="h-4 w-4 shrink-0" style={{ color: stat.color }} strokeWidth={2} />
+                  <div className="min-w-0">
+                    <div className="truncate text-[10px] text-zinc-500">{stat.label}</div>
+                    <div className="font-mono text-sm font-semibold tabular-nums" style={{ color: stat.color }}>
+                      {stat.value}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Progress ────────────────────────────────── */}
         <AnimatePresence>
@@ -308,10 +482,14 @@ export function GameModePage() {
                     {progress.phase === 'activating' ? t('activatingProgress') : t('deactivatingProgress')}
                   </span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <div className="relative h-2 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: `linear-gradient(90deg, ${CYAN}, ${PURPLE})` }}
+                    style={{
+                      background: `linear-gradient(90deg, ${CYAN}, ${PURPLE}, ${CYAN})`,
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 2s linear infinite',
+                    }}
                     animate={{ width: `${(progress.current / progress.total) * 100}%` }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
                   />
@@ -364,7 +542,7 @@ export function GameModePage() {
         )}
 
         {/* ── Category Cards ──────────────────────────── */}
-        {CATEGORIES.map((cat) => {
+        {CATEGORIES.map((cat, catIndex) => {
           const catOpts = OPTIMIZATIONS.filter((o) => o.category === cat.id)
           if (catOpts.length === 0) return null
 
@@ -373,10 +551,16 @@ export function GameModePage() {
           const CatIcon = cat.icon
 
           return (
-            <div
+            <motion.div
               key={cat.id}
-              className="overflow-hidden rounded-xl"
-              style={{ border: `1px solid ${CYAN_BORDER}`, background: 'rgba(255,255,255,0.015)' }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: catIndex * 0.05, duration: 0.3 }}
+              className="group overflow-hidden rounded-xl transition-all duration-300"
+              style={{
+                border: `1px solid ${isExpanded ? `${cat.color}22` : 'rgba(255,255,255,0.05)'}`,
+                background: isExpanded ? `linear-gradient(135deg, ${cat.glow}, transparent)` : 'rgba(255,255,255,0.015)',
+              }}
             >
               {/* Category header */}
               <button
@@ -384,27 +568,32 @@ export function GameModePage() {
                 className="flex w-full items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.02]"
               >
                 <div
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: CYAN_BG }}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300"
+                  style={{
+                    background: `${cat.color}14`,
+                    boxShadow: isExpanded ? `0 0 12px ${cat.color}20` : 'none',
+                  }}
                 >
-                  <CatIcon className="h-[18px] w-[18px]" style={{ color: CYAN }} strokeWidth={1.8} />
+                  <CatIcon className="h-[18px] w-[18px]" style={{ color: cat.color }} strokeWidth={1.8} />
                 </div>
                 <div className="flex-1 text-left">
                   <div className="flex items-center gap-2">
                     <span className="text-[14px] font-semibold text-zinc-200">{t(cat.labelKey)}</span>
                     <span
                       className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                      style={{ background: CYAN_BG, color: CYAN }}
+                      style={{ background: `${cat.color}14`, color: cat.color }}
                     >
                       {t('enabledCount', { count: enabledInCat })}
                     </span>
                   </div>
                   <p className="mt-0.5 text-[11px] text-zinc-500">{t(cat.descKey)}</p>
                 </div>
-                <ChevronDown
-                  className="h-4 w-4 shrink-0 text-zinc-600 transition-transform"
-                  style={{ transform: isExpanded ? 'rotate(180deg)' : undefined }}
-                />
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
+                </motion.div>
               </button>
 
               {/* Expanded options */}
@@ -423,7 +612,7 @@ export function GameModePage() {
                       return (
                         <div
                           key={opt.id}
-                          className="flex items-center gap-4 px-5 py-3.5"
+                          className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.01]"
                           style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
                         >
                           <div className="flex-1">
@@ -446,14 +635,15 @@ export function GameModePage() {
                             onClick={() => !active && store.getState().toggleOptimization(opt.id)}
                             disabled={active}
                             className="relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-40"
-                            style={{ background: isEnabled ? CYAN : 'rgba(255,255,255,0.08)' }}
+                            style={{ background: isEnabled ? cat.color : 'rgba(255,255,255,0.08)' }}
                           >
-                            <div
-                              className="absolute top-0.5 h-5 w-5 rounded-full transition-all duration-200"
-                              style={{
-                                left: isEnabled ? '22px' : '2px',
+                            <motion.div
+                              className="absolute top-0.5 h-5 w-5 rounded-full"
+                              animate={{
+                                left: isEnabled ? 22 : 2,
                                 background: isEnabled ? '#fff' : '#6e6e76',
                               }}
+                              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                             />
                           </button>
                         </div>
@@ -477,7 +667,7 @@ export function GameModePage() {
                             onClick={handleAddCustomProcess}
                             disabled={active || !customInput.trim()}
                             className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors disabled:opacity-40"
-                            style={{ background: CYAN_BG, color: CYAN }}
+                            style={{ background: `${cat.color}14`, color: cat.color }}
                           >
                             <Plus className="h-3 w-3" />
                             {t('customProcessAdd')}
@@ -511,7 +701,7 @@ export function GameModePage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           )
         })}
       </div>
