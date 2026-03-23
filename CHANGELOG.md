@@ -1,3 +1,14 @@
+## [1.21.1](https://github.com/adventdevinc/kudu/compare/v1.21.0...v1.21.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **build:** add zip target for macOS auto-updates ([290f492](https://github.com/adventdevinc/kudu/commit/290f49256f8dc5cae175778e8291740f4300886a))
+
+
+### Features
+
+* **ui:** show badge counts on flyout submenu items ([d67a38d](https://github.com/adventdevinc/kudu/commit/d67a38dc901aa667832f1c26e8f1081e7d7cdf7d))
 # [1.21.0](https://github.com/adventdevinc/kudu/compare/v1.20.0...v1.21.0) (2026-03-23)
 
 
