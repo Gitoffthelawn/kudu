@@ -424,7 +424,7 @@ function FlyoutMenu({ buttonRef, popoverRef, items, badgeCounts, onSelect }: {
       style={{ top: pos.top, left: pos.left, transformOrigin: 'left top' }}
     >
       <div
-        className="glass-card w-48 rounded-xl py-1.5"
+        className="glass-card w-56 rounded-xl py-1.5"
         style={{
           background: 'rgba(18, 18, 26, 0.92)',
           boxShadow: '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
