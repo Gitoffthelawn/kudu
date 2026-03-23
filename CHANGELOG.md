@@ -1,3 +1,23 @@
+# [1.22.0](https://github.com/adventdevinc/kudu/compare/v1.21.1...v1.22.0) (2026-03-23)
+
+
+### Bug Fixes
+
+* **elevation:** wait for macOS admin prompt before exiting ([7d296bf](https://github.com/adventdevinc/kudu/commit/7d296bf1d28e8a16b76e37db24a4ce31371a5db8))
+* **settings:** remove custom cloud server URL setting ([#50](https://github.com/adventdevinc/kudu/issues/50)) ([9fbd92b](https://github.com/adventdevinc/kudu/commit/9fbd92b1647a2f2206ee667a9f69e4e6bf5ae5f3))
+* **sidebar:** hide Vulnerabilities item when cloud is disconnected ([49a1f3a](https://github.com/adventdevinc/kudu/commit/49a1f3a6e94046292e889587eeb037269e72e3f3))
+* **sidebar:** widen flyout submenu to prevent text wrapping ([032fe59](https://github.com/adventdevinc/kudu/commit/032fe59fd4a72585cdd857bf60f2f255424b9be8))
+* **startup:** fall back to Run key when Task Scheduler fails ([#51](https://github.com/adventdevinc/kudu/issues/51)) ([ac70237](https://github.com/adventdevinc/kudu/commit/ac70237ae4ba12f332d7b15973ba0c87bc9790ee))
+
+
+### Features
+
+* **a11y:** add ARIA labels, keyboard nav, and screen reader support ([#57](https://github.com/adventdevinc/kudu/issues/57)) ([56e68fc](https://github.com/adventdevinc/kudu/commit/56e68fce87eb5e54074591466d443cbc37f92878))
+* **browsers:** add CatsXP, LibreWolf, Waterfox, and Floorp support ([#48](https://github.com/adventdevinc/kudu/issues/48)) ([c990593](https://github.com/adventdevinc/kudu/commit/c99059311200c03fd1ae7e0a2fd719b5f5fe49f6))
+* **disk-tools:** add standalone File Shredder tool ([#53](https://github.com/adventdevinc/kudu/issues/53)) ([9cfdce8](https://github.com/adventdevinc/kudu/commit/9cfdce881ef3dd84d6d0e17e46d0c9b47cf336c7))
+* **game-mode:** redesign hero section with animated visuals and category theming ([ec5645a](https://github.com/adventdevinc/kudu/commit/ec5645a1d37591519b5cc22e42aa9f8abcc61f27))
+* **privacy:** expand macOS Privacy Shield from 20 to 35 settings ([#56](https://github.com/adventdevinc/kudu/issues/56)) ([0e31199](https://github.com/adventdevinc/kudu/commit/0e31199bdd912cde807eaab9bd35a382876985a8))
+* **rules:** add Flatpak/Snap/Homebrew cleaning coverage ([#52](https://github.com/adventdevinc/kudu/issues/52)) ([2006078](https://github.com/adventdevinc/kudu/commit/2006078b6f0fe3fa4cc1c78c8eb08681e3d3eed5))
 ## [1.21.1](https://github.com/adventdevinc/kudu/compare/v1.21.0...v1.21.1) (2026-03-23)
 
 
