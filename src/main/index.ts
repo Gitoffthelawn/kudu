@@ -363,6 +363,35 @@ app.on('second-instance', () => {
 })
 
 app.whenReady().then(() => {
+  // On macOS, ensure the Dock icon is visible.  When relaunched as root
+  // via osascript the binary is executed directly (not through `open` /
+  // LaunchServices), so the Dock icon won't appear automatically.
+  if (process.platform === 'darwin' && app.dock) {
+    app.dock.show()
+  }
+
+  // Ensure an Edit menu exists so clipboard shortcuts (Cmd+C/V/X on macOS,
+  // Ctrl+C/V/X elsewhere) work in the frameless window.  On macOS Cmd+V
+  // relies on an Edit menu with the paste role — without an explicit menu
+  // the shortcuts break when the app is relaunched as root.
+  // We preserve the default appMenu role so Cmd+Q, Cmd+H, About, etc. stay.
+  const appMenu = Menu.buildFromTemplate([
+    { role: 'appMenu' },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    }
+  ])
+  Menu.setApplicationMenu(appMenu)
+
   const settings = getSettings()
 
   // Apply auto-launch setting
