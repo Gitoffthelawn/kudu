@@ -52,10 +52,15 @@ export function App() {
   }, [i18n.language])
 
   useEffect(() => {
-    window.kudu?.onboardingGet?.().then((done) => {
-      setShowOnboarding(!done)
+    const p = window.kudu?.onboardingGet?.()
+    if (p) {
+      p.then((done) => {
+        setShowOnboarding(!done)
+        setOnboardingChecked(true)
+      }).catch(() => setOnboardingChecked(true))
+    } else {
       setOnboardingChecked(true)
-    }).catch(() => setOnboardingChecked(true))
+    }
   }, [])
 
   const handleOnboardingComplete = () => {
