@@ -25,3 +25,21 @@ npm run validate:rules # validate rule JSON files against schema
 ```
 npm run dev
 ```
+
+## Commit Conventions
+
+Always use [Conventional Commits](https://www.conventionalcommits.org/). Format:
+
+```
+<type>(<scope>): <short summary>
+```
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`.
+
+Examples:
+- `feat(rules): add new browser cache cleaning rule`
+- `fix(scanner): handle missing registry keys on Windows`
+- `refactor(ui): extract settings panel into separate component`
+- `test(engine): add unit tests for file size calculation`
+
+Breaking changes must include `!` after the type/scope (e.g., `feat(api)!: redesign plugin interface`).
