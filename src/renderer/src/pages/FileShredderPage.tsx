@@ -89,7 +89,7 @@ export function FileShredderPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-[24px] font-bold tracking-tight text-white">{t('pageTitle')}</h1>
-        <p className="mt-1.5 text-[13px] animate-fade-in" style={{ color: '#5e5e68' }}>{t('pageDescription')}</p>
+        <p className="mt-1.5 text-[13px] animate-fade-in" style={{ color: '#8e8e98' }}>{t('pageDescription')}</p>
       </div>
 
       {/* Action buttons */}
@@ -173,7 +173,7 @@ export function FileShredderPage() {
           </div>
           <p className="text-[13px] font-medium text-white">{t('shredding')}</p>
           {store.progress.currentPath && (
-            <p className="mt-1 truncate text-[12px]" style={{ color: '#6e6e76' }} title={store.progress.currentPath}>
+            <p className="mt-1 truncate text-[12px]" style={{ color: '#9e9ea6' }} title={store.progress.currentPath}>
               {store.progress.currentPath}
             </p>
           )}
@@ -211,7 +211,7 @@ export function FileShredderPage() {
       {store.status === 'idle' && store.entries.length > 0 && (
         <>
           <div className="mb-3 flex items-center gap-3">
-            <span className="text-[12px] font-medium" style={{ color: '#6e6e76' }}>
+            <span className="text-[12px] font-medium" style={{ color: '#9e9ea6' }}>
               {t('itemCount', { count: store.entries.length })}
             </span>
             <span className="text-[12px] font-medium" style={{ color: '#f59e0b' }}>
@@ -231,7 +231,7 @@ export function FileShredderPage() {
                 {entry.isDirectory ? (
                   <Folder className="h-4 w-4 shrink-0" style={{ color: '#f59e0b' }} strokeWidth={1.5} />
                 ) : (
-                  <File className="h-4 w-4 shrink-0" style={{ color: '#52525b' }} strokeWidth={1.5} />
+                  <File className="h-4 w-4 shrink-0" style={{ color: '#8a8a96' }} strokeWidth={1.5} />
                 )}
                 <span
                   className="min-w-0 flex-1 truncate text-[12.5px]"
@@ -240,7 +240,7 @@ export function FileShredderPage() {
                 >
                   {entry.path}
                 </span>
-                <span className="shrink-0 text-[11px] font-medium" style={{ color: '#6e6e76' }}>
+                <span className="shrink-0 text-[11px] font-medium" style={{ color: '#9e9ea6' }}>
                   {entry.isDirectory ? t('folder') : t('file')}
                 </span>
                 <span className="shrink-0 text-[12px] font-semibold" style={{ color: '#f59e0b' }}>
@@ -291,7 +291,7 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
       className="rounded-xl px-4 py-3"
       style={{ background: '#1c1c21', border: '1px solid rgba(255,255,255,0.04)' }}
     >
-      <div className="text-[11px] font-medium" style={{ color: '#6e6e76' }}>{label}</div>
+      <div className="text-[11px] font-medium" style={{ color: '#9e9ea6' }}>{label}</div>
       <div className="mt-1 text-[18px] font-bold" style={{ color: accent ? '#ef4444' : '#fafafa' }}>{value}</div>
     </div>
   )
@@ -300,7 +300,7 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
 function StatMini({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <span className="text-[11px]" style={{ color: '#6e6e76' }}>{label}: </span>
+      <span className="text-[11px]" style={{ color: '#9e9ea6' }}>{label}: </span>
       <span className="text-[12px] font-medium text-white">{value}</span>
     </div>
   )
@@ -311,7 +311,7 @@ function EmptyState({ title, description }: { title: string; description: string
     <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
       <ShieldAlert className="mb-4 h-12 w-12" style={{ color: '#3f3f46' }} strokeWidth={1.2} />
       <h3 className="text-[15px] font-semibold text-white">{title}</h3>
-      <p className="mt-1.5 max-w-sm text-[13px]" style={{ color: '#6e6e76' }}>{description}</p>
+      <p className="mt-1.5 max-w-sm text-[13px]" style={{ color: '#9e9ea6' }}>{description}</p>
     </div>
   )
 }

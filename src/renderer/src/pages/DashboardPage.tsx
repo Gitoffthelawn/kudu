@@ -496,13 +496,13 @@ export function DashboardPage() {
               >
                 <Gamepad2
                   className="h-6 w-6"
-                  style={{ color: gameModeActive ? '#fff' : '#52525b' }}
+                  style={{ color: gameModeActive ? '#fff' : '#8a8a96' }}
                   strokeWidth={2}
                 />
               </div>
               <span
                 className="mt-3 text-xs font-bold tracking-[0.2em]"
-                style={{ color: gameModeActive ? '#06b6d4' : '#52525b' }}
+                style={{ color: gameModeActive ? '#06b6d4' : '#8a8a96' }}
               >
                 {gameModeActive ? t('gameModeActive') : t('gameModeReady')}
               </span>
@@ -522,18 +522,18 @@ export function DashboardPage() {
             <div
               className="glass-card flex flex-col justify-center rounded-2xl px-5 py-4"
             >
-              <h3 className="mb-3 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+              <h3 className="mb-3 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
                 {t('statusHeading')}
               </h3>
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px]" style={{ color: '#6e6e76' }}>{t('statusLastScan')}</span>
+                  <span className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('statusLastScan')}</span>
                   <span className="text-[12px] font-medium text-zinc-300">
                     {stats.lastScanDate ? formatDate(stats.lastScanDate) : t('statusLastScanNever')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px]" style={{ color: '#6e6e76' }}>{t('statusTotalScans')}</span>
+                  <span className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('statusTotalScans')}</span>
                   <span className="text-[12px] font-medium text-zinc-300">{formatNumber(stats.totalScans)}</span>
                 </div>
               </div>
@@ -569,7 +569,7 @@ export function DashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-semibold text-zinc-200">{t('quickCleanTitle')}</p>
-              <p className="text-[12px]" style={{ color: '#52525e' }}>
+              <p className="text-[12px]" style={{ color: '#8a8a96' }}>
                 {features.registry ? t('quickCleanDescriptionWithRegistry') : t('quickCleanDescriptionWithoutRegistry')}
               </p>
             </div>
@@ -594,7 +594,7 @@ export function DashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-semibold text-zinc-200">{t('fullCleanTitle')}</p>
-              <p className="text-[12px]" style={{ color: '#52525e' }}>
+              <p className="text-[12px]" style={{ color: '#8a8a96' }}>
                 {features.registry ? t('fullCleanDescriptionWithRegistry') : t('fullCleanDescriptionWithoutRegistry')}
               </p>
             </div>
@@ -611,7 +611,7 @@ export function DashboardPage() {
               <Loader2 className="h-4 w-4 shrink-0 animate-spin text-amber-400" strokeWidth={2} />
               <span className="flex-1 text-[13px] text-zinc-400">{phaseLabel || t('progressWorking')}</span>
               {stepProgress.total > 0 && (
-                <span className="text-[11px] font-mono" style={{ color: '#52525e' }}>
+                <span className="text-[11px] font-mono" style={{ color: '#8a8a96' }}>
                   {stepProgress.current}/{stepProgress.total}
                 </span>
               )}
@@ -637,16 +637,16 @@ export function DashboardPage() {
               <div>
                 <p className="text-[13px] font-medium text-zinc-200">{t('resultCleanupComplete')}</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1">
-                  {result.spaceRecovered > 0 && <p className="text-[12px]" style={{ color: '#6e6e76' }}>{t('resultSpaceRecovered', { size: formatBytes(result.spaceRecovered) })}</p>}
-                  {result.filesCleaned > 0 && <p className="text-[12px]" style={{ color: '#6e6e76' }}>{t('resultFilesCleaned', { count: formatNumber(result.filesCleaned) })}</p>}
-                  {result.registryFixed > 0 && <p className="text-[12px]" style={{ color: '#6e6e76' }}>{t('resultRegistryFixed', { count: result.registryFixed })}</p>}
-                  {result.driversRemoved > 0 && <p className="text-[12px]" style={{ color: '#6e6e76' }}>{t('resultDriversRemoved', { count: result.driversRemoved })}</p>}
+                  {result.spaceRecovered > 0 && <p className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('resultSpaceRecovered', { size: formatBytes(result.spaceRecovered) })}</p>}
+                  {result.filesCleaned > 0 && <p className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('resultFilesCleaned', { count: formatNumber(result.filesCleaned) })}</p>}
+                  {result.registryFixed > 0 && <p className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('resultRegistryFixed', { count: result.registryFixed })}</p>}
+                  {result.driversRemoved > 0 && <p className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('resultDriversRemoved', { count: result.driversRemoved })}</p>}
                   {result.threatsFound > 0 && (
                     <p className="text-[12px]" style={{ color: result.threatsQuarantined > 0 ? '#22c55e' : '#ef4444' }}>
                       {t(result.threatsQuarantined !== 1 ? 'resultThreatsQuarantinedPlural' : 'resultThreatsQuarantined', { count: result.threatsQuarantined })}
                     </p>
                   )}
-                  {result.threatsFound === 0 && result.privacyScore > 0 && <p className="text-[12px]" style={{ color: '#6e6e76' }}>{t('resultNoThreatsFound')}</p>}
+                  {result.threatsFound === 0 && result.privacyScore > 0 && <p className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('resultNoThreatsFound')}</p>}
                   {result.privacyIssues > 0 && (
                     <button onClick={() => navigate('/hardening')} className="text-[12px] hover:underline" style={{ color: '#3b82f6' }}>
                       {t(result.privacyIssues !== 1 ? 'resultPrivacyImprovementsPlural' : 'resultPrivacyImprovements', { count: result.privacyIssues })} &rarr;
@@ -663,7 +663,7 @@ export function DashboardPage() {
                     </button>
                   )}
                   {result.spaceRecovered === 0 && result.filesCleaned === 0 && result.registryFixed === 0 && result.driversRemoved === 0 && result.threatsFound === 0 && result.privacyIssues === 0 && result.startupHighImpact === 0 && result.updatesAvailable === 0 && (
-                    <p className="text-[12px]" style={{ color: '#6e6e76' }}>{t('resultSystemAlreadyClean')}</p>
+                    <p className="text-[12px]" style={{ color: '#9e9ea6' }}>{t('resultSystemAlreadyClean')}</p>
                   )}
                 </div>
               </div>
@@ -675,12 +675,12 @@ export function DashboardPage() {
         <div
           className="glass-card rounded-2xl p-5"
         >
-          <h3 className="mb-5 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+          <h3 className="mb-5 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
             {t('storageOverviewHeading')}
           </h3>
           <div className="space-y-5">
             {drives.length === 0 && (
-              <p className="py-4 text-center text-[13px]" style={{ color: '#4e4e56' }}>
+              <p className="py-4 text-center text-[13px]" style={{ color: '#8a8a94' }}>
                 {t('storageOverviewEmpty')}
               </p>
             )}
@@ -754,7 +754,7 @@ function MiniGauge({ icon: Icon, label, percent, detail }: {
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-semibold text-zinc-200">{label}</p>
-        <p className="truncate text-[11px]" style={{ color: '#6e6e76' }}>{detail}</p>
+        <p className="truncate text-[11px]" style={{ color: '#9e9ea6' }}>{detail}</p>
       </div>
     </div>
   )
@@ -770,12 +770,12 @@ function DriveBar({ drive, platform }: { drive: DriveInfo; platform: string }) {
     <div>
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <HardDrive className="h-4 w-4" style={{ color: '#52525e' }} strokeWidth={1.6} />
+          <HardDrive className="h-4 w-4" style={{ color: '#8a8a96' }} strokeWidth={1.6} />
           <span className="text-[13px] font-medium text-zinc-300">
             {platform === 'win32' ? `${drive.letter}: ${drive.label}` : `${drive.letter} ${drive.label}`}
           </span>
         </div>
-        <span className="font-mono text-[11px]" style={{ color: '#6e6e76' }}>
+        <span className="font-mono text-[11px]" style={{ color: '#9e9ea6' }}>
           {formatBytes(drive.usedSpace)} / {formatBytes(drive.totalSize)}
         </span>
       </div>

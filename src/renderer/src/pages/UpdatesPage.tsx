@@ -67,7 +67,7 @@ export function UpdatesPage() {
             >
               <TabIcon className="h-4 w-4 shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
               <span>{tab.label}</span>
-              <span className="hidden text-[11px] sm:inline" style={{ color: isActive ? '#b08c2a' : '#4e4e56' }}>
+              <span className="hidden text-[11px] sm:inline" style={{ color: isActive ? '#b08c2a' : '#8a8a94' }}>
                 {tab.description}
               </span>
             </button>

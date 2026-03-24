@@ -11,7 +11,7 @@ const statusConfig = {
   Healthy: { icon: CheckCircle, color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
   Caution: { icon: AlertTriangle, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
   Bad: { icon: XCircle, color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
-  Unknown: { icon: HelpCircle, color: '#6e6e76', bg: 'rgba(110,110,118,0.1)' }
+  Unknown: { icon: HelpCircle, color: '#9e9ea6', bg: 'rgba(110,110,118,0.1)' }
 }
 
 const statusI18nKeys = {
@@ -42,7 +42,7 @@ function DiskCard({ disk }: { disk: DiskSmartInfo }) {
           </div>
           <div>
             <div className="text-[13px] font-semibold text-white">{disk.model}</div>
-            <div className="text-[11px] font-medium" style={{ color: '#6e6e76' }}>
+            <div className="text-[11px] font-medium" style={{ color: '#9e9ea6' }}>
               {disk.type} &middot; {formatBytes(disk.sizeBytes, 0)}
             </div>
           </div>
@@ -121,8 +121,8 @@ function StatItem({
   return (
     <div className="flex flex-col gap-0.5">
       <div className="flex items-center gap-1">
-        {icon && <span style={{ color: warn ? '#f59e0b' : '#52525e' }}>{icon}</span>}
-        <span className="text-[10px] font-medium" style={{ color: '#52525e' }}>
+        {icon && <span style={{ color: warn ? '#f59e0b' : '#8a8a96' }}>{icon}</span>}
+        <span className="text-[10px] font-medium" style={{ color: '#8a8a96' }}>
           {label}
         </span>
       </div>

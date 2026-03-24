@@ -241,7 +241,7 @@ export function SettingsPage() {
                 </button>
               </div>
             </div>
-            <p className="text-[11px]" style={{ color: '#4e4e56' }}>
+            <p className="text-[11px]" style={{ color: '#8a8a94' }}>
               {t('cloudTelemetryDisclaimer', { registryExtra: features.registry ? t('cloudTelemetryRegistryExtra') : '' })}
             </p>
           </div>
@@ -398,17 +398,17 @@ export function SettingsPage() {
       <Section title={t('sectionExclusions')}>
         <div className="space-y-2 pb-3">
           {settings.exclusions.length === 0 && (
-            <p className="text-[13px]" style={{ color: '#4e4e56' }}>{t('noExclusionsConfigured')}</p>
+            <p className="text-[13px]" style={{ color: '#8a8a94' }}>{t('noExclusionsConfigured')}</p>
           )}
           {settings.exclusions.map((exc, i) => (
             <div key={i} className="flex items-center justify-between rounded-xl px-4 py-2.5"
               style={{ background: 'rgba(255,255,255,0.03)' }}>
               <div className="flex items-center gap-2.5">
-                <FolderOpen className="h-3.5 w-3.5" style={{ color: '#4e4e56' }} strokeWidth={1.8} />
+                <FolderOpen className="h-3.5 w-3.5" style={{ color: '#8a8a94' }} strokeWidth={1.8} />
                 <span className="font-mono text-[12px] text-zinc-400">{exc}</span>
               </div>
               <button onClick={() => save({ exclusions: settings.exclusions.filter((_, j) => j !== i) })}
-                className="rounded-lg p-1.5 transition-colors" style={{ color: '#4e4e56' }}
+                className="rounded-lg p-1.5 transition-colors" style={{ color: '#8a8a94' }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
                 <X className="h-3.5 w-3.5" />
@@ -437,7 +437,7 @@ export function SettingsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-7">
-      <h3 className="mb-3 text-[11px] font-medium uppercase tracking-widest" style={{ color: '#4e4e56' }}>{title}</h3>
+      <h3 className="mb-3 text-[11px] font-medium uppercase tracking-widest" style={{ color: '#8a8a94' }}>{title}</h3>
       <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>{children}</div>
     </div>
   )
@@ -449,7 +449,7 @@ function Row({ label, desc, children, last }: { label: string; desc?: string; ch
       style={!last ? { borderColor: 'rgba(255,255,255,0.04)' } : undefined}>
       <div>
         <p className="text-[13px] font-medium text-zinc-300">{label}</p>
-        {desc && <p className="mt-0.5 text-[12px]" style={{ color: '#52525e' }}>{desc}</p>}
+        {desc && <p className="mt-0.5 text-[12px]" style={{ color: '#8a8a96' }}>{desc}</p>}
       </div>
       {children}
     </div>

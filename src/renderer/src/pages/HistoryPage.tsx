@@ -168,7 +168,7 @@ export function HistoryPage() {
                 className="px-4 py-2 text-[12px] font-medium transition-colors"
                 style={{
                   background: viewMode === 'overview' ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.03)',
-                  color: viewMode === 'overview' ? '#f59e0b' : '#6e6e76'
+                  color: viewMode === 'overview' ? '#f59e0b' : '#9e9ea6'
                 }}
               >
                 {t('viewOverview')}
@@ -178,7 +178,7 @@ export function HistoryPage() {
                 className="px-4 py-2 text-[12px] font-medium transition-colors"
                 style={{
                   background: viewMode === 'timeline' ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.03)',
-                  color: viewMode === 'timeline' ? '#f59e0b' : '#6e6e76'
+                  color: viewMode === 'timeline' ? '#f59e0b' : '#9e9ea6'
                 }}
               >
                 {t('viewTimeline')}
@@ -188,7 +188,7 @@ export function HistoryPage() {
                 className="px-4 py-2 text-[12px] font-medium transition-colors"
                 style={{
                   background: viewMode === 'cloud' ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.03)',
-                  color: viewMode === 'cloud' ? '#3b82f6' : '#6e6e76'
+                  color: viewMode === 'cloud' ? '#3b82f6' : '#9e9ea6'
                 }}
               >
                 {t('viewCloud')}
@@ -282,7 +282,7 @@ function OverviewView({
       <div className="mb-5 grid grid-cols-3 gap-4">
         {/* Space saved over time */}
         <div className="col-span-2 rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
             {t('overview.spaceRecoveredOverTime')}
           </h3>
           {timelineData.length > 1 ? (
@@ -295,8 +295,8 @@ function OverviewView({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="date" tick={{ fill: '#4e4e56', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#4e4e56', fontSize: 11 }} axisLine={false} tickLine={false}
+                <XAxis dataKey="date" tick={{ fill: '#8a8a94', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#8a8a94', fontSize: 11 }} axisLine={false} tickLine={false}
                   tickFormatter={(v) => formatBytes(v, 0)} width={60} />
                 <Tooltip
                   contentStyle={{ background: '#1e1e22', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
@@ -308,7 +308,7 @@ function OverviewView({
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-[220px] items-center justify-center text-[13px]" style={{ color: '#4e4e56' }}>
+            <div className="flex h-[220px] items-center justify-center text-[13px]" style={{ color: '#8a8a94' }}>
               {t('overview.needTwoScansForChart')}
             </div>
           )}
@@ -316,7 +316,7 @@ function OverviewView({
 
         {/* Scan type distribution */}
         <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
             {t('overview.scanTypeDistribution')}
           </h3>
           {typeBreakdown.length > 0 ? (
@@ -345,13 +345,13 @@ function OverviewView({
                   <div key={item.name} className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
                     <span className="flex-1 text-[12px] text-zinc-400">{item.name}</span>
-                    <span className="font-mono text-[11px]" style={{ color: '#6e6e76' }}>{item.count}</span>
+                    <span className="font-mono text-[11px]" style={{ color: '#9e9ea6' }}>{item.count}</span>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <div className="flex h-[200px] items-center justify-center text-[13px]" style={{ color: '#4e4e56' }}>
+            <div className="flex h-[200px] items-center justify-center text-[13px]" style={{ color: '#8a8a94' }}>
               {t('overview.noData')}
             </div>
           )}
@@ -362,14 +362,14 @@ function OverviewView({
       <div className="mb-5 grid grid-cols-2 gap-4">
         {/* Category breakdown */}
         <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
             {t('overview.topCategoriesBySpace')}
           </h3>
           {categoryBreakdown.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={categoryBreakdown} layout="vertical" barSize={14}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
-                <XAxis type="number" tick={{ fill: '#4e4e56', fontSize: 11 }} axisLine={false} tickLine={false}
+                <XAxis type="number" tick={{ fill: '#8a8a94', fontSize: 11 }} axisLine={false} tickLine={false}
                   tickFormatter={(v) => formatBytes(v, 0)} />
                 <YAxis type="category" dataKey="name" tick={{ fill: '#a1a1aa', fontSize: 11 }} axisLine={false}
                   tickLine={false} width={90} />
@@ -385,7 +385,7 @@ function OverviewView({
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-[220px] items-center justify-center text-[13px]" style={{ color: '#4e4e56' }}>
+            <div className="flex h-[220px] items-center justify-center text-[13px]" style={{ color: '#8a8a94' }}>
               {t('overview.noCategoryData')}
             </div>
           )}
@@ -393,15 +393,15 @@ function OverviewView({
 
         {/* Weekly trend */}
         <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+          <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
             {t('overview.weeklyActivity')}
           </h3>
           {weeklyData.length > 1 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={weeklyData} barSize={20}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="week" tick={{ fill: '#4e4e56', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#4e4e56', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="week" tick={{ fill: '#8a8a94', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#8a8a94', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{ background: '#1e1e22', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
                   labelStyle={{ color: '#a1a1aa' }}
@@ -414,7 +414,7 @@ function OverviewView({
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-[220px] items-center justify-center text-[13px]" style={{ color: '#4e4e56' }}>
+            <div className="flex h-[220px] items-center justify-center text-[13px]" style={{ color: '#8a8a94' }}>
               {t('overview.needTwoWeeksData')}
             </div>
           )}
@@ -423,7 +423,7 @@ function OverviewView({
 
       {/* Recent 5 scans summary */}
       <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
-        <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+        <h3 className="mb-4 text-[12px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
           {t('overview.recentScans')}
         </h3>
         <div className="space-y-2">
@@ -482,13 +482,13 @@ function TimelineView({
             className="rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-colors"
             style={{
               background: typeFilter === f.value ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
-              color: typeFilter === f.value ? '#f59e0b' : '#6e6e76'
+              color: typeFilter === f.value ? '#f59e0b' : '#9e9ea6'
             }}
           >
             {f.label}
           </button>
         ))}
-        <span className="ml-auto text-[12px] font-mono" style={{ color: '#4e4e56' }}>
+        <span className="ml-auto text-[12px] font-mono" style={{ color: '#8a8a94' }}>
           {t('timeline.entriesCount', { count: entries.length })}
         </span>
       </div>
@@ -498,12 +498,12 @@ function TimelineView({
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              <th className="px-5 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('timeline.columnType')}</th>
-              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('timeline.columnDate')}</th>
-              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('timeline.columnItems')}</th>
-              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('timeline.columnSpace')}</th>
-              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('timeline.columnDuration')}</th>
-              <th className="px-4 py-3 text-center text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('timeline.columnStatus')}</th>
+              <th className="px-5 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('timeline.columnType')}</th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('timeline.columnDate')}</th>
+              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('timeline.columnItems')}</th>
+              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('timeline.columnSpace')}</th>
+              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('timeline.columnDuration')}</th>
+              <th className="px-4 py-3 text-center text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('timeline.columnStatus')}</th>
               <th className="w-10 px-4 py-3" />
             </tr>
           </thead>
@@ -535,17 +535,17 @@ function TimelineView({
                   </td>
                   <td className="px-4 py-3 text-[12px]" style={{ color: '#8e8e96' }}>
                     {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                    <span className="ml-1.5" style={{ color: '#4e4e56' }}>
+                    <span className="ml-1.5" style={{ color: '#8a8a94' }}>
                       {new Date(entry.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-[12px] text-zinc-300">
                     {entry.totalItemsCleaned.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-[12px]" style={{ color: entry.totalSpaceSaved > 0 ? '#22c55e' : '#4e4e56' }}>
+                  <td className="px-4 py-3 text-right font-mono text-[12px]" style={{ color: entry.totalSpaceSaved > 0 ? '#22c55e' : '#8a8a94' }}>
                     {entry.totalSpaceSaved > 0 ? formatBytes(entry.totalSpaceSaved) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-[12px]" style={{ color: '#6e6e76' }}>
+                  <td className="px-4 py-3 text-right font-mono text-[12px]" style={{ color: '#9e9ea6' }}>
                     {formatDuration(entry.duration, t)}
                   </td>
                   <td className="px-4 py-3 text-center">
@@ -559,7 +559,7 @@ function TimelineView({
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <Info className="inline h-3.5 w-3.5" style={{ color: '#4e4e56' }} strokeWidth={1.8} />
+                    <Info className="inline h-3.5 w-3.5" style={{ color: '#8a8a94' }} strokeWidth={1.8} />
                   </td>
                 </tr>
               )
@@ -568,7 +568,7 @@ function TimelineView({
         </table>
 
         {entries.length === 0 && (
-          <div className="py-12 text-center text-[13px]" style={{ color: '#4e4e56' }}>
+          <div className="py-12 text-center text-[13px]" style={{ color: '#8a8a94' }}>
             {t('timeline.noEntriesMatchFilter')}
           </div>
         )}
@@ -602,14 +602,14 @@ function ScanDetailPopup({ entry, onClose }: { entry: ScanHistoryEntry; onClose:
           </div>
           <div className="flex-1">
             <h3 className="text-[15px] font-semibold text-white">{config.label}</h3>
-            <p className="text-[12px]" style={{ color: '#6e6e76' }}>
+            <p className="text-[12px]" style={{ color: '#9e9ea6' }}>
               {new Date(entry.timestamp).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
               {' ' + t('timeline.dateAt') + ' '}
               {new Date(entry.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
               {entry.scheduled && <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ background: 'rgba(99,102,241,0.1)', color: '#818cf8' }}>{t('detail.scheduledBadge')}</span>}
             </p>
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors" style={{ color: '#6e6e76' }}
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors" style={{ color: '#9e9ea6' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
             <XCircle className="h-4 w-4" strokeWidth={1.8} />
@@ -626,7 +626,7 @@ function ScanDetailPopup({ entry, onClose }: { entry: ScanHistoryEntry; onClose:
 
         {/* Duration & errors */}
         <div className="mb-5 flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-[12px]" style={{ color: '#6e6e76' }}>
+          <div className="flex items-center gap-1.5 text-[12px]" style={{ color: '#9e9ea6' }}>
             <Clock className="h-3.5 w-3.5" strokeWidth={1.6} />
             {formatDuration(entry.duration, t)}
           </div>
@@ -641,7 +641,7 @@ function ScanDetailPopup({ entry, onClose }: { entry: ScanHistoryEntry; onClose:
         {/* Category breakdown */}
         {entry.categories.length > 0 && (
           <div>
-            <h4 className="mb-3 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+            <h4 className="mb-3 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
               {t('detail.categoriesLabel')}
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin' }}>
@@ -654,9 +654,9 @@ function ScanDetailPopup({ entry, onClose }: { entry: ScanHistoryEntry; onClose:
                     <div className="flex-1 h-[6px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
                       <div className="h-full rounded-full" style={{ width: `${percent}%`, background: PIE_COLORS[i % PIE_COLORS.length], opacity: 0.8 }} />
                     </div>
-                    <span className="w-14 shrink-0 text-right font-mono text-[11px]" style={{ color: '#6e6e76' }}>{cat.itemsCleaned}</span>
+                    <span className="w-14 shrink-0 text-right font-mono text-[11px]" style={{ color: '#9e9ea6' }}>{cat.itemsCleaned}</span>
                     {cat.spaceSaved > 0 && (
-                      <span className="w-18 shrink-0 text-right font-mono text-[11px]" style={{ color: '#4e4e56' }}>{formatBytes(cat.spaceSaved)}</span>
+                      <span className="w-18 shrink-0 text-right font-mono text-[11px]" style={{ color: '#8a8a94' }}>{formatBytes(cat.spaceSaved)}</span>
                     )}
                   </div>
                 )
@@ -673,7 +673,7 @@ function ScanDetailPopup({ entry, onClose }: { entry: ScanHistoryEntry; onClose:
 
 const cloudCommandColors: Record<string, string> = {
   'scan': '#f59e0b', 'clean': '#22c55e', 'software-update-check': '#06b6d4', 'software-update-run': '#06b6d4',
-  'get-status': '#6e6e76', 'get-system-info': '#6e6e76', 'get-health-report': '#3b82f6', 'ping': '#6e6e76',
+  'get-status': '#9e9ea6', 'get-system-info': '#9e9ea6', 'get-health-report': '#3b82f6', 'ping': '#9e9ea6',
   'shutdown': '#ef4444', 'restart': '#f97316', 'windows-update-check': '#06b6d4', 'windows-update-install': '#06b6d4',
   'run-sfc': '#8b5cf6', 'run-dism': '#8b5cf6', 'get-network-config': '#22c55e', 'get-event-log': '#6366f1',
   'get-installed-apps': '#a855f7', 'driver-update-scan': '#8b5cf6', 'driver-update-install': '#8b5cf6',
@@ -742,18 +742,18 @@ function CloudView({ entries, loaded }: { entries: CloudActionEntry[]; loaded: b
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              <th className="w-10 px-4 py-3 text-center text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('cloud.columnStatus')}</th>
-              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('cloud.columnCommand')}</th>
-              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('cloud.columnSummary')}</th>
-              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('cloud.columnDate')}</th>
-              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{t('cloud.columnDuration')}</th>
+              <th className="w-10 px-4 py-3 text-center text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('cloud.columnStatus')}</th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('cloud.columnCommand')}</th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('cloud.columnSummary')}</th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('cloud.columnDate')}</th>
+              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{t('cloud.columnDuration')}</th>
               <th className="w-10 px-4 py-3" />
             </tr>
           </thead>
           <tbody>
             {entries.map((entry) => {
               const labelKey = cloudCommandLabelKeys[entry.commandType]
-              const cfg = { label: labelKey ? t(labelKey) : entry.commandType, color: cloudCommandColors[entry.commandType] || '#6e6e76' }
+              const cfg = { label: labelKey ? t(labelKey) : entry.commandType, color: cloudCommandColors[entry.commandType] || '#9e9ea6' }
               return (
                 <tr
                   key={entry.id}
@@ -778,21 +778,21 @@ function CloudView({ entries, loaded }: { entries: CloudActionEntry[]; loaded: b
                     </div>
                   </td>
                   <td className="px-4 py-3 max-w-[240px]">
-                    <span className="block truncate text-[12px]" style={{ color: entry.error ? '#ef4444' : '#6e6e76' }}>
+                    <span className="block truncate text-[12px]" style={{ color: entry.error ? '#ef4444' : '#9e9ea6' }}>
                       {entry.summary || entry.error || t('cloud.completed')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-[12px]" style={{ color: '#8e8e96' }}>
                     {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                    <span className="ml-1.5" style={{ color: '#4e4e56' }}>
+                    <span className="ml-1.5" style={{ color: '#8a8a94' }}>
                       {new Date(entry.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-[12px]" style={{ color: '#6e6e76' }}>
+                  <td className="px-4 py-3 text-right font-mono text-[12px]" style={{ color: '#9e9ea6' }}>
                     {formatDuration(entry.duration, t)}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <Info className="inline h-3.5 w-3.5" style={{ color: '#4e4e56' }} strokeWidth={1.8} />
+                    <Info className="inline h-3.5 w-3.5" style={{ color: '#8a8a94' }} strokeWidth={1.8} />
                   </td>
                 </tr>
               )
@@ -812,7 +812,7 @@ function CloudView({ entries, loaded }: { entries: CloudActionEntry[]; loaded: b
 function CloudDetailPopup({ entry, onClose }: { entry: CloudActionEntry; onClose: () => void }) {
   const { t } = useTranslation('history')
   const labelKey = cloudCommandLabelKeys[entry.commandType]
-  const cfg = { label: labelKey ? t(labelKey) : entry.commandType, color: cloudCommandColors[entry.commandType] || '#6e6e76' }
+  const cfg = { label: labelKey ? t(labelKey) : entry.commandType, color: cloudCommandColors[entry.commandType] || '#9e9ea6' }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
@@ -834,13 +834,13 @@ function CloudDetailPopup({ entry, onClose }: { entry: CloudActionEntry; onClose
           </div>
           <div className="flex-1">
             <h3 className="text-[15px] font-semibold text-white">{cfg.label}</h3>
-            <p className="text-[12px]" style={{ color: '#6e6e76' }}>
+            <p className="text-[12px]" style={{ color: '#9e9ea6' }}>
               {new Date(entry.timestamp).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
               {' ' + t('timeline.dateAt') + ' '}
               {new Date(entry.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </p>
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors" style={{ color: '#6e6e76' }}
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors" style={{ color: '#9e9ea6' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}>
             <XCircle className="h-4 w-4" strokeWidth={1.8} />
@@ -864,7 +864,7 @@ function CloudDetailPopup({ entry, onClose }: { entry: CloudActionEntry; onClose
 function DetailRow({ label, value, color, mono }: { label: string; value: string; color?: string; mono?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{label}</span>
+      <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{label}</span>
       <span className={`text-right text-[12px] break-all ${mono ? 'font-mono' : ''}`} style={{ color: color || '#a1a1aa' }}>{value}</span>
     </div>
   )
@@ -877,7 +877,7 @@ function MiniStat({ icon: Icon, label, value, color }: { icon: typeof BarChart3;
     <div className="rounded-2xl p-4" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
       <div className="mb-2 flex items-center gap-2">
         <Icon className="h-4 w-4" style={{ color }} strokeWidth={1.8} />
-        <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>{label}</span>
+        <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>{label}</span>
       </div>
       <span className="text-[20px] font-bold tracking-tight text-zinc-100">{value}</span>
     </div>
@@ -887,7 +887,7 @@ function MiniStat({ icon: Icon, label, value, color }: { icon: typeof BarChart3;
 function DetailStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
-      <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#4e4e56' }}>{label}</p>
+      <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#8a8a94' }}>{label}</p>
       <p className="mt-1 text-[16px] font-semibold text-zinc-200">{value}</p>
     </div>
   )
@@ -907,12 +907,12 @@ function RecentScanRow({ entry }: { entry: ScanHistoryEntry }) {
       </div>
       <div className="flex-1 min-w-0">
         <span className="text-[12px] font-medium text-zinc-300">{config.label}</span>
-        <p className="text-[11px]" style={{ color: '#4e4e56' }}>
+        <p className="text-[11px]" style={{ color: '#8a8a94' }}>
           {entry.totalItemsCleaned.toLocaleString()} {t('detail.itemsSuffix')}
           {entry.totalSpaceSaved > 0 && ` · ${formatBytes(entry.totalSpaceSaved)}`}
         </p>
       </div>
-      <span className="shrink-0 text-[11px]" style={{ color: '#4e4e56' }}>
+      <span className="shrink-0 text-[11px]" style={{ color: '#8a8a94' }}>
         {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
       </span>
     </div>

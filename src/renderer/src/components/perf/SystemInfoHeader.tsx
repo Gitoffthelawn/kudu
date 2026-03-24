@@ -35,14 +35,14 @@ export function SystemInfoHeader({ info, uptime }: SystemInfoHeaderProps) {
     >
       {items.map((item) => (
         <div key={item.label} className="flex items-center gap-3 px-2">
-          <item.icon className="h-4 w-4 shrink-0" style={{ color: '#52525b' }} strokeWidth={1.8} />
+          <item.icon className="h-4 w-4 shrink-0" style={{ color: '#8a8a96' }} strokeWidth={1.8} />
           <div className="flex items-baseline gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#4e4e56' }}>
+            <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a94' }}>
               {item.label}
             </span>
             <span className="text-[12px] font-medium text-zinc-300">{item.value}</span>
             {item.sub && (
-              <span className="text-[11px]" style={{ color: '#6e6e76' }}>{item.sub}</span>
+              <span className="text-[11px]" style={{ color: '#9e9ea6' }}>{item.sub}</span>
             )}
           </div>
         </div>

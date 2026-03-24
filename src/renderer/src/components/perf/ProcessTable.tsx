@@ -88,7 +88,7 @@ export function ProcessTable() {
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <span className="text-[13px] font-semibold text-white">{t('processes')}</span>
-          <span className="text-[11px]" style={{ color: '#6e6e76' }}>
+          <span className="text-[11px]" style={{ color: '#9e9ea6' }}>
             {processCount} {t('totalSuffix')}
           </span>
         </div>
@@ -96,7 +96,7 @@ export function ProcessTable() {
           className="flex items-center gap-2 rounded-lg px-3 py-1.5"
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <Search className="h-3.5 w-3.5" style={{ color: '#52525b' }} />
+          <Search className="h-3.5 w-3.5" style={{ color: '#8a8a96' }} />
           <input
             type="text"
             value={filter}
@@ -107,7 +107,7 @@ export function ProcessTable() {
           />
           {filter && (
             <button onClick={() => setFilter('')}>
-              <X className="h-3 w-3" style={{ color: '#6e6e76' }} />
+              <X className="h-3 w-3" style={{ color: '#9e9ea6' }} />
             </button>
           )}
         </div>
@@ -145,7 +145,7 @@ export function ProcessTable() {
             </div>
 
             {/* PID */}
-            <span className="text-[11px] font-mono" style={{ width: '12%', color: '#6e6e76' }}>
+            <span className="text-[11px] font-mono" style={{ width: '12%', color: '#9e9ea6' }}>
               {p.pid}
             </span>
 

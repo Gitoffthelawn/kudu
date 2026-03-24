@@ -183,7 +183,7 @@ export function NetworkCleanupPage() {
                 <cat.icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.8} />
                 <div className="flex-1 min-w-0">
                   <span className="text-[13px] font-medium">{t(cat.labelKey)}</span>
-                  <p className="text-[11px]" style={{ color: '#4e4e56' }}>{t(cat.descriptionKey)}</p>
+                  <p className="text-[11px]" style={{ color: '#8a8a94' }}>{t(cat.descriptionKey)}</p>
                 </div>
                 {count > 0 && (
                   <span
@@ -199,11 +199,11 @@ export function NetworkCleanupPage() {
 
           {hasItems && (
             <div className="mt-5 rounded-2xl p-4" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <p className="text-[11px] font-medium" style={{ color: '#52525e' }}>{t('totalFound')}</p>
+              <p className="text-[11px] font-medium" style={{ color: '#8a8a96' }}>{t('totalFound')}</p>
               <p className="text-[20px] font-bold tracking-tight text-amber-400">{items.length}</p>
-              <p className="text-[11px]" style={{ color: '#52525e' }}>{t('networkItems')}</p>
+              <p className="text-[11px]" style={{ color: '#8a8a96' }}>{t('networkItems')}</p>
               <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                <p className="text-[11px] font-medium" style={{ color: '#52525e' }}>{t('selected')}</p>
+                <p className="text-[11px] font-medium" style={{ color: '#8a8a96' }}>{t('selected')}</p>
                 <p className="text-[15px] font-semibold text-zinc-200">{t('selectedItems', { count: selectedIds.size })}</p>
               </div>
             </div>
@@ -235,7 +235,7 @@ export function NetworkCleanupPage() {
                 <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" strokeWidth={1.8} />
                 <div>
                   <p className="text-[13px] font-medium text-zinc-200">{t('cleanupComplete')}</p>
-                  <p className="text-[12px]" style={{ color: '#6e6e76' }}>
+                  <p className="text-[12px]" style={{ color: '#9e9ea6' }}>
                     {t('cleanedCount', { count: cleanResult.cleaned })}
                     {cleanResult.failed > 0 && <span> · {t('failedCount', { count: cleanResult.failed })}</span>}
                   </p>
@@ -244,7 +244,7 @@ export function NetworkCleanupPage() {
               {cleanResult.details.length > 0 && (
                 <div className="mt-3 ml-8 space-y-0.5">
                   {cleanResult.details.map((detail, i) => (
-                    <p key={i} className="text-[11px] font-mono" style={{ color: '#6e6e76' }}>{detail}</p>
+                    <p key={i} className="text-[11px] font-mono" style={{ color: '#9e9ea6' }}>{detail}</p>
                   ))}
                 </div>
               )}
@@ -273,7 +273,7 @@ export function NetworkCleanupPage() {
           {hasItems && (
             <div key={activeCategory} className="space-y-2">
               <div className="mb-3 flex items-center justify-between px-1">
-                <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525e' }}>
+                <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
                   {t(categories.find((c) => c.type === activeCategory)?.labelKey ?? '')}
                 </span>
                 {categoryItems.length > 0 && (
@@ -287,7 +287,7 @@ export function NetworkCleanupPage() {
               </div>
 
               {categoryItems.length === 0 && (
-                <div className="py-12 text-center text-[13px]" style={{ color: '#4e4e56' }}>
+                <div className="py-12 text-center text-[13px]" style={{ color: '#8a8a94' }}>
                   {t('noItemsInCategory')}
                 </div>
               )}
@@ -335,12 +335,12 @@ export function NetworkCleanupPage() {
                       </div>
                       <CatIcon
                         className="h-4 w-4 shrink-0"
-                        style={{ color: checked ? '#f59e0b' : '#4e4e56' }}
+                        style={{ color: checked ? '#f59e0b' : '#8a8a94' }}
                         strokeWidth={1.8}
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-medium text-zinc-300">{item.label}</p>
-                        <p className="text-[11px] truncate" style={{ color: '#4e4e56' }}>{item.detail}</p>
+                        <p className="text-[11px] truncate" style={{ color: '#8a8a94' }}>{item.detail}</p>
                       </div>
                     </label>
                   )

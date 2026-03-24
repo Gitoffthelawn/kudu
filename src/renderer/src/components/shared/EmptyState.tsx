@@ -19,8 +19,8 @@ export function EmptyState({ icon: Icon, title, description, action, className }
       >
         <Icon className="h-7 w-7" style={{ color: '#3a3a42' }} strokeWidth={1.5} />
       </div>
-      <h3 className="text-[15px] font-medium" style={{ color: '#6e6e76' }}>{title}</h3>
-      <p className="mt-1.5 max-w-sm text-center text-[13px]" style={{ color: '#4e4e56' }}>
+      <h3 className="text-[15px] font-medium" style={{ color: '#9e9ea6' }}>{title}</h3>
+      <p className="mt-1.5 max-w-sm text-center text-[13px]" style={{ color: '#8a8a94' }}>
         {description}
       </p>
       {action && <div className="mt-5">{action}</div>}

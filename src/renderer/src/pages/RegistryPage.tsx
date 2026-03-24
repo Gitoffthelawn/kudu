@@ -295,7 +295,7 @@ function RegistryPageContent() {
               <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
               <span className="text-[13px] font-medium text-zinc-200">{t('fixingEntries')}</span>
             </div>
-            <span className="font-mono text-[12px]" style={{ color: '#6e6e76' }}>
+            <span className="font-mono text-[12px]" style={{ color: '#9e9ea6' }}>
               {fixProgress.current} / {fixProgress.total}
             </span>
           </div>
@@ -306,7 +306,7 @@ function RegistryPageContent() {
                 background: 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)'
               }} />
           </div>
-          <p className="truncate font-mono text-[11px]" style={{ color: '#4e4e56' }}>
+          <p className="truncate font-mono text-[11px]" style={{ color: '#8a8a94' }}>
             {fixProgress.currentEntry}
           </p>
         </div>
@@ -421,7 +421,7 @@ function RegistryPageContent() {
                       ) : (
                         <>
                           <span className="rounded-full px-2 py-0.5 text-[11px] font-medium"
-                            style={{ background: 'rgba(255,255,255,0.05)', color: '#6e6e76' }}>
+                            style={{ background: 'rgba(255,255,255,0.05)', color: '#9e9ea6' }}>
                             {issueCount !== 1 ? t('issueCountPlural', { count: issueCount }) : t('issueCount', { count: issueCount })}
                           </span>
                           {highRiskCount > 0 && (
@@ -459,7 +459,7 @@ function RegistryPageContent() {
                         <div className="absolute top-0.5 h-5 w-5 rounded-full transition-all"
                           style={{
                             left: allSelected ? '22px' : '2px',
-                            background: allSelected ? '#fff' : '#6e6e76'
+                            background: allSelected ? '#fff' : '#9e9ea6'
                           }} />
                       </button>
 
@@ -469,7 +469,7 @@ function RegistryPageContent() {
                         <ChevronDown
                           className="h-4 w-4 transition-transform"
                           style={{
-                            color: '#6e6e76',
+                            color: '#9e9ea6',
                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
                           }}
                           strokeWidth={2} />
@@ -501,7 +501,7 @@ function RegistryPageContent() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[12px] text-zinc-300">{entry.issue}</p>
-                          <p className="mt-0.5 font-mono text-[10px]" style={{ color: '#4e4e56' }}>{entry.keyPath}</p>
+                          <p className="mt-0.5 font-mono text-[10px]" style={{ color: '#8a8a94' }}>{entry.keyPath}</p>
                         </div>
                         <span className="shrink-0 rounded-md px-2 py-0.5 text-[11px] font-medium"
                           style={{ background: typeColors[entry.type].bg, color: typeColors[entry.type].text }}>

@@ -157,7 +157,7 @@ function ScoreRing({ score, size = 80 }: { score: number; size?: number }) {
       </svg>
       <div className="absolute flex flex-col items-center">
         <span className="text-[20px] font-bold" style={{ color }}>{score}</span>
-        <span className="text-[9px] font-medium" style={{ color: '#52525e' }}>/ 100</span>
+        <span className="text-[9px] font-medium" style={{ color: '#8a8a96' }}>/ 100</span>
       </div>
     </div>
   )
@@ -395,7 +395,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
             <ScoreRing score={state.score} />
             <div>
               <p className="text-[14px] font-semibold text-zinc-200">{t('privacy.privacyScore')}</p>
-              <p className="text-[12px] mt-0.5" style={{ color: '#6e6e76' }}>
+              <p className="text-[12px] mt-0.5" style={{ color: '#9e9ea6' }}>
                 {state.score >= 80 ? t('privacy.scoreWellProtected') : state.score >= 50 ? t('privacy.scoreNeedsImprovement') : t('privacy.scoreAtRisk')}
               </p>
             </div>
@@ -423,7 +423,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
                   }}
                 />
               </div>
-              <span className="text-[12px] font-mono" style={{ color: '#6e6e76' }}>
+              <span className="text-[12px] font-mono" style={{ color: '#9e9ea6' }}>
                 {state.protected}/{state.total}
               </span>
             </div>
@@ -431,7 +431,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
 
           {/* Category breakdown */}
           <div className="rounded-2xl p-5" style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <p className="text-[11px] font-medium mb-2" style={{ color: '#52525e' }}>{t('privacy.categoriesLabel')}</p>
+            <p className="text-[11px] font-medium mb-2" style={{ color: '#8a8a96' }}>{t('privacy.categoriesLabel')}</p>
             <div className="space-y-1.5">
               {categories.map(cat => {
                 const catSettings = state.settings.filter(s => s.category === cat.id)
@@ -444,7 +444,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
                       <div className="h-1.5 w-1.5 rounded-full" style={{ background: allGood ? '#22c55e' : cat.color }} />
                       <span className="text-[11px] text-zinc-400">{t(cat.labelKey).split(' ')[0]}</span>
                     </div>
-                    <span className="text-[11px] font-mono" style={{ color: allGood ? '#22c55e' : '#6e6e76' }}>
+                    <span className="text-[11px] font-mono" style={{ color: allGood ? '#22c55e' : '#9e9ea6' }}>
                       {protectedInCat}/{catSettings.length}
                     </span>
                   </div>
@@ -509,7 +509,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
                     )}
                     <span
                       className="text-[10px] font-medium"
-                      style={{ color: isCurrent ? '#4ade80' : isDone ? '#4ade80' : '#52525e' }}
+                      style={{ color: isCurrent ? '#4ade80' : isDone ? '#4ade80' : '#8a8a96' }}
                     >
                       {catLabel}
                     </span>
@@ -554,7 +554,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
           {applyResult.errors.length > 0 && (
             <div className="mt-3 ml-8 space-y-1">
               {applyResult.errors.map((err) => (
-                <p key={err.id} className="text-[11px] font-mono" style={{ color: '#6e6e76' }}>
+                <p key={err.id} className="text-[11px] font-mono" style={{ color: '#9e9ea6' }}>
                   {err.label}: {err.reason}
                 </p>
               ))}
@@ -646,7 +646,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
                         'h-5 w-5 transition-transform',
                         isExpanded ? 'rotate-180' : 'rotate-0'
                       )}
-                      style={{ color: '#6e6e76' }}
+                      style={{ color: '#9e9ea6' }}
                     >
                       <svg viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
@@ -699,7 +699,7 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
                           <div className="absolute top-0.5 h-5 w-5 rounded-full transition-all"
                             style={{
                               left: setting.enabled ? '22px' : '2px',
-                              background: setting.enabled ? '#fff' : '#6e6e76'
+                              background: setting.enabled ? '#fff' : '#9e9ea6'
                             }} />
                         </button>
                       </div>

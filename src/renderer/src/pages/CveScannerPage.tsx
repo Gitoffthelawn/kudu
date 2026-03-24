@@ -113,7 +113,7 @@ export function CveScannerPage() {
       <div className="p-8">
         <PageHeader title={t('pageTitle')} description={t('pageDescription')} />
         <div className="flex items-center justify-center py-20">
-          <div className="text-[13px]" style={{ color: '#6e6e76' }}>{t('loading')}</div>
+          <div className="text-[13px]" style={{ color: '#9e9ea6' }}>{t('loading')}</div>
         </div>
       </div>
     )
@@ -274,7 +274,7 @@ function SummaryCard({ label, count, color }: { label: string; count: number; co
       className="rounded-xl px-4 py-3"
       style={{ background: '#16161a', border: '1px solid rgba(255,255,255,0.05)' }}
     >
-      <div className="text-[11px] font-medium uppercase tracking-wide" style={{ color: '#6e6e76' }}>
+      <div className="text-[11px] font-medium uppercase tracking-wide" style={{ color: '#9e9ea6' }}>
         {label}
       </div>
       <div className="mt-1 text-[22px] font-bold" style={{ color }}>

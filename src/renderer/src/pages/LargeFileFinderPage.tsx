@@ -137,7 +137,7 @@ export function LargeFileFinderPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-[24px] font-bold tracking-tight text-white">{t('pageTitle')}</h1>
-        <p className="mt-1.5 text-[13px] animate-fade-in" style={{ color: '#5e5e68' }}>{t('pageDescription')}</p>
+        <p className="mt-1.5 text-[13px] animate-fade-in" style={{ color: '#8e8e98' }}>{t('pageDescription')}</p>
       </div>
 
       {/* Directory selector + scan button */}
@@ -194,7 +194,7 @@ export function LargeFileFinderPage() {
         >
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <div>
-              <label className="mb-2 block text-[11px] font-semibold tracking-wide" style={{ color: '#6e6e76' }}>
+              <label className="mb-2 block text-[11px] font-semibold tracking-wide" style={{ color: '#9e9ea6' }}>
                 {t('minFileSize')}
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -217,7 +217,7 @@ export function LargeFileFinderPage() {
             </div>
 
             <div>
-              <label className="mb-2 block text-[11px] font-semibold tracking-wide" style={{ color: '#6e6e76' }}>
+              <label className="mb-2 block text-[11px] font-semibold tracking-wide" style={{ color: '#9e9ea6' }}>
                 {t('maxDepth')}
               </label>
               <input
@@ -232,7 +232,7 @@ export function LargeFileFinderPage() {
             </div>
 
             <div className="col-span-2">
-              <label className="mb-2 block text-[11px] font-semibold tracking-wide" style={{ color: '#6e6e76' }}>
+              <label className="mb-2 block text-[11px] font-semibold tracking-wide" style={{ color: '#9e9ea6' }}>
                 {t('excludePatterns')}
               </label>
               <div className="flex flex-wrap items-center gap-1.5">
@@ -284,7 +284,7 @@ export function LargeFileFinderPage() {
           </div>
           <p className="text-[13px] font-medium text-white">{t('scanning')}</p>
           {store.progress.currentPath && (
-            <p className="mt-1 truncate text-[12px]" style={{ color: '#6e6e76' }} title={store.progress.currentPath}>
+            <p className="mt-1 truncate text-[12px]" style={{ color: '#9e9ea6' }} title={store.progress.currentPath}>
               {store.progress.currentPath}
             </p>
           )}
@@ -384,7 +384,7 @@ export function LargeFileFinderPage() {
                       onChange={() => store.togglePath(file.path)}
                       className="h-3.5 w-3.5 shrink-0 cursor-pointer rounded accent-amber-500"
                     />
-                    <FileUp className="h-4 w-4 shrink-0" style={{ color: '#52525b' }} strokeWidth={1.5} />
+                    <FileUp className="h-4 w-4 shrink-0" style={{ color: '#8a8a96' }} strokeWidth={1.5} />
                     <span
                       className="min-w-0 flex-1 truncate text-[12.5px]"
                       style={{ color: '#a1a1aa' }}
@@ -395,10 +395,10 @@ export function LargeFileFinderPage() {
                     <span className="shrink-0 text-[12px] font-semibold" style={{ color: '#f59e0b' }}>
                       {formatBytes(file.size)}
                     </span>
-                    <span className="shrink-0 text-[11px]" style={{ color: '#6e6e76' }}>
+                    <span className="shrink-0 text-[11px]" style={{ color: '#9e9ea6' }}>
                       {file.extension || '—'}
                     </span>
-                    <span className="shrink-0 text-[11px]" style={{ color: '#6e6e76' }}>
+                    <span className="shrink-0 text-[11px]" style={{ color: '#9e9ea6' }}>
                       {new Date(file.lastModified).toLocaleDateString()}
                     </span>
                     <button
@@ -461,7 +461,7 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
       className="rounded-xl px-4 py-3"
       style={{ background: '#1c1c21', border: '1px solid rgba(255,255,255,0.04)' }}
     >
-      <div className="text-[11px] font-medium" style={{ color: '#6e6e76' }}>{label}</div>
+      <div className="text-[11px] font-medium" style={{ color: '#9e9ea6' }}>{label}</div>
       <div className="mt-1 text-[18px] font-bold" style={{ color: accent ? '#f59e0b' : '#fafafa' }}>{value}</div>
     </div>
   )
@@ -470,7 +470,7 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
 function StatMini({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <span className="text-[11px]" style={{ color: '#6e6e76' }}>{label}: </span>
+      <span className="text-[11px]" style={{ color: '#9e9ea6' }}>{label}: </span>
       <span className="text-[12px] font-medium text-white">{value}</span>
     </div>
   )
@@ -481,7 +481,7 @@ function EmptyState({ title, description }: { title: string; description: string
     <div className="flex flex-1 flex-col items-center justify-center py-20 text-center">
       <FileUp className="mb-4 h-12 w-12" style={{ color: '#3f3f46' }} strokeWidth={1.2} />
       <h3 className="text-[15px] font-semibold text-white">{title}</h3>
-      <p className="mt-1.5 max-w-sm text-[13px]" style={{ color: '#6e6e76' }}>{description}</p>
+      <p className="mt-1.5 max-w-sm text-[13px]" style={{ color: '#9e9ea6' }}>{description}</p>
     </div>
   )
 }

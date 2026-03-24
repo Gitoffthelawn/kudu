@@ -106,7 +106,7 @@ export function ConfirmDialog({
             {details && (
               <p
                 className="mt-3 rounded-xl p-3 font-mono text-[11px] break-all overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.03)', color: '#6e6e76', maxHeight: '4.5rem' }}
+                style={{ background: 'rgba(255,255,255,0.03)', color: '#9e9ea6', maxHeight: '4.5rem' }}
               >
                 {details}
               </p>

@@ -19,7 +19,7 @@ export function AboutPage() {
           <img src={logoSrc} alt="Kudu" className="h-14 w-14 rounded-xl" />
           <div>
             <p className="text-[16px] font-semibold text-white">{t('appVersion', { version: __APP_VERSION__ })}</p>
-            <p className="mt-0.5 text-[12px]" style={{ color: '#52525e' }}>{t('license')}</p>
+            <p className="mt-0.5 text-[12px]" style={{ color: '#8a8a96' }}>{t('license')}</p>
           </div>
         </div>
 

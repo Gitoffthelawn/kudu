@@ -31,11 +31,11 @@ const SAFETY_COLORS = {
 
 const STATUS_COLORS: Record<string, string> = {
   Running: '#22c55e',
-  Stopped: '#6e6e76',
+  Stopped: '#9e9ea6',
   StartPending: '#f59e0b',
   StopPending: '#f59e0b',
   Paused: '#f59e0b',
-  Unknown: '#6e6e76'
+  Unknown: '#9e9ea6'
 }
 
 const START_TYPE_KEY_MAP: Record<string, string> = {
@@ -344,7 +344,7 @@ export function ServiceManagerPage({ embedded }: { embedded?: boolean }) {
               {scanProgress.phase === 'enumerating' ? t('serviceManager.scanProgressEnumerating') : t('serviceManager.scanProgressClassifying')}
             </span>
             {scanProgress.total > 0 && (
-              <span className="text-[12px]" style={{ color: '#6e6e76' }}>
+              <span className="text-[12px]" style={{ color: '#9e9ea6' }}>
                 {scanProgress.current} / {scanProgress.total}
               </span>
             )}
@@ -360,7 +360,7 @@ export function ServiceManagerPage({ embedded }: { embedded?: boolean }) {
               />
             </div>
           )}
-          <div className="mt-1.5 truncate text-[11.5px]" style={{ color: '#52525b' }}>
+          <div className="mt-1.5 truncate text-[11.5px]" style={{ color: '#8a8a96' }}>
             {scanProgress.currentService}
           </div>
         </div>
@@ -423,7 +423,7 @@ export function ServiceManagerPage({ embedded }: { embedded?: boolean }) {
           <div className="mb-5 grid grid-cols-4 gap-3">
             <StatCard label={t('serviceManager.statTotal')} value={services.length} color="#a1a1aa" />
             <StatCard label={t('serviceManager.statRunning')} value={runningCount} color="#22c55e" />
-            <StatCard label={t('serviceManager.statDisabled')} value={disabledCount} color="#6e6e76" />
+            <StatCard label={t('serviceManager.statDisabled')} value={disabledCount} color="#9e9ea6" />
             <StatCard label={t('serviceManager.statSafeToDisable')} value={totalSafeToDisable} color="#f59e0b" />
           </div>
 
@@ -433,7 +433,7 @@ export function ServiceManagerPage({ embedded }: { embedded?: boolean }) {
               className="flex flex-1 items-center gap-2 rounded-lg px-3 py-2"
               style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.06)' }}
             >
-              <Search className="h-4 w-4 shrink-0" style={{ color: '#52525b' }} strokeWidth={1.8} />
+              <Search className="h-4 w-4 shrink-0" style={{ color: '#8a8a96' }} strokeWidth={1.8} />
               <input
                 type="text"
                 placeholder={t('serviceManager.searchPlaceholder')}
@@ -481,7 +481,7 @@ export function ServiceManagerPage({ embedded }: { embedded?: boolean }) {
           {filteredServices.length === 0 ? (
             <div
               className="rounded-xl py-12 text-center text-[13px]"
-              style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.06)', color: '#52525b' }}
+              style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.06)', color: '#8a8a96' }}
             >
               {t('serviceManager.noServicesMatch')}
             </div>
@@ -493,7 +493,7 @@ export function ServiceManagerPage({ embedded }: { embedded?: boolean }) {
             </div>
           )}
 
-          <div className="mt-2 text-right text-[11.5px]" style={{ color: '#52525b' }}>
+          <div className="mt-2 text-right text-[11.5px]" style={{ color: '#8a8a96' }}>
             {t('serviceManager.showingCount', { filtered: filteredServices.length, total: services.length })}
           </div>
         </>
@@ -550,7 +550,7 @@ function SafetyGroup({
         <span className="text-[13px] font-semibold" style={{ color: colors.dot }}>
           {label}
         </span>
-        <span className="text-[12px]" style={{ color: '#6e6e76' }}>
+        <span className="text-[12px]" style={{ color: '#9e9ea6' }}>
           {t(services.length !== 1 ? 'serviceManager.servicesCountPlural' : 'serviceManager.servicesCount', { count: services.length })}
           {alreadyDisabled > 0 && ` · ${t('serviceManager.alreadyDisabled', { count: alreadyDisabled })}`}
           {selectedInGroup > 0 && (
@@ -566,7 +566,7 @@ function SafetyGroup({
             className="grid items-center gap-3 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider"
             style={{
               gridTemplateColumns: '32px 1fr 120px 100px 60px',
-              color: '#52525b',
+              color: '#8a8a96',
               borderTop: `1px solid ${colors.border}`,
               borderBottom: '1px solid rgba(255,255,255,0.04)'
             }}
@@ -611,7 +611,7 @@ function ServiceRow({ service: svc }: { service: WindowsService }) {
         <div
           className="flex h-[18px] w-[18px] items-center justify-center rounded"
           style={{
-            border: `1.5px solid ${svc.selected ? colors.dot : isUnsafe ? '#3f3f46' : '#52525b'}`,
+            border: `1.5px solid ${svc.selected ? colors.dot : isUnsafe ? '#3f3f46' : '#8a8a96'}`,
             background: svc.selected ? colors.dot : 'transparent',
             opacity: isUnsafe ? 0.4 : 1
           }}
@@ -633,7 +633,7 @@ function ServiceRow({ service: svc }: { service: WindowsService }) {
             </span>
           )}
         </div>
-        <div className="truncate text-[11.5px]" style={{ color: '#6e6e76' }}>
+        <div className="truncate text-[11.5px]" style={{ color: '#9e9ea6' }}>
           {svc.description || svc.name}
         </div>
       </div>
@@ -665,9 +665,9 @@ function ServiceRow({ service: svc }: { service: WindowsService }) {
       <div className="flex items-center gap-1.5">
         <div
           className="h-1.5 w-1.5 rounded-full"
-          style={{ background: STATUS_COLORS[svc.status] || '#6e6e76' }}
+          style={{ background: STATUS_COLORS[svc.status] || '#9e9ea6' }}
         />
-        <span className="text-[12px]" style={{ color: STATUS_COLORS[svc.status] || '#6e6e76' }}>
+        <span className="text-[12px]" style={{ color: STATUS_COLORS[svc.status] || '#9e9ea6' }}>
           {t(STATUS_KEY_MAP[svc.status] || 'serviceManager.statusUnknown')}
         </span>
       </div>
@@ -677,7 +677,7 @@ function ServiceRow({ service: svc }: { service: WindowsService }) {
         {svc.dependents.length > 0 && (
           <span
             className="flex items-center gap-0.5 text-[11px]"
-            style={{ color: '#6e6e76' }}
+            style={{ color: '#9e9ea6' }}
             title={t('serviceManager.dependentsTitle', { count: svc.dependents.length })}
           >
             <Link2 className="h-3 w-3" strokeWidth={1.8} />
@@ -695,7 +695,7 @@ function StatCard({ label, value, color }: { label: string; value: number; color
       className="rounded-xl px-4 py-3"
       style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.06)' }}
     >
-      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#52525b' }}>
+      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a96' }}>
         {label}
       </div>
       <div className="mt-1 text-[22px] font-bold" style={{ color }}>
@@ -730,7 +730,7 @@ function FilterDropdown({
       </select>
       <ChevronDown
         className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
-        style={{ color: '#52525b' }}
+        style={{ color: '#8a8a96' }}
         strokeWidth={2}
       />
     </div>

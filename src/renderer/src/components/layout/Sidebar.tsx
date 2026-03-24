@@ -507,7 +507,7 @@ function FlyoutMenu({ buttonRef, popoverRef, items, badgeCounts, onSelect, onClo
             >
               <child.icon
                 className="h-[14px] w-[14px] shrink-0"
-                style={{ color: isChildActive ? '#f59e0b' : '#52525b' }}
+                style={{ color: isChildActive ? '#f59e0b' : '#8a8a96' }}
                 strokeWidth={isChildActive ? 2 : 1.7}
                 aria-hidden="true"
               />

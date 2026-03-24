@@ -32,7 +32,7 @@ export function ScanProgress({
             {status === 'scanning' ? t('scanning') : t('cleaning')}
           </span>
         </div>
-        <span className="font-mono text-[12px]" style={{ color: '#6e6e76' }}>
+        <span className="font-mono text-[12px]" style={{ color: '#9e9ea6' }}>
           {Math.round(progress)}%
         </span>
       </div>
@@ -57,12 +57,12 @@ export function ScanProgress({
       </div>
 
       {currentPath && (
-        <p className="mb-2 truncate font-mono text-[11px]" style={{ color: '#4e4e56' }}>
+        <p className="mb-2 truncate font-mono text-[11px]" style={{ color: '#8a8a94' }}>
           {currentPath}
         </p>
       )}
 
-      <div className="flex items-center gap-4 text-[12px]" style={{ color: '#6e6e76' }}>
+      <div className="flex items-center gap-4 text-[12px]" style={{ color: '#9e9ea6' }}>
         <span>
           {t('foundLabel')} <span className="font-medium text-zinc-300">{formatNumber(itemsFound)}</span> {t('itemsUnit')}
         </span>

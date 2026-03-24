@@ -15,7 +15,7 @@ interface StatCardProps {
 const variantConfig = {
   default: {
     iconBg: 'rgba(255,255,255,0.05)',
-    iconColor: '#6e6e76',
+    iconColor: '#9e9ea6',
     accentLine: 'rgba(255,255,255,0.06)',
     glowClass: '',
   },
@@ -81,9 +81,9 @@ export function StatCard({
         <span className="text-[24px] font-bold tracking-tight text-white">
           {displayValue ?? Math.round(animatedValue).toLocaleString()}
         </span>
-        {unit && <span className="text-[12px] font-medium" style={{ color: '#5e5e68' }}>{unit}</span>}
+        {unit && <span className="text-[12px] font-medium" style={{ color: '#8e8e98' }}>{unit}</span>}
       </div>
-      <p className="mt-1 text-[12px] font-medium" style={{ color: '#4e4e58' }}>{label}</p>
+      <p className="mt-1 text-[12px] font-medium" style={{ color: '#8a8a94' }}>{label}</p>
     </div>
   )
 }

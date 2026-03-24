@@ -89,7 +89,7 @@ export function HealthScore({ score, size = 'md', className }: HealthScoreProps)
           {Math.round(animatedScore)}
         </span>
         {size !== 'sm' && (
-          <span className={cn(config.labelSize, 'font-medium uppercase tracking-widest')} style={{ color: '#52525e' }}>
+          <span className={cn(config.labelSize, 'font-medium uppercase tracking-widest')} style={{ color: '#8a8a96' }}>
             {t('health')}
           </span>
         )}

@@ -294,7 +294,7 @@ function SettingRow({
     >
       <div className="mr-4">
         <p className="text-[13px] font-medium text-zinc-300">{label}</p>
-        <p className="mt-0.5 text-[12px]" style={{ color: '#52525e' }}>{desc}</p>
+        <p className="mt-0.5 text-[12px]" style={{ color: '#8a8a96' }}>{desc}</p>
       </div>
       <Toggle checked={checked} onChange={onChange} />
     </div>

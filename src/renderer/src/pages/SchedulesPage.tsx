@@ -360,7 +360,7 @@ function ScheduleCard({
               </span>
             )}
           </div>
-          <p className="mt-1 text-[13px]" style={{ color: '#6e6e76' }}>
+          <p className="mt-1 text-[13px]" style={{ color: '#9e9ea6' }}>
             {frequencyText}
           </p>
         </div>
@@ -394,7 +394,7 @@ function ScheduleCard({
           )
         })}
         {taskCount === 0 && (
-          <span className="text-[11px]" style={{ color: '#52525e' }}>{t('card.noTasksSelected')}</span>
+          <span className="text-[11px]" style={{ color: '#8a8a96' }}>{t('card.noTasksSelected')}</span>
         )}
       </div>
 
@@ -424,7 +424,7 @@ function ScheduleCard({
           {entry.lastRunStatus === 'never' && (
             <Minus className="h-3.5 w-3.5 shrink-0" style={{ color: '#3a3a42' }} strokeWidth={1.8} />
           )}
-          <span className="text-[12px]" style={{ color: '#6e6e76' }}>
+          <span className="text-[12px]" style={{ color: '#9e9ea6' }}>
             {entry.lastRunAt ? t('card.lastRun', { time: formatLastRun(entry.lastRunAt, t) }) : t('card.neverRun')}
           </span>
         </div>
@@ -470,7 +470,7 @@ function PresetPicker({
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)' }}
             >
               <p className="text-[14px] font-medium text-zinc-200">{preset.label}</p>
-              <p className="mt-1 text-[12px]" style={{ color: '#6e6e76' }}>{preset.description}</p>
+              <p className="mt-1 text-[12px]" style={{ color: '#9e9ea6' }}>{preset.description}</p>
             </button>
           ))}
 
@@ -482,7 +482,7 @@ function PresetPicker({
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)' }}
           >
             <p className="text-[14px] font-medium text-zinc-200">{t('presets.customLabel')}</p>
-            <p className="mt-1 text-[12px]" style={{ color: '#6e6e76' }}>{t('presets.customDescription')}</p>
+            <p className="mt-1 text-[12px]" style={{ color: '#9e9ea6' }}>{t('presets.customDescription')}</p>
           </button>
         </div>
       </div>
@@ -567,7 +567,7 @@ function ScheduleDialog({
 
         {/* Name */}
         <div className="mb-5">
-          <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#6e6e76' }}>{t('dialog.nameLabel')}</label>
+          <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#9e9ea6' }}>{t('dialog.nameLabel')}</label>
           <input
             type="text"
             value={name}
@@ -582,7 +582,7 @@ function ScheduleDialog({
         {/* Schedule timing */}
         <div className="mb-5 grid grid-cols-3 gap-3">
           <div>
-            <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#6e6e76' }}>{t('dialog.frequencyLabel')}</label>
+            <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#9e9ea6' }}>{t('dialog.frequencyLabel')}</label>
             <select
               value={frequency}
               onChange={(e) => {
@@ -603,7 +603,7 @@ function ScheduleDialog({
 
           {frequency === 'weekly' && (
             <div>
-              <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#6e6e76' }}>{t('dialog.dayLabel')}</label>
+              <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#9e9ea6' }}>{t('dialog.dayLabel')}</label>
               <select
                 value={day}
                 onChange={(e) => setDay(Number(e.target.value))}
@@ -617,7 +617,7 @@ function ScheduleDialog({
 
           {frequency === 'monthly' && (
             <div>
-              <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#6e6e76' }}>{t('dialog.dayLabel')}</label>
+              <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#9e9ea6' }}>{t('dialog.dayLabel')}</label>
               <select
                 value={day}
                 onChange={(e) => setDay(Number(e.target.value))}
@@ -632,7 +632,7 @@ function ScheduleDialog({
           )}
 
           <div>
-            <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#6e6e76' }}>{t('dialog.timeLabel')}</label>
+            <label className="mb-1.5 block text-[12px] font-medium" style={{ color: '#9e9ea6' }}>{t('dialog.timeLabel')}</label>
             <select
               value={hour}
               onChange={(e) => setHour(Number(e.target.value))}
@@ -649,10 +649,10 @@ function ScheduleDialog({
         {/* Tasks */}
         <div className="mb-5">
           <div className="mb-2 flex items-center justify-between">
-            <label className="text-[12px] font-medium" style={{ color: '#6e6e76' }}>{t('dialog.tasksLabel')}</label>
+            <label className="text-[12px] font-medium" style={{ color: '#9e9ea6' }}>{t('dialog.tasksLabel')}</label>
             <div className="flex gap-3">
               <button onClick={selectAll} className="text-[11px] font-medium" style={{ color: '#f59e0b' }}>{t('dialog.selectAll')}</button>
-              <button onClick={deselectAll} className="text-[11px] font-medium" style={{ color: '#6e6e76' }}>{t('dialog.deselectAll')}</button>
+              <button onClick={deselectAll} className="text-[11px] font-medium" style={{ color: '#9e9ea6' }}>{t('dialog.deselectAll')}</button>
             </div>
           </div>
 
@@ -661,7 +661,7 @@ function ScheduleDialog({
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
           >
             {/* Cleaner group */}
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: '#4e4e56' }}>{t('dialog.cleanerGroup')}</p>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: '#8a8a94' }}>{t('dialog.cleanerGroup')}</p>
             <div className="mb-4 grid grid-cols-2 gap-1.5">
               {cleanerTasks.map((task) => (
                 <TaskCheckbox
@@ -674,7 +674,7 @@ function ScheduleDialog({
             </div>
 
             {/* Maintenance group */}
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: '#4e4e56' }}>{t('dialog.maintenanceGroup')}</p>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: '#8a8a94' }}>{t('dialog.maintenanceGroup')}</p>
             <div className="grid grid-cols-2 gap-1.5">
               {maintTasks.map((task) => (
                 <TaskCheckbox
@@ -695,7 +695,7 @@ function ScheduleDialog({
         >
           <div className="flex-1">
             <p className="text-[13px] font-medium text-zinc-300">{t('dialog.autoApplyLabel')}</p>
-            <p className="mt-1 text-[12px] leading-relaxed" style={{ color: '#52525e' }}>
+            <p className="mt-1 text-[12px] leading-relaxed" style={{ color: '#8a8a96' }}>
               {t('dialog.autoApplyDescription')}
             </p>
           </div>
@@ -799,7 +799,7 @@ function IconBtn({ icon: Icon, title, onClick, color }: { icon: typeof Pencil; t
       onClick={(e) => { e.stopPropagation(); onClick() }}
       title={title}
       className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
-      style={{ color: color ?? '#6e6e76' }}
+      style={{ color: color ?? '#9e9ea6' }}
       onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >

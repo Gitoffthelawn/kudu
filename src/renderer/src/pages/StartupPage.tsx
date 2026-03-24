@@ -16,7 +16,7 @@ const impactStyles: Record<StartupItem['impact'], { bg: string; text: string }> 
   high: { bg: 'rgba(239,68,68,0.08)', text: '#ef4444' },
   medium: { bg: 'rgba(245,158,11,0.08)', text: '#f59e0b' },
   low: { bg: 'rgba(34,197,94,0.08)', text: '#22c55e' },
-  none: { bg: 'rgba(255,255,255,0.04)', text: '#52525e' }
+  none: { bg: 'rgba(255,255,255,0.04)', text: '#8a8a96' }
 }
 
 const impactBarColors: Record<string, string> = {
@@ -105,7 +105,7 @@ function BootTracePanel({ trace, loading }: { trace: StartupBootTrace | null; lo
           </div>
           <div>
             <h3 className="text-[14px] font-medium text-zinc-200">{t('bootTraceTitle')}</h3>
-            <p className="text-[12px]" style={{ color: '#52525e' }}>
+            <p className="text-[12px]" style={{ color: '#8a8a96' }}>
               {trace.lastBootDate
                 ? t('bootTraceLastBoot', { date: new Date(trace.lastBootDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) })
                 : t('bootTraceBasedOnLastBoot')}
@@ -142,7 +142,7 @@ function BootTracePanel({ trace, loading }: { trace: StartupBootTrace | null; lo
                   <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 16, top: 0, bottom: 0 }}>
                     <XAxis
                       type="number"
-                      tick={{ fill: '#52525e', fontSize: 11 }}
+                      tick={{ fill: '#8a8a96', fontSize: 11 }}
                       tickFormatter={(v: number) => formatMs(v)}
                       axisLine={false}
                       tickLine={false}
@@ -174,7 +174,7 @@ function BootTracePanel({ trace, loading }: { trace: StartupBootTrace | null; lo
                     />
                     <Bar dataKey="delay" radius={[0, 6, 6, 0]} maxBarSize={22}>
                       {barData.map((entry, i) => (
-                        <Cell key={i} fill={impactBarColors[entry.impact] || '#52525e'} fillOpacity={0.85} />
+                        <Cell key={i} fill={impactBarColors[entry.impact] || '#8a8a96'} fillOpacity={0.85} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -406,7 +406,7 @@ export function StartupPage() {
             {/* Icon */}
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
               style={{ background: 'rgba(255,255,255,0.04)' }}>
-              <span className="text-[14px] font-bold" style={{ color: '#4e4e56' }}>{item.displayName.charAt(0)}</span>
+              <span className="text-[14px] font-bold" style={{ color: '#8a8a94' }}>{item.displayName.charAt(0)}</span>
             </div>
 
             {/* Info */}
@@ -415,7 +415,7 @@ export function StartupPage() {
                 <span className="text-[14px] font-medium text-zinc-200">{item.displayName}</span>
                 {item.impact === 'none' && <Shield className="h-3.5 w-3.5" style={{ color: '#3a3a42' }} strokeWidth={1.8} />}
               </div>
-              <div className="mt-0.5 flex items-center gap-2 text-[12px]" style={{ color: '#52525e' }}>
+              <div className="mt-0.5 flex items-center gap-2 text-[12px]" style={{ color: '#8a8a96' }}>
                 <span>{item.publisher}</span>
                 <span style={{ color: '#2a2a30' }}>·</span>
                 <span>{t(sourceKeys[item.source])}</span>

@@ -329,7 +329,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
                 {updateProgress.total > 0 && ` (${updateProgress.current}/${updateProgress.total})`}
               </span>
             </div>
-            <span className="text-[12px] font-mono" style={{ color: '#6e6e76' }}>
+            <span className="text-[12px] font-mono" style={{ color: '#9e9ea6' }}>
               {updateProgress.percent}%
             </span>
           </div>
@@ -342,7 +342,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
               }}
             />
           </div>
-          <p className="mt-2 text-[11px] truncate" style={{ color: '#6e6e76' }}>
+          <p className="mt-2 text-[11px] truncate" style={{ color: '#9e9ea6' }}>
             {updateProgress.currentDevice}
           </p>
         </div>
@@ -407,7 +407,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
         >
           <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" strokeWidth={1.5} />
           <p className="text-[15px] font-medium text-zinc-200">{t('driverManager.allUpToDateTitle')}</p>
-          <p className="mt-1 text-[12px]" style={{ color: '#6e6e76' }}>{t('driverManager.allUpToDateDescription')}</p>
+          <p className="mt-1 text-[12px]" style={{ color: '#9e9ea6' }}>{t('driverManager.allUpToDateDescription')}</p>
         </div>
       )}
 
@@ -425,7 +425,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
               <button
                 onClick={() => allUpdatesSelected ? useDriverStore.getState().deselectAllUpdates() : useDriverStore.getState().selectAllUpdates()}
                 className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
-                style={{ background: 'rgba(255,255,255,0.04)', color: '#6e6e76' }}
+                style={{ background: 'rgba(255,255,255,0.04)', color: '#9e9ea6' }}
               >
                 {allUpdatesSelected ? t('driverManager.deselectAll') : t('driverManager.selectAll')}
               </button>
@@ -459,7 +459,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
                       {upd.className}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[11px]" style={{ color: '#6e6e76' }}>
+                  <p className="mt-0.5 text-[11px]" style={{ color: '#9e9ea6' }}>
                     {upd.provider} — {upd.currentVersion ? `v${upd.currentVersion}` : t('driverManager.versionUnknown')} → v{upd.availableVersion}
                   </p>
                 </div>
@@ -468,7 +468,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
                     <span className="text-[12px] font-medium text-zinc-400">{upd.downloadSize}</span>
                   )}
                   {upd.availableDate && (
-                    <div className="mt-0.5 text-[10px] font-mono" style={{ color: '#4e4e56' }}>
+                    <div className="mt-0.5 text-[10px] font-mono" style={{ color: '#8a8a94' }}>
                       {upd.availableDate}
                     </div>
                   )}
@@ -498,7 +498,7 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
               <button
                 onClick={() => allStaleSelected ? useDriverStore.getState().deselectAllStale() : useDriverStore.getState().selectAllStale()}
                 className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
-                style={{ background: 'rgba(255,255,255,0.04)', color: '#6e6e76' }}
+                style={{ background: 'rgba(255,255,255,0.04)', color: '#9e9ea6' }}
               >
                 {allStaleSelected ? t('driverManager.deselectAll') : t('driverManager.selectAll')}
               </button>
@@ -532,13 +532,13 @@ export function DriverManagerPage({ embedded }: { embedded?: boolean }) {
                       {pkg.className}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[11px]" style={{ color: '#6e6e76' }}>
+                  <p className="mt-0.5 text-[11px]" style={{ color: '#9e9ea6' }}>
                     {pkg.provider} — v{pkg.version}{pkg.date ? ` — ${pkg.date}` : ''}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
                   <span className="text-[12px] font-medium text-zinc-400">{formatBytes(pkg.size)}</span>
-                  <div className="mt-0.5 text-[10px] font-mono" style={{ color: '#4e4e56' }}>{pkg.publishedName}</div>
+                  <div className="mt-0.5 text-[10px] font-mono" style={{ color: '#8a8a94' }}>{pkg.publishedName}</div>
                 </div>
               </div>
             ))}

@@ -356,7 +356,7 @@ export function UninstallerPage() {
               className="px-4 py-2.5 text-[12px] font-medium transition-colors"
               style={{
                 background: filterMode === 'all' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.02)',
-                color: filterMode === 'all' ? '#e4e4e7' : '#6e6e76',
+                color: filterMode === 'all' ? '#e4e4e7' : '#9e9ea6',
               }}
             >
               {t('filterAll', { count: programs.length })}
@@ -366,7 +366,7 @@ export function UninstallerPage() {
               className="flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-medium transition-colors"
               style={{
                 background: filterMode === 'unused' ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.02)',
-                color: filterMode === 'unused' ? '#fbbf24' : '#6e6e76',
+                color: filterMode === 'unused' ? '#fbbf24' : '#9e9ea6',
                 borderLeft: '1px solid rgba(255,255,255,0.06)',
               }}
             >
@@ -479,7 +479,7 @@ export function UninstallerPage() {
                   ? t('unusedBannerTitlePlural', { count: unusedPrograms.length, days: UNUSED_THRESHOLD_DAYS })
                   : t('unusedBannerTitle', { count: unusedPrograms.length, days: UNUSED_THRESHOLD_DAYS })}
               </p>
-              <p className="text-[11px] mt-0.5" style={{ color: '#6e6e76' }}>
+              <p className="text-[11px] mt-0.5" style={{ color: '#9e9ea6' }}>
                 {unusedTotalSize > 0
                   ? t('unusedBannerDescriptionWithSize', { size: formatBytes(unusedTotalSize) })
                   : t('unusedBannerDescriptionNoSize')}
@@ -540,7 +540,7 @@ export function UninstallerPage() {
                       : t('progressLoading')}
               </span>
             </div>
-            <span className="text-[12px] font-mono" style={{ color: '#6e6e76' }}>
+            <span className="text-[12px] font-mono" style={{ color: '#9e9ea6' }}>
               {progress.progress}%
             </span>
           </div>
@@ -556,7 +556,7 @@ export function UninstallerPage() {
               }}
             />
           </div>
-          <p className="mt-2 text-[11px] truncate" style={{ color: '#6e6e76' }}>
+          <p className="mt-2 text-[11px] truncate" style={{ color: '#9e9ea6' }}>
             {progress.detail}
           </p>
         </div>
@@ -592,7 +592,7 @@ export function UninstallerPage() {
                   </span>
                 )}
                 {uninstallResult.leftoversFound === 0 && (
-                  <span style={{ color: '#6e6e76' }}> — {t('noLeftoverFilesFound')}</span>
+                  <span style={{ color: '#9e9ea6' }}> — {t('noLeftoverFilesFound')}</span>
                 )}
               </p>
             ) : (
@@ -739,7 +739,7 @@ export function UninstallerPage() {
                       {prog.displayVersion && (
                         <span
                           className="rounded-md px-2 py-0.5 text-[10px] font-medium shrink-0"
-                          style={{ background: 'rgba(255,255,255,0.05)', color: '#6e6e76' }}
+                          style={{ background: 'rgba(255,255,255,0.05)', color: '#9e9ea6' }}
                         >
                           v{prog.displayVersion}
                         </span>
@@ -754,12 +754,12 @@ export function UninstallerPage() {
                       )}
                     </div>
                     <div className="mt-0.5 flex items-center gap-3">
-                      <p className="text-[11px] truncate" style={{ color: '#6e6e76' }}>
+                      <p className="text-[11px] truncate" style={{ color: '#9e9ea6' }}>
                         {prog.publisher || t('unknownPublisher')}
                         {prog.installDate ? ` — ${formatDate(prog.installDate)}` : ''}
                       </p>
                       {prog.lastUsed > 0 && (
-                        <span className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: unused ? '#f59e0b' : '#4e4e56' }}>
+                        <span className="flex items-center gap-1 text-[10px] shrink-0" style={{ color: unused ? '#f59e0b' : '#8a8a94' }}>
                           <Clock className="h-3 w-3" strokeWidth={1.8} />
                           {formatLastUsed(prog.lastUsed, t)}
                         </span>

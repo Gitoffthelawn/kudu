@@ -83,7 +83,7 @@ function layoutTreemap(items: { name: string; size: number; fill: string }[], wi
   const grouped = [...big]
   if (small.length > 0) {
     const otherSize = small.reduce((s, i) => s + i.size, 0)
-    grouped.push({ name: otherLabel ? otherLabel(small.length) : `${small.length} other items`, size: otherSize, fill: '#52525b' })
+    grouped.push({ name: otherLabel ? otherLabel(small.length) : `${small.length} other items`, size: otherSize, fill: '#8a8a96' })
   }
   const sorted = grouped.sort((a, b) => b.size - a.size)
   const rects: TreemapRect[] = []
@@ -242,20 +242,20 @@ export function DiskAnalyzerPage() {
       <div className="mb-5 flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', width: 'fit-content' }}>
         <button onClick={() => setViewMode('folders')}
           className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
-          style={{ background: viewMode === 'folders' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'folders' ? '#f59e0b' : '#6e6e76' }}>
+          style={{ background: viewMode === 'folders' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'folders' ? '#f59e0b' : '#9e9ea6' }}>
           <Folder className="h-3.5 w-3.5" strokeWidth={2} />
           {t('viewFolders')}
         </button>
         <button onClick={() => setViewMode('filetypes')}
           className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
-          style={{ background: viewMode === 'filetypes' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'filetypes' ? '#f59e0b' : '#6e6e76' }}>
+          style={{ background: viewMode === 'filetypes' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'filetypes' ? '#f59e0b' : '#9e9ea6' }}>
           <FileType2 className="h-3.5 w-3.5" strokeWidth={2} />
           {t('viewFileTypes')}
         </button>
         {isWin && (
           <button onClick={() => setViewMode('repair')}
             className="flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all"
-            style={{ background: viewMode === 'repair' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'repair' ? '#f59e0b' : '#6e6e76' }}>
+            style={{ background: viewMode === 'repair' ? 'rgba(245,158,11,0.15)' : 'transparent', color: viewMode === 'repair' ? '#f59e0b' : '#9e9ea6' }}>
             <Wrench className="h-3.5 w-3.5" strokeWidth={2} />
             {t('viewRepair')}
           </button>
@@ -276,7 +276,7 @@ export function DiskAnalyzerPage() {
                     {i > 0 && <ChevronRight className="mx-1 h-3 w-3" style={{ color: '#3a3a42' }} />}
                     <button onClick={() => store.sliceBreadcrumb(i)}
                       className="rounded-md px-2 py-1 font-mono text-[12px] transition-colors"
-                      style={{ color: i === breadcrumb.length - 1 ? '#f59e0b' : '#6e6e76' }}>
+                      style={{ color: i === breadcrumb.length - 1 ? '#f59e0b' : '#9e9ea6' }}>
                       {node.name}
                     </button>
                   </div>
@@ -312,7 +312,7 @@ export function DiskAnalyzerPage() {
               {currentNode.children && (
                 <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
                   <div className="flex items-center gap-4 px-5 py-3 text-[11px] font-medium uppercase tracking-wider"
-                    style={{ background: '#14141a', color: '#4e4e56', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    style={{ background: '#14141a', color: '#8a8a94', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <div className="flex-1">{t('folderTableHeaderName')}</div>
                     <div className="w-28 text-right">{t('folderTableHeaderSize')}</div>
                     <div className="w-44">{t('folderTableHeaderUsage')}</div>
@@ -325,15 +325,15 @@ export function DiskAnalyzerPage() {
                           className="flex w-full items-center gap-4 px-5 py-3 text-left transition-colors hover:bg-white/2"
                           style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                           <div className="flex flex-1 items-center gap-2.5 min-w-0">
-                            {child.children ? <Folder className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={1.8} /> : <File className="h-4 w-4 shrink-0" style={{ color: '#4e4e56' }} strokeWidth={1.8} />}
+                            {child.children ? <Folder className="h-4 w-4 shrink-0 text-amber-500" strokeWidth={1.8} /> : <File className="h-4 w-4 shrink-0" style={{ color: '#8a8a94' }} strokeWidth={1.8} />}
                             <span className="truncate text-[13px] text-zinc-300">{child.name}</span>
                           </div>
-                          <span className="w-28 text-right font-mono text-[12px]" style={{ color: '#6e6e76' }}>{formatBytes(child.size)}</span>
+                          <span className="w-28 text-right font-mono text-[12px]" style={{ color: '#9e9ea6' }}>{formatBytes(child.size)}</span>
                           <div className="w-44 flex items-center gap-2.5">
                             <div className="flex-1 h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
                               <div className="h-full rounded-full" style={{ width: `${percent}%`, background: '#f59e0b' }} />
                             </div>
-                            <span className="w-10 text-right font-mono text-[11px]" style={{ color: '#4e4e56' }}>{percent.toFixed(0)}%</span>
+                            <span className="w-10 text-right font-mono text-[11px]" style={{ color: '#8a8a94' }}>{percent.toFixed(0)}%</span>
                           </div>
                         </button>
                       )
@@ -357,15 +357,15 @@ export function DiskAnalyzerPage() {
                   {/* Summary cards */}
                   <div className="mb-5 grid grid-cols-3 gap-3">
                     <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#4e4e56' }}>{t('summaryTotalScanned')}</div>
+                      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a94' }}>{t('summaryTotalScanned')}</div>
                       <div className="mt-1 text-[18px] font-semibold text-zinc-200">{formatBytes(fileTypesTotal)}</div>
                     </div>
                     <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#4e4e56' }}>{t('summaryFileTypes')}</div>
+                      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a94' }}>{t('summaryFileTypes')}</div>
                       <div className="mt-1 text-[18px] font-semibold text-zinc-200">{fileTypes.length}</div>
                     </div>
                     <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#4e4e56' }}>{t('summaryLargestType')}</div>
+                      <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: '#8a8a94' }}>{t('summaryLargestType')}</div>
                       <div className="mt-1 text-[18px] font-semibold text-zinc-200">{fileTypes[0]?.extension ?? '-'}</div>
                     </div>
                   </div>
@@ -400,7 +400,7 @@ export function DiskAnalyzerPage() {
                   {/* File type table */}
                   <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div className="flex items-center gap-4 px-5 py-3 text-[11px] font-medium uppercase tracking-wider"
-                      style={{ background: '#14141a', color: '#4e4e56', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      style={{ background: '#14141a', color: '#8a8a94', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                       <div className="flex-1">{t('fileTypeTableHeaderExtension')}</div>
                       <div className="w-20 text-right">{t('fileTypeTableHeaderFiles')}</div>
                       <div className="w-28 text-right">{t('fileTypeTableHeaderSize')}</div>
@@ -419,13 +419,13 @@ export function DiskAnalyzerPage() {
                               </div>
                               <span className="truncate font-mono text-[13px] text-zinc-300">{ft.extension}</span>
                             </div>
-                            <span className="w-20 text-right font-mono text-[12px]" style={{ color: '#6e6e76' }}>{ft.fileCount.toLocaleString()}</span>
-                            <span className="w-28 text-right font-mono text-[12px]" style={{ color: '#6e6e76' }}>{formatBytes(ft.totalSize)}</span>
+                            <span className="w-20 text-right font-mono text-[12px]" style={{ color: '#9e9ea6' }}>{ft.fileCount.toLocaleString()}</span>
+                            <span className="w-28 text-right font-mono text-[12px]" style={{ color: '#9e9ea6' }}>{formatBytes(ft.totalSize)}</span>
                             <div className="w-44 flex items-center gap-2.5">
                               <div className="flex-1 h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
                                 <div className="h-full rounded-full" style={{ width: `${Math.max(percent, 0.5)}%`, background: COLORS[i % COLORS.length] }} />
                               </div>
-                              <span className="w-12 text-right font-mono text-[11px]" style={{ color: '#4e4e56' }}>{percent.toFixed(1)}%</span>
+                              <span className="w-12 text-right font-mono text-[11px]" style={{ color: '#8a8a94' }}>{percent.toFixed(1)}%</span>
                             </div>
                           </div>
                         )
@@ -448,7 +448,7 @@ export function DiskAnalyzerPage() {
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" strokeWidth={1.8} />
               <div>
                 <p className="text-[13px] font-medium text-zinc-200">{t('repairTitle')}</p>
-                <p className="mt-1 text-[12px]" style={{ color: '#6e6e76' }}>
+                <p className="mt-1 text-[12px]" style={{ color: '#9e9ea6' }}>
                   {t('repairDescription')}{' '}
                   {t('repairRunOrder', { dism: 'DISM', sfc: 'SFC' })}
                 </p>
@@ -464,12 +464,12 @@ export function DiskAnalyzerPage() {
                 <span className="text-[13px] font-medium text-zinc-200">
                   {repairProgress.tool === 'sfc' ? t('repairProgressSfc') : t('repairProgressDism')}
                 </span>
-                <span className="ml-auto font-mono text-[12px]" style={{ color: '#6e6e76' }}>{repairProgress.percent}%</span>
+                <span className="ml-auto font-mono text-[12px]" style={{ color: '#9e9ea6' }}>{repairProgress.percent}%</span>
               </div>
               <div className="h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${repairProgress.percent}%`, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }} />
               </div>
-              <p className="mt-2 text-[12px]" style={{ color: '#52525e' }}>{repairProgress.message}</p>
+              <p className="mt-2 text-[12px]" style={{ color: '#8a8a96' }}>{repairProgress.message}</p>
             </div>
           )}
 
@@ -483,10 +483,10 @@ export function DiskAnalyzerPage() {
                 </div>
                 <div>
                   <p className="text-[13px] font-medium text-zinc-200">{t('dismCardTitle')}</p>
-                  <p className="text-[11px]" style={{ color: '#52525e' }}>{t('dismCardSubtitle')}</p>
+                  <p className="text-[11px]" style={{ color: '#8a8a96' }}>{t('dismCardSubtitle')}</p>
                 </div>
               </div>
-              <p className="mb-4 text-[12px] leading-relaxed" style={{ color: '#6e6e76' }}>
+              <p className="mb-4 text-[12px] leading-relaxed" style={{ color: '#9e9ea6' }}>
                 {t('dismCardDescription')}
               </p>
 
@@ -516,7 +516,7 @@ export function DiskAnalyzerPage() {
                   )}
                   {showRepairLog === 'dism' && dismResult.log && (
                     <pre className="mt-2 max-h-48 overflow-auto rounded-lg p-3 font-mono text-[11px]"
-                      style={{ background: 'rgba(0,0,0,0.3)', color: '#6e6e76' }}>
+                      style={{ background: 'rgba(0,0,0,0.3)', color: '#9e9ea6' }}>
                       {dismResult.log}
                     </pre>
                   )}
@@ -540,10 +540,10 @@ export function DiskAnalyzerPage() {
                 </div>
                 <div>
                   <p className="text-[13px] font-medium text-zinc-200">{t('sfcCardTitle')}</p>
-                  <p className="text-[11px]" style={{ color: '#52525e' }}>{t('sfcCardSubtitle')}</p>
+                  <p className="text-[11px]" style={{ color: '#8a8a96' }}>{t('sfcCardSubtitle')}</p>
                 </div>
               </div>
-              <p className="mb-4 text-[12px] leading-relaxed" style={{ color: '#6e6e76' }}>
+              <p className="mb-4 text-[12px] leading-relaxed" style={{ color: '#9e9ea6' }}>
                 {t('sfcCardDescription')}
               </p>
 
@@ -573,7 +573,7 @@ export function DiskAnalyzerPage() {
                   )}
                   {showRepairLog === 'sfc' && sfcResult.log && (
                     <pre className="mt-2 max-h-48 overflow-auto rounded-lg p-3 font-mono text-[11px]"
-                      style={{ background: 'rgba(0,0,0,0.3)', color: '#6e6e76' }}>
+                      style={{ background: 'rgba(0,0,0,0.3)', color: '#9e9ea6' }}>
                       {sfcResult.log}
                     </pre>
                   )}

@@ -641,7 +641,7 @@ export function GameModePage() {
                               className="absolute top-0.5 h-5 w-5 rounded-full"
                               animate={{
                                 left: isEnabled ? 22 : 2,
-                                background: isEnabled ? '#fff' : '#6e6e76',
+                                background: isEnabled ? '#fff' : '#9e9ea6',
                               }}
                               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                             />

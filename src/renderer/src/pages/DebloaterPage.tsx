@@ -191,7 +191,7 @@ export function DebloaterPage({ embedded }: { embedded?: boolean }) {
                 {t('debloater.removingProgress', { current: removeProgress.current, total: removeProgress.total })}
               </span>
             </div>
-            <span className="text-[12px] font-mono" style={{ color: '#6e6e76' }}>
+            <span className="text-[12px] font-mono" style={{ color: '#9e9ea6' }}>
               {Math.round((removeProgress.current / removeProgress.total) * 100)}%
             </span>
           </div>
@@ -203,7 +203,7 @@ export function DebloaterPage({ embedded }: { embedded?: boolean }) {
                 background: 'linear-gradient(90deg, #ef4444 0%, #f87171 100%)'
               }} />
           </div>
-          <p className="mt-2 text-[11px] truncate" style={{ color: '#6e6e76' }}>
+          <p className="mt-2 text-[11px] truncate" style={{ color: '#9e9ea6' }}>
             {apps.find((a) => a.packageName === removeProgress.currentApp)?.name || removeProgress.currentApp}
           </p>
         </div>
@@ -231,7 +231,7 @@ export function DebloaterPage({ embedded }: { embedded?: boolean }) {
                 className="rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-colors"
                 style={{
                   background: filter === f.value ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
-                  color: filter === f.value ? '#f59e0b' : '#6e6e76'
+                  color: filter === f.value ? '#f59e0b' : '#9e9ea6'
                 }}>
                 {t(f.labelKey)} ({count})
               </button>
@@ -242,12 +242,12 @@ export function DebloaterPage({ embedded }: { embedded?: boolean }) {
           <div className="ml-auto flex items-center gap-2">
             <button onClick={() => store.getState().selectAll()}
               className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
-              style={{ background: 'rgba(255,255,255,0.04)', color: '#6e6e76' }}>
+              style={{ background: 'rgba(255,255,255,0.04)', color: '#9e9ea6' }}>
               {t('debloater.selectAll')}
             </button>
             <button onClick={() => store.getState().deselectAll()}
               className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
-              style={{ background: 'rgba(255,255,255,0.04)', color: '#6e6e76' }}>
+              style={{ background: 'rgba(255,255,255,0.04)', color: '#9e9ea6' }}>
               {t('debloater.deselectAll')}
             </button>
           </div>
@@ -263,7 +263,7 @@ export function DebloaterPage({ embedded }: { embedded?: boolean }) {
         <div className="grid grid-cols-1 gap-2.5">
           {/* Header with master checkbox */}
           <div className="flex items-center gap-4 px-5 py-2.5 text-[11px] font-medium uppercase tracking-wider"
-            style={{ color: '#4e4e56' }}>
+            style={{ color: '#8a8a94' }}>
             <div className="w-6">
               <input type="checkbox"
                 checked={filtered.every((a) => a.selected)}
@@ -303,13 +303,13 @@ export function DebloaterPage({ embedded }: { embedded?: boolean }) {
                     {t(categoryColors[app.category].labelKey)}
                   </span>
                 </div>
-                <p className="mt-0.5 text-[11px]" style={{ color: '#6e6e76' }}>{app.description}</p>
+                <p className="mt-0.5 text-[11px]" style={{ color: '#9e9ea6' }}>{app.description}</p>
               </div>
 
               {/* Publisher */}
               <div className="shrink-0 text-right">
                 <span className="text-[11px] text-zinc-500">{app.publisher}</span>
-                <div className="mt-0.5 text-[11px] font-mono" style={{ color: '#4e4e56' }}>{app.size}</div>
+                <div className="mt-0.5 text-[11px] font-mono" style={{ color: '#8a8a94' }}>{app.size}</div>
               </div>
             </div>
           ))}

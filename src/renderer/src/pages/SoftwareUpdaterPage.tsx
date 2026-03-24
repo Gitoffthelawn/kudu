@@ -494,7 +494,7 @@ export function SoftwareUpdaterPage({ embedded }: { embedded?: boolean }) {
                 {t('softwareUpdater.updatingProgress', { app: progress.currentApp, current: progress.current, total: progress.total })}
               </span>
             </div>
-            <span className="text-[12px] font-mono" style={{ color: '#6e6e76' }}>
+            <span className="text-[12px] font-mono" style={{ color: '#9e9ea6' }}>
               {progress.percent}%
             </span>
           </div>
@@ -553,7 +553,7 @@ export function SoftwareUpdaterPage({ embedded }: { embedded?: boolean }) {
                   const isInstallerChange = e.reason.toLowerCase().includes('installer type changed')
                   return (
                     <div key={e.appId} className="mt-1.5">
-                      <span style={{ color: '#6e6e76' }} className="text-[12px]">
+                      <span style={{ color: '#9e9ea6' }} className="text-[12px]">
                         {e.name}: {e.reason}
                       </span>
                       {isInstallerChange && packageManagerName && (
@@ -600,7 +600,7 @@ export function SoftwareUpdaterPage({ embedded }: { embedded?: boolean }) {
           </button>
 
           {selectedCount > 0 && (
-            <span className="text-[12px]" style={{ color: '#6e6e76' }}>
+            <span className="text-[12px]" style={{ color: '#9e9ea6' }}>
               {t('softwareUpdater.selectedCount', { count: selectedCount })}
             </span>
           )}
@@ -655,7 +655,7 @@ export function SoftwareUpdaterPage({ embedded }: { embedded?: boolean }) {
         <div className="flex flex-col items-center justify-center py-16">
           <Loader2 className="h-10 w-10 animate-spin text-amber-400 mb-4" strokeWidth={1.5} />
           <p className="text-[13px] text-zinc-400">{t('softwareUpdater.checkingForUpdates')}</p>
-          <p className="text-[11px] mt-1" style={{ color: '#52525e' }}>
+          <p className="text-[11px] mt-1" style={{ color: '#8a8a96' }}>
             {t('softwareUpdater.checkingSubtext')}
           </p>
         </div>
@@ -824,7 +824,7 @@ function AppRow({
             {severity.label}
           </span>
         </div>
-        <p className="mt-0.5 text-[11px] truncate" style={{ color: '#6e6e76' }}>
+        <p className="mt-0.5 text-[11px] truncate" style={{ color: '#9e9ea6' }}>
           {app.id}
         </p>
       </div>
@@ -841,7 +841,7 @@ function AppRow({
       {/* Source badge */}
       <span
         className="shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium"
-        style={{ background: 'rgba(255,255,255,0.05)', color: '#6e6e76' }}
+        style={{ background: 'rgba(255,255,255,0.05)', color: '#9e9ea6' }}
       >
         {app.source}
       </span>
@@ -891,7 +891,7 @@ function IgnoredRow({ app, onUnignore }: { app: UpdatableApp; onUnignore: () => 
       </div>
       <div className="flex-1 min-w-0">
         <span className="text-[12px] font-medium text-zinc-400 truncate block">{app.name}</span>
-        <span className="text-[10px] truncate block" style={{ color: '#52525e' }}>
+        <span className="text-[10px] truncate block" style={{ color: '#8a8a96' }}>
           {app.id}
         </span>
       </div>
@@ -932,7 +932,7 @@ function UpToDateRow({ app }: { app: UpToDateApp }) {
       </div>
       <div className="flex-1 min-w-0">
         <span className="text-[12px] font-medium text-zinc-400 truncate block">{app.name}</span>
-        <span className="text-[10px] truncate block" style={{ color: '#52525e' }}>
+        <span className="text-[10px] truncate block" style={{ color: '#8a8a96' }}>
           {app.id}
         </span>
       </div>
