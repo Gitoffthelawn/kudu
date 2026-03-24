@@ -1,3 +1,15 @@
+# [1.24.0](https://github.com/adventdevinc/kudu/compare/v1.23.0...v1.24.0) (2026-03-24)
+
+
+### Bug Fixes
+
+* **privacy:** make privacy shield toggles bidirectional ([#63](https://github.com/adventdevinc/kudu/issues/63)) ([e72cfc2](https://github.com/adventdevinc/kudu/commit/e72cfc2508c6e2a124de817640fade9a2e8d12b9))
+* **renderer:** prevent blank screen when preload fails to load ([a684ff9](https://github.com/adventdevinc/kudu/commit/a684ff9c7690e5e4de26a60ec9774c1e3a91c5f9))
+
+
+### Features
+
+* **malware:** add quarantine management UI ([#62](https://github.com/adventdevinc/kudu/issues/62)) ([1ecf642](https://github.com/adventdevinc/kudu/commit/1ecf642faf79484d18f03d170ac8217235a04cb2))
 # [1.23.0](https://github.com/adventdevinc/kudu/compare/v1.22.0...v1.23.0) (2026-03-24)
 
 
