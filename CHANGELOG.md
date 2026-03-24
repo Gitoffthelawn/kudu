@@ -1,3 +1,9 @@
+# [1.23.0](https://github.com/adventdevinc/kudu/compare/v1.22.0...v1.23.0) (2026-03-24)
+
+
+### Bug Fixes
+
+* **software-updater:** fix winget parsing bugs and add ignore feature ([#59](https://github.com/adventdevinc/kudu/issues/59)) ([a685406](https://github.com/adventdevinc/kudu/commit/a685406f19b46e0bcc5e11a1c0363dd08eda07d4))
 # [1.22.0](https://github.com/adventdevinc/kudu/compare/v1.21.1...v1.22.0) (2026-03-23)
 
 
