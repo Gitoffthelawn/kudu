@@ -248,6 +248,8 @@ export interface PrivacySettingDef {
   dependsOn?: string        // ID of a setting that must be enabled first
   check: () => Promise<boolean>
   apply: () => Promise<void>
+  revert?: () => Promise<void>
+  applicable?: () => Promise<boolean>
 }
 
 export interface PlatformPrivacy {
