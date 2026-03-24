@@ -1,3 +1,15 @@
+# [1.25.0](https://github.com/adventdevinc/kudu/compare/v1.24.0...v1.25.0) (2026-03-24)
+
+
+### Bug Fixes
+
+* **encoding:** correct UTF-8 handling for accented characters ([#68](https://github.com/adventdevinc/kudu/issues/68)) ([38f3e2d](https://github.com/adventdevinc/kudu/commit/38f3e2df9b64824b80e5ee8a2399759290a9e205))
+* patch 4 high-severity bugs from codebase review ([#65](https://github.com/adventdevinc/kudu/issues/65)) ([58acebf](https://github.com/adventdevinc/kudu/commit/58acebfe2b2154e9db8166cf15a2e4b9041c3ce1)), closes [hi#severity](https://github.com/hi/issues/severity)
+
+
+### Features
+
+* **ci:** auto-translate workflow & remove local git hooks ([#64](https://github.com/adventdevinc/kudu/issues/64)) ([a7ccf64](https://github.com/adventdevinc/kudu/commit/a7ccf6440152ca929823c19b9a47f714717c7dc1))
 # [1.24.0](https://github.com/adventdevinc/kudu/compare/v1.23.0...v1.24.0) (2026-03-24)
 
 
