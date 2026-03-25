@@ -397,11 +397,14 @@ export async function toggleStartupItem(
         // This is the authoritative signal Windows checks — even if the Run value
         // is re-created by the app, Windows will skip it while the marker is 03.
         // The value is a 12-byte REG_BINARY: status byte + 8-byte timestamp + padding.
+        let approvedOk = false
+        let deleteOk = false
         try {
           await execNativeUtf8('reg',[
             'add', approvedKey, '/v', name, '/t', 'REG_BINARY',
             '/d', '030000000000000000000000', '/f'
           ], { timeout: 10000 })
+          approvedOk = true
         } catch {
           // May fail if key doesn't exist yet — fall through to Run deletion
         }
@@ -410,9 +413,13 @@ export async function toggleStartupItem(
           await execNativeUtf8('reg',[
             'delete', location, '/v', name, '/f'
           ], { timeout: 10000 })
+          deleteOk = true
         } catch {
-          // Registry op may fail for permissions — still persist state
+          // Registry op may fail for permissions
         }
+
+        // If neither registry operation succeeded, the disable didn't take effect
+        if (!approvedOk && !deleteOk) return false
 
         await withDisabledFileLock(() => {
           const disabled = readDisabledEntries()
@@ -430,12 +437,14 @@ export async function toggleStartupItem(
         if (!stored) return false
         const safeCommand = stored.command
 
+        let addOk = false
         try {
           await execNativeUtf8('reg',[
             'add', location, '/v', name, '/t', 'REG_SZ', '/d', safeCommand, '/f'
           ], { timeout: 10000 })
+          addOk = true
         } catch {
-          // Registry op may fail for permissions — still persist state
+          // Registry op may fail for permissions
         }
 
         // Write an "enabled" marker (first byte 02) to StartupApproved
@@ -447,6 +456,9 @@ export async function toggleStartupItem(
         } catch {
           // Non-critical — Run key entry is sufficient for most apps
         }
+
+        // If the critical Run key write failed, the enable didn't take effect
+        if (!addOk) return false
 
         await withDisabledFileLock(() => {
           const current = readDisabledEntries()

@@ -316,7 +316,8 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
     const setting = store.state.settings.find(s => s.id === settingId)
     if (!setting) return
 
-    const isEnabling = !setting.enabled
+    const wasEnabled = setting.enabled
+    const isEnabling = !wasEnabled
     store.setStatus('applying')
     try {
       const result = isEnabling
@@ -326,11 +327,17 @@ export function PrivacyShieldPage({ embedded }: { embedded?: boolean }) {
       usePrivacyStore.getState().setState(updated)
       usePrivacyStore.getState().setStatus('done')
 
+      const newSetting = updated.settings.find(s => s.id === settingId)
+      const actuallyChanged = newSetting != null && newSetting.enabled !== wasEnabled
+
       if (result.failed > 0) {
         const reason = result.errors[0]?.reason || t('privacy.unknownError')
         toast.error(t(isEnabling ? 'privacy.settingApplyFailed' : 'privacy.settingRevertFailed', { label: setting.label }), { description: reason })
+      } else if (!actuallyChanged) {
+        // Operation reported success but system state didn't change (e.g. needs admin)
+        toast.error(t(isEnabling ? 'privacy.settingApplyFailed' : 'privacy.settingRevertFailed', { label: setting.label }), { description: t('privacy.adminRequired') })
       } else {
-        toast.success(t(isEnabling ? 'privacy.settingEnabled' : 'privacy.settingDisabled', { label: setting.label }))
+        toast.success(t(newSetting.enabled ? 'privacy.settingEnabled' : 'privacy.settingDisabled', { label: setting.label }))
       }
     } catch {
       toast.error(t(isEnabling ? 'privacy.settingApplyFailedGeneric' : 'privacy.settingRevertFailedGeneric'))
