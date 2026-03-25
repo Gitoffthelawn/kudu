@@ -113,7 +113,16 @@ export function App() {
   // Hydrate Game Mode status so the sidebar badge works on all pages
   useEffect(() => { initGameModeStore() }, [])
 
-  if (!onboardingChecked) return null
+  if (!onboardingChecked) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center" style={{ background: '#09090b' }}>
+        <div className="flex flex-col items-center gap-4">
+          <img src="" alt="" className="h-16 w-16 rounded-2xl" style={{ visibility: 'hidden' }} />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <PlatformContext value={platformInfo}>
