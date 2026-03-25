@@ -29,6 +29,8 @@ import { registerEmptyFolderCleanerIpc } from './empty-folder-cleaner.ipc'
 import { registerFileShredderIpc } from './file-shredder.ipc'
 import { registerGameModeIpc } from './game-mode.ipc'
 import { registerCveScannerIpc } from './cve-scanner.ipc'
+import { registerStartupSafetyIpc } from './startup-safety.ipc'
+import { registerProgramSafetyIpc } from './program-safety.ipc'
 import { getSettings, setSettings, flushSettings, getOnboardingComplete, setOnboardingComplete } from '../services/settings-store'
 import { isAdmin } from '../services/elevation'
 import { getHistory, addHistoryEntry, clearHistory } from '../services/history-store'
@@ -65,6 +67,8 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
   registerSoftwareUpdaterIpc(getWindow)
   registerCloudAgentIpc()
   registerCveScannerIpc()
+  registerStartupSafetyIpc()
+  registerProgramSafetyIpc()
   registerFileShredderIpc(getWindow)
   registerGameModeIpc(getWindow)
 
@@ -103,9 +107,9 @@ export function registerCleanerIpc(getWindow: WindowGetter): void {
 
   // Onboarding
   ipcMain.handle(IPC.ONBOARDING_GET, () => getOnboardingComplete())
-  ipcMain.handle(IPC.ONBOARDING_SET, (_event, value: boolean) => {
+  ipcMain.handle(IPC.ONBOARDING_SET, async (_event, value: boolean) => {
     if (typeof value !== 'boolean') return
-    setOnboardingComplete(value)
+    await setOnboardingComplete(value)
   })
 
   // Elevation

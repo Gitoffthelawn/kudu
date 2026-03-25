@@ -260,11 +260,11 @@ export function getOnboardingComplete(): boolean {
   return readStore().onboardingComplete
 }
 
-export function setOnboardingComplete(value: boolean): void {
+export function setOnboardingComplete(value: boolean): Promise<void> {
   const prev = writeLock
   let unlock: () => void
   writeLock = new Promise<void>((r) => { unlock = r })
-  prev.then(() => {
+  return prev.then(() => {
     try {
       const data = readStore()
       data.onboardingComplete = value
