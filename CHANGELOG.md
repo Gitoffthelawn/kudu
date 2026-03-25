@@ -1,3 +1,19 @@
+# [1.26.0](https://github.com/adventdevinc/kudu/compare/v1.25.0...v1.26.0) (2026-03-25)
+
+
+### Bug Fixes
+
+* **i18n:** platform-aware onboarding text ([#70](https://github.com/adventdevinc/kudu/issues/70)) ([8b6457d](https://github.com/adventdevinc/kudu/commit/8b6457d57cd85d0e1c6f44bb12bfb14edd51c152))
+* **ui:** report failure when startup/privacy toggles don't take effect ([09086f3](https://github.com/adventdevinc/kudu/commit/09086f3d784bf826ca88ea8ee9bca8af71c148e0))
+* **ui:** resolve black screen on first launch for slow machines ([2c6a573](https://github.com/adventdevinc/kudu/commit/2c6a5731ef74c111d26f70845143041693680127))
+* **ui:** show real-time progress during cleaner clean operation ([#72](https://github.com/adventdevinc/kudu/issues/72)) ([46e3d01](https://github.com/adventdevinc/kudu/commit/46e3d012a4276508fa7e634aacfb8d90f291485e))
+
+
+### Features
+
+* **cloud:** AI safety ratings for Startup Manager and Uninstaller ([#73](https://github.com/adventdevinc/kudu/issues/73)) ([37bc5db](https://github.com/adventdevinc/kudu/commit/37bc5dbe3fd416e982340607abd6035d2e002df7))
+* **darwin:** comprehensive macOS platform improvements ([#71](https://github.com/adventdevinc/kudu/issues/71)) ([2362321](https://github.com/adventdevinc/kudu/commit/2362321167ab55e17bf30d50b9daac0ed916a3de))
+* **ui:** add dark/light/system theme toggle ([#69](https://github.com/adventdevinc/kudu/issues/69)) ([c57bffb](https://github.com/adventdevinc/kudu/commit/c57bffbe2862e69b7bcca94390e0ef9ea2be5172))
 # [1.25.0](https://github.com/adventdevinc/kudu/compare/v1.24.0...v1.25.0) (2026-03-24)
 
 
