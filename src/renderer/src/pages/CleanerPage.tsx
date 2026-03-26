@@ -13,6 +13,7 @@ import {
   Sparkles,
   ChevronRight,
   Folder,
+  FolderOpen,
   AlertTriangle,
   ShieldAlert,
   Loader2
@@ -31,6 +32,9 @@ import { ScanStatus, CleanerType } from '@shared/enums'
 import type { ScanResult } from '@shared/types'
 import type { LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
+
+/** Check whether a path looks like an absolute filesystem path (not a label like "Recycle Bin" or "PATH → …"). */
+const isAbsolutePath = (p: string) => /^[A-Za-z]:[\\/]/.test(p) || p.startsWith('/')
 
 interface CategoryDef {
   type: CleanerType
@@ -543,6 +547,17 @@ export function CleanerPage() {
                               <span className="font-mono text-[12px] font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
                                 {formatBytes(result.totalSize)}
                               </span>
+
+                              {/* Open location */}
+                              {result.items.length > 0 && isAbsolutePath(result.items[0].path) && (
+                                <button
+                                  type="button"
+                                  title={t('openLocation')}
+                                  className="shrink-0 p-1 rounded transition-colors hover:bg-[var(--bg-hover-2)]"
+                                  onClick={(e) => { e.stopPropagation(); window.kudu?.cleanerOpenLocation?.(result.items[0].path) }}>
+                                  <FolderOpen className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} />
+                                </button>
+                              )}
                             </div>
 
                             {/* Expanded item list */}
@@ -576,6 +591,15 @@ export function CleanerPage() {
                                       <span className="font-mono text-[11px] shrink-0" style={{ color: 'var(--text-muted)' }}>
                                         {formatBytes(item.size)}
                                       </span>
+                                      {isAbsolutePath(item.path) && (
+                                        <button
+                                          type="button"
+                                          title={t('openLocation')}
+                                          className="shrink-0 p-0.5 rounded transition-colors hover:bg-[var(--bg-hover-2)]"
+                                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.kudu?.cleanerOpenLocation?.(item.path) }}>
+                                          <FolderOpen className="h-3.5 w-3.5" style={{ color: 'var(--text-muted)' }} />
+                                        </button>
+                                      )}
                                     </label>
                                   )
                                 })}
