@@ -1,3 +1,17 @@
+# [1.27.0](https://github.com/adventdevinc/kudu/compare/v1.26.0...v1.27.0) (2026-03-26)
+
+
+### Bug Fixes
+
+* **elevation:** share config and fix paste when relaunched as admin on macOS/Linux ([#75](https://github.com/adventdevinc/kudu/issues/75)) ([0316aa5](https://github.com/adventdevinc/kudu/commit/0316aa5ef2e1e3845b17bb5b53ab5540c68799fa))
+* **privacy:** use locale-independent XML to detect scheduled task state ([#79](https://github.com/adventdevinc/kudu/issues/79)) ([5261780](https://github.com/adventdevinc/kudu/commit/52617808d11e921c2c342fd931d1be9687ce4e62))
+* **ui:** disable hardware acceleration to prevent black window on incompatible GPUs ([#76](https://github.com/adventdevinc/kudu/issues/76)) ([4361b60](https://github.com/adventdevinc/kudu/commit/4361b603b04263737120b7634483613b5f9e2330))
+
+
+### Features
+
+* **cloud:** add dedicated Cloud page and Breach Monitor ([#78](https://github.com/adventdevinc/kudu/issues/78)) ([6d470e3](https://github.com/adventdevinc/kudu/commit/6d470e3d664ef848e7d432ad81078992e5a8776c))
+* **uninstaller:** force remove option for failed uninstalls ([#74](https://github.com/adventdevinc/kudu/issues/74)) ([9571c7c](https://github.com/adventdevinc/kudu/commit/9571c7c8f82439ed67c75816431464d6ff066b92))
 # [1.26.0](https://github.com/adventdevinc/kudu/compare/v1.25.0...v1.26.0) (2026-03-25)
 
 
