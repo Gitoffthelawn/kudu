@@ -2,7 +2,7 @@
   "$schema": "../schema/rules.schema.json",
   "type": "databases",
   "sharedDbFileSets": {
-    "chromium": ["History", "Cookies", "Network/Cookies", "Favicons", "Top Sites", "Web Data", "Shortcuts", "Login Data"],
+    "chromium": ["History", "Cookies", "Network/Cookies", "Favicons", "Top Sites", "Web Data", "Shortcuts"],
     "firefox": ["places.sqlite", "cookies.sqlite", "favicons.sqlite", "formhistory.sqlite", "webappsstore.sqlite", "content-prefs.sqlite"]
   },
   "targets": [
