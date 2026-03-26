@@ -1,3 +1,17 @@
+# [1.28.0](https://github.com/adventdevinc/kudu/compare/v1.27.0...v1.28.0) (2026-03-26)
+
+
+### Bug Fixes
+
+* **rules:** remove Login Data from database optimizer to reduce AV false positives ([5711783](https://github.com/adventdevinc/kudu/commit/5711783b2b8be08a538b20ee9b204bcc4ad35ff0))
+
+
+### Features
+
+* **cleaner:** add Environment Variable & PATH cleaner ([#80](https://github.com/adventdevinc/kudu/issues/80)) ([7ad17bd](https://github.com/adventdevinc/kudu/commit/7ad17bd287635ccfc42d108d947e46f42fae5095))
+* **cleaner:** add open file location button to scan results ([#83](https://github.com/adventdevinc/kudu/issues/83)) ([80dd048](https://github.com/adventdevinc/kudu/commit/80dd04815c7971085546abd828b78357072f4012))
+* **cleaner:** add rich post-clean summary receipt UI ([#82](https://github.com/adventdevinc/kudu/issues/82)) ([6b9dd9c](https://github.com/adventdevinc/kudu/commit/6b9dd9c2f21f6ec6aba24a0978ff374da8d64ee9))
+* **disk:** add dedicated Disk Repair page with CHKDSK support ([#81](https://github.com/adventdevinc/kudu/issues/81)) ([d6288cb](https://github.com/adventdevinc/kudu/commit/d6288cb430a0a31a9dcae9829b6d1f207500b910))
 # [1.27.0](https://github.com/adventdevinc/kudu/compare/v1.26.0...v1.27.0) (2026-03-26)
 
 
