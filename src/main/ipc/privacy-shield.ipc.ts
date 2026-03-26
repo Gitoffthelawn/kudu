@@ -59,9 +59,13 @@ async function regSetDword(key: string, value: string, data: number): Promise<vo
 
 async function isTaskActive(taskPath: string): Promise<boolean> {
   try {
-    const { stdout } = await execNativeUtf8('schtasks',['/query', '/tn', taskPath, '/fo', 'CSV', '/nh'], { timeout: 8000, windowsHide: true })
-    // "Disabled" in the status column means it's not active
-    return !stdout.toLowerCase().includes('disabled')
+    const { stdout } = await execNativeUtf8('schtasks',['/query', '/tn', taskPath, '/xml'], { timeout: 8000, windowsHide: true })
+    // XML <Enabled> element is language-independent (always "true"/"false"),
+    // unlike CSV status which is localized (e.g. "Désactivé" on French Windows).
+    // Match only the <Enabled> inside <Settings>, not trigger-level <Enabled> elements.
+    const m = stdout.match(/<Settings>[\s\S]*?<Enabled>(true|false)<\/Enabled>[\s\S]*?<\/Settings>/i)
+    if (m) return m[1].toLowerCase() === 'true'
+    return true
   } catch {
     return false // task doesn't exist
   }

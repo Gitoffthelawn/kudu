@@ -336,10 +336,10 @@ describe('registry operations via settings', () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe('task scheduler operations', () => {
-  it('check returns false when task is active (Ready)', async () => {
+  it('check returns false when task is active (Enabled=true in XML)', async () => {
     setupExecFile((cmd, args) => {
       if (cmd === 'schtasks' && args[0] === '/query') {
-        return { stdout: '"TaskName","Next Run Time","Status"\r\n"\\Some\\Task","N/A","Ready"' }
+        return { stdout: '<?xml version="1.0"?><Task><Settings><Enabled>true</Enabled></Settings></Task>' }
       }
       return { stdout: '' }
     })
@@ -348,16 +348,33 @@ describe('task scheduler operations', () => {
     expect(await setting.check()).toBe(false) // !(isTaskActive=true) = false
   })
 
-  it('check returns true when task is disabled', async () => {
+  it('check returns true when task is disabled (Enabled=false in XML)', async () => {
     setupExecFile((cmd, args) => {
       if (cmd === 'schtasks' && args[0] === '/query') {
-        return { stdout: '"TaskName","Next Run Time","Status"\r\n"\\Some\\Task","N/A","Disabled"' }
+        return { stdout: '<?xml version="1.0"?><Task><Settings><Enabled>false</Enabled></Settings></Task>' }
       }
       return { stdout: '' }
     })
 
     const setting = PRIVACY_SETTINGS.find(s => s.id === 'task-compatibility-appraiser')!
     expect(await setting.check()).toBe(true)
+  })
+
+  it('check returns false when task is active but a trigger has Enabled=false', async () => {
+    setupExecFile((cmd, args) => {
+      if (cmd === 'schtasks' && args[0] === '/query') {
+        return {
+          stdout: '<?xml version="1.0"?><Task>'
+            + '<Triggers><TimeTrigger><Enabled>false</Enabled></TimeTrigger></Triggers>'
+            + '<Settings><Enabled>true</Enabled></Settings>'
+            + '</Task>'
+        }
+      }
+      return { stdout: '' }
+    })
+
+    const setting = PRIVACY_SETTINGS.find(s => s.id === 'task-compatibility-appraiser')!
+    expect(await setting.check()).toBe(false) // task itself is enabled -> active -> not privacy-friendly
   })
 
   it('check returns true when task does not exist (query throws)', async () => {
