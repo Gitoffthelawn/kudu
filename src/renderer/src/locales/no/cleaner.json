@@ -10,11 +10,13 @@
   "categoryApplications": "Programmer",
   "categoryApplicationsDescription": "Programhurtigbuffer og utviklerverktøy",
   "categoryGaming": "Spill",
-  "categoryGamingDescription": "Hurtigbuffer for oppstartsprogrammer og redistribuerbare komponenter",
+  "categoryGamingDescription": "Oppstarterhurtigbuffer, redistribuerbare komponenter",
   "categoryRecycleBin": "Papirkurv",
   "categoryRecycleBinDescription": "Slettede filer",
   "categoryShortcuts": "Snarveier",
   "categoryShortcutsDescription": "Ødelagte snarveier og ugyldige koblinger",
+  "categoryEnvironment": "Miljø",
+  "categoryEnvironmentDescription": "Foreldreløse PATH-oppføringer og miljøvariabler",
   "categoryDatabases": "Databaser",
   "categoryDatabasesDescription": "Vakuumer SQLite-databaser",
   "totalRecoverable": "Totalt mulig å frigjøre",
@@ -45,6 +47,6 @@
   "toastRestorePointSkipped": "Gjenopprettingspunkt hoppet over",
   "toastRestorePointSkippedDescription": "Kunne ikke opprette gjenopprettingspunkt",
   "confirmCleanTitle": "Rens valgte filer",
-  "confirmCleanDescription": "Dette vil slette {{count}} elementer ({{size}}) permanent. Denne handlingen kan ikke angres.",
+  "confirmCleanDescription": "Dette vil slette {{count}} elementer permanent ({{size}}). Denne handlingen kan ikke angres.",
   "confirmCleanLabel": "Rens nå"
 }
