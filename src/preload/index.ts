@@ -72,6 +72,8 @@ import type {
   GameModeProgress,
   CvePageResult,
   StartupSafetyResult,
+  BreachMonitorResult,
+  BreachAcknowledgeResult,
 } from '../shared/types'
 
 const api = {
@@ -454,6 +456,16 @@ const api = {
     ipcRenderer.on(IPC.CVE_UPDATED, handler)
     return () => { ipcRenderer.removeListener(IPC.CVE_UPDATED, handler) }
   },
+
+  // Breach Monitor
+  breachMonitorFetch: (): Promise<BreachMonitorResult> =>
+    ipcRenderer.invoke(IPC.BREACH_MONITOR_FETCH),
+  breachMonitorAdd: (emails: string[]): Promise<BreachMonitorResult> =>
+    ipcRenderer.invoke(IPC.BREACH_MONITOR_ADD, emails),
+  breachMonitorRemove: (email: string): Promise<void> =>
+    ipcRenderer.invoke(IPC.BREACH_MONITOR_REMOVE, email),
+  breachMonitorAcknowledge: (breachIds: string[]): Promise<BreachAcknowledgeResult> =>
+    ipcRenderer.invoke(IPC.BREACH_MONITOR_ACKNOWLEDGE, breachIds),
 
   // Progress events
   onScanProgress: (callback: (data: ProgressData) => void) => {
