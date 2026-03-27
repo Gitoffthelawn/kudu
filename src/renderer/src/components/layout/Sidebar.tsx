@@ -49,7 +49,8 @@ import { usePlatform } from '@/hooks/usePlatform'
 
 interface SubItemDef {
   icon: LucideIcon
-  label: string
+  label?: string
+  labelKey?: string
   path: string
   badge?: boolean
 }
@@ -84,9 +85,9 @@ const navGroups: NavGroup[] = [
       {
         icon: Radar, labelKey: 'monitoring', path: '/monitoring',
         children: [
-          { icon: Radar, label: 'Threat Monitor', path: '/threat-monitor' },
-          { icon: Bug, label: 'Vulnerabilities', path: '/cve' },
-          { icon: Mail, label: 'Breach Monitor', path: '/breach-monitor' },
+          { icon: Radar, labelKey: 'threatMonitor', path: '/threat-monitor' },
+          { icon: Bug, labelKey: 'cveScanner', path: '/cve' },
+          { icon: Mail, labelKey: 'breachMonitor', path: '/breach-monitor' },
         ]
       },
     ]
@@ -160,8 +161,6 @@ function useBadgeCounts(): Record<string, number> {
 
   const updatesCount = updaterApps.length + driverUpdates.length
 
-  const monitoringCount = threatCount + cveTotal + breachTotal
-
   return {
     '/updates': updaterApps.length,
     '/software': updatesCount,
@@ -170,7 +169,6 @@ function useBadgeCounts(): Record<string, number> {
     '/game-mode': gameModeActive ? 1 : 0,
     '/cve': cveTotal,
     '/breach-monitor': breachTotal,
-    '/monitoring': monitoringCount,
   }
 }
 
@@ -222,6 +220,18 @@ export function Sidebar() {
       return true
     }),
   }))
+
+  // Compute parent badge counts from visible children only
+  const effectiveBadgeCounts = { ...badgeCounts }
+  for (const group of filteredNavGroups) {
+    for (const item of group.items) {
+      if (item.children && item.children.length > 0) {
+        effectiveBadgeCounts[item.path] = item.children.reduce(
+          (sum, child) => sum + (badgeCounts[child.path] ?? 0), 0
+        )
+      }
+    }
+  }
 
   const isPathActive = (item: NavItemDef) => {
     if (item.children) {
@@ -280,8 +290,8 @@ export function Sidebar() {
                 <NavItem
                   key={item.path}
                   item={item}
-                  badgeCount={badgeCounts[item.path]}
-                  badgeCounts={badgeCounts}
+                  badgeCount={effectiveBadgeCounts[item.path]}
+                  badgeCounts={effectiveBadgeCounts}
                   isActive={isPathActive(item)}
                   submenuOpen={openSubmenu === item.path}
                   {...submenuProps}
@@ -293,7 +303,7 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <BottomNav submenuProps={submenuProps} openSubmenu={openSubmenu} isPathActive={isPathActive} badgeCounts={badgeCounts} />
+      <BottomNav submenuProps={submenuProps} openSubmenu={openSubmenu} isPathActive={isPathActive} badgeCounts={effectiveBadgeCounts} />
     </div>
   )
 }
@@ -450,6 +460,7 @@ function FlyoutMenu({ buttonRef, popoverRef, items, badgeCounts, onSelect, onClo
   onSelect: (path: string) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation('sidebar')
   const location = useLocation()
   const [pos, setPos] = useState({ top: 0, left: 0 })
 
@@ -534,7 +545,7 @@ function FlyoutMenu({ buttonRef, popoverRef, items, badgeCounts, onSelect, onClo
                 strokeWidth={isChildActive ? 2 : 1.7}
                 aria-hidden="true"
               />
-              <span className="flex-1">{child.label}</span>
+              <span className="flex-1">{child.labelKey ? t(child.labelKey) : child.label}</span>
               {(badgeCounts?.[child.path] ?? 0) > 0 && (
                 <span
                   className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold leading-none"
