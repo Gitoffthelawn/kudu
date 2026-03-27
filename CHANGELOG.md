@@ -1,3 +1,17 @@
+# [1.29.0](https://github.com/adventdevinc/kudu/compare/v1.28.0...v1.29.0) (2026-03-27)
+
+
+### Bug Fixes
+
+* **elevation:** fix relaunch-as-admin on all platforms ([#88](https://github.com/adventdevinc/kudu/issues/88)) ([4943778](https://github.com/adventdevinc/kudu/commit/4943778ee87cbb192f75e850908737a59d7c1389))
+* **linux:** fix deb install failures on Linux Mint ([#84](https://github.com/adventdevinc/kudu/issues/84)) ([4750f88](https://github.com/adventdevinc/kudu/commit/4750f88f79d12faf7ca64cd94c051769e1c0e490))
+* **mac:** sharp retina tray icon with bundled size variants ([#89](https://github.com/adventdevinc/kudu/issues/89)) ([8724a85](https://github.com/adventdevinc/kudu/commit/8724a857eac51a09c04e8e1dbe7f5d1735aac34c))
+* **ui:** restore i18n for monitoring submenu and fix badge count ([313c79b](https://github.com/adventdevinc/kudu/commit/313c79b56c92f7a447af15b42b51dea26c06a340))
+
+
+### Features
+
+* **rules:** add missing cleaning rules for 25+ apps and system targets ([#90](https://github.com/adventdevinc/kudu/issues/90)) ([65f6ce6](https://github.com/adventdevinc/kudu/commit/65f6ce6922ce2102e82fbfc2bf21feed9c3b5443))
 # [1.28.0](https://github.com/adventdevinc/kudu/compare/v1.27.0...v1.28.0) (2026-03-26)
 
 
