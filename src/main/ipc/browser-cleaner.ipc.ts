@@ -103,7 +103,7 @@ export function registerBrowserCleanerIpc(getWindow: WindowGetter): void {
       }
     }
 
-    // Firefox forks (LibreWolf, Waterfox, Floorp)
+    // Firefox forks — Zen is excluded here because it's already covered by the app scanner (zen-browser in apps.json)
     const firefoxForks = [
       { key: 'librewolf', label: 'LibreWolf', ...browserPaths.librewolf },
       { key: 'waterfox', label: 'Waterfox', ...browserPaths.waterfox },

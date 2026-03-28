@@ -1920,7 +1920,7 @@ class CloudAgentService {
           } catch { /* skip */ }
         }
 
-        // Firefox forks (LibreWolf, Waterfox, Floorp)
+        // Firefox forks — Zen is excluded here because it's already covered by the app scanner (zen-browser in apps.json)
         const firefoxForks = [
           { label: 'LibreWolf', ...browserPaths.librewolf },
           { label: 'Waterfox', ...browserPaths.waterfox },
