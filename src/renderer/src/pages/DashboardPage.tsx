@@ -173,6 +173,15 @@ export function DashboardPage() {
     return [...historyResults, ...sessionResults]
   })()
 
+  const toolRoutes: Record<string, string> = {
+    cleaner: '/cleaner',
+    registry: '/registry',
+    drivers: '/drivers',
+    updater: '/updates',
+    services: '/services',
+    startup: '/startup'
+  }
+
   const healthScore = (() => {
     const totalTools = toolCoverage.length
     const doneTools = toolCoverage.filter((t) => t.usedRecently).length
@@ -442,15 +451,17 @@ export function DashboardPage() {
             <div className="mt-4 flex items-center gap-2">
               {toolCoverage.map((tool) => {
                 const Icon = tool.icon
+                const route = toolRoutes[tool.key]
                 return (
                   <div
                     key={tool.key}
-                    className="relative flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                    className="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg transition-colors hover:brightness-110"
                     style={{
                       background: tool.usedRecently ? tool.color + '18' : 'var(--bg-subtle)',
                       border: `1px solid ${tool.usedRecently ? tool.color + '30' : 'var(--border-subtle)'}`
                     }}
                     title={`${tool.label}: ${tool.usedRecently ? t('toolTipUsedRecently') : tool.usedEver ? t('toolTipNotUsedRecently') : t('toolTipNeverUsed')}`}
+                    onClick={() => route && navigate(route)}
                   >
                     <Icon
                       className="h-3.5 w-3.5"
