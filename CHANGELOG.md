@@ -1,3 +1,10 @@
+# [1.30.0](https://github.com/adventdevinc/kudu/compare/v1.29.0...v1.30.0) (2026-03-28)
+
+
+### Bug Fixes
+
+* **mac:** remove broken relaunch-as-admin on macOS ([#91](https://github.com/adventdevinc/kudu/issues/91)) ([d84843f](https://github.com/adventdevinc/kudu/commit/d84843fa654956311a50fb40d82bf258590cdeeb))
+* malware auto-scan, exclusions, schedule minutes, network cleaning ([#92](https://github.com/adventdevinc/kudu/issues/92)) ([592a23a](https://github.com/adventdevinc/kudu/commit/592a23a990164eadf9e2fcb251936e7e2878fa12))
 # [1.29.0](https://github.com/adventdevinc/kudu/compare/v1.28.0...v1.29.0) (2026-03-27)
 
 
