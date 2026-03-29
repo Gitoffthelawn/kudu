@@ -1,3 +1,16 @@
+# [1.31.0](https://github.com/adventdevinc/kudu/compare/v1.30.0...v1.31.0) (2026-03-29)
+
+
+### Bug Fixes
+
+* **mac:** use correct memory metric to match Activity Monitor ([#93](https://github.com/adventdevinc/kudu/issues/93)) ([eab0228](https://github.com/adventdevinc/kudu/commit/eab0228bf697076da6f667abe862f40279732a0f))
+
+
+### Features
+
+* **game-mode:** auto-detect games and activate/deactivate automatically ([#95](https://github.com/adventdevinc/kudu/issues/95)) ([a7d523b](https://github.com/adventdevinc/kudu/commit/a7d523b7194e8ff80b9c2628fe8e7b013f57150e))
+* **malware:** WASM-based YARA signature engine ([#102](https://github.com/adventdevinc/kudu/issues/102)) ([2ac60d1](https://github.com/adventdevinc/kudu/commit/2ac60d1720abc92d18b7bf5784fbab38b043d7de))
+* **rules:** add Zen Browser, Scoop, AWS CLI, and gcloud cleaners ([#94](https://github.com/adventdevinc/kudu/issues/94)) ([68e68aa](https://github.com/adventdevinc/kudu/commit/68e68aa90ecfd700cd4d5c71ad9f64460e9beb2f))
 # [1.30.0](https://github.com/adventdevinc/kudu/compare/v1.29.0...v1.30.0) (2026-03-28)
 
 
