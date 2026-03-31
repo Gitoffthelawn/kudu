@@ -1,3 +1,16 @@
+# [1.32.0](https://github.com/adventdevinc/kudu/compare/v1.31.0...v1.32.0) (2026-03-31)
+
+
+### Bug Fixes
+
+* **elevation:** disable renderer sandbox when running as root on Linux ([#107](https://github.com/adventdevinc/kudu/issues/107)) ([b7329d4](https://github.com/adventdevinc/kudu/commit/b7329d453436d72a619ae27af67029963786f6b9))
+* **malware:** remove hardcoded signatures to prevent AV false positives ([#106](https://github.com/adventdevinc/kudu/issues/106)) ([f1e4d3e](https://github.com/adventdevinc/kudu/commit/f1e4d3e4eea7a0038668d2213f2ce0faf5690f15))
+* **registry:** kill process tree on timeout to prevent zombie reg.exe ([#105](https://github.com/adventdevinc/kudu/issues/105)) ([7ec25e7](https://github.com/adventdevinc/kudu/commit/7ec25e7feac4eb5a33ca4b5467f24dc2cbd16694))
+
+
+### Features
+
+* **settings:** add Protect Recycle Bin setting ([#104](https://github.com/adventdevinc/kudu/issues/104)) ([7b52934](https://github.com/adventdevinc/kudu/commit/7b5293435b0660f9f8e38c6d6b9e6d28af052f02))
 # [1.31.0](https://github.com/adventdevinc/kudu/compare/v1.30.0...v1.31.0) (2026-03-29)
 
 
