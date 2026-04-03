@@ -178,7 +178,7 @@ export function SoftwareUpdaterPage({ embedded }: { embedded?: boolean }) {
       const appsToUpdate = store.apps.filter(a => ids.includes(a.id))
 
       try {
-        const result = await window.kudu.softwareUpdateRun(ids)
+        const result = await window.kudu.softwareUpdateRun(ids, store.packageManagerName ?? undefined)
         const s = useUpdaterStore.getState()
         s.setUpdateResult(result)
         s.setProgress(null)
@@ -437,6 +437,11 @@ export function SoftwareUpdaterPage({ embedded }: { embedded?: boolean }) {
               <>
                 <span className="font-semibold text-red-400">{t('softwareUpdater.packageManagerNotFound.wingetNotFound')}</span> — {t('softwareUpdater.packageManagerNotFound.wingetRequired')}{' '}
                 <span className="text-zinc-300">{t('softwareUpdater.packageManagerNotFound.wingetStore')}</span> {t('softwareUpdater.packageManagerNotFound.wingetSearchTerm')}
+              </>
+            ) : packageManagerName === 'choco' ? (
+              <>
+                <span className="font-semibold text-red-400">{t('softwareUpdater.packageManagerNotFound.chocoNotFound')}</span> — {t('softwareUpdater.packageManagerNotFound.chocoRequired')}{' '}
+                <span className="text-zinc-300">{t('softwareUpdater.packageManagerNotFound.chocoSite')}</span>.
               </>
             ) : packageManagerName === 'apt' ? (
               <>
