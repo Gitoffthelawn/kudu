@@ -1,3 +1,14 @@
+# [1.33.0](https://github.com/adventdevinc/kudu/compare/v1.32.0...v1.33.0) (2026-04-03)
+
+
+### Bug Fixes
+
+* **ui:** clarify privacy toggle toast messages to avoid ambiguity ([d9ebdf4](https://github.com/adventdevinc/kudu/commit/d9ebdf49244e309fc7a0bcdbb2fb31bf0cae5da8))
+
+
+### Features
+
+* **updater:** add Chocolatey as optional Windows package manager ([#111](https://github.com/adventdevinc/kudu/issues/111)) ([e030f6b](https://github.com/adventdevinc/kudu/commit/e030f6b041ac2f3ed3c930defa46167b697b0d02))
 # [1.32.0](https://github.com/adventdevinc/kudu/compare/v1.31.0...v1.32.0) (2026-03-31)
 
 
