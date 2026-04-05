@@ -1,3 +1,16 @@
+# [1.34.0](https://github.com/adventdevinc/kudu/compare/v1.33.0...v1.34.0) (2026-04-05)
+
+
+### Bug Fixes
+
+* **linux:** resolve grey window when relaunched as root via pkexec ([#118](https://github.com/adventdevinc/kudu/issues/118)) ([b83d448](https://github.com/adventdevinc/kudu/commit/b83d448d2f64a4f8ed760b77dbe3119def42fe3b))
+* **registry:** prevent orphaned reg.exe/powershell processes on timeout ([#117](https://github.com/adventdevinc/kudu/issues/117)) ([870bad3](https://github.com/adventdevinc/kudu/commit/870bad39799351687088ca36ca3e3a8f94b1a8d9))
+* **ui:** record history entry after driver scan so dashboard highlights completion ([#116](https://github.com/adventdevinc/kudu/issues/116)) ([0501600](https://github.com/adventdevinc/kudu/commit/0501600a6aac716a28f91b83b858825a87887edc))
+
+
+### Features
+
+* **updater:** add package manager selector to Software Updater page ([#113](https://github.com/adventdevinc/kudu/issues/113)) ([318b4b7](https://github.com/adventdevinc/kudu/commit/318b4b74697844cb33037b049b8b88e6359daac7))
 # [1.33.0](https://github.com/adventdevinc/kudu/compare/v1.32.0...v1.33.0) (2026-04-03)
 
 
