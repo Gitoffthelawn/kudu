@@ -181,6 +181,7 @@ export function GameModePage() {
   const store = useGameModeStore
   const active = useGameModeStore((s) => s.active)
   const activatedAt = useGameModeStore((s) => s.activatedAt)
+  const pendingRestore = useGameModeStore((s) => s.pendingRestore)
   const status = useGameModeStore((s) => s.status)
   const progress = useGameModeStore((s) => s.progress)
   const lastResult = useGameModeStore((s) => s.lastResult)
@@ -240,7 +241,7 @@ export function GameModePage() {
       }
       store.getState().setLastResult({ type: 'activate', succeeded: result.succeeded, failed: result.failed })
       if (result.succeeded === 0 && result.failed > 0) {
-        toast.error(`All optimizations failed`)
+        toast.error(result.errors[0]?.reason ?? 'All optimizations failed')
       } else if (result.failed > 0) {
         toast.warning(`${result.failed} optimization(s) failed`)
       }
@@ -265,8 +266,9 @@ export function GameModePage() {
     try {
       const result = await window.kudu.gameModeDeactivate()
       store.getState().setActive(false, null)
+      store.getState().setPendingRestore(result.failed > 0)
       if (result.failed > 0) {
-        toast.warning(`${result.failed} setting(s) could not be restored automatically — you may need to restore them manually`)
+        toast.warning(`${result.failed} setting(s) could not be restored — use the cleanup banner below to retry once the cause is fixed`)
       }
       store.getState().setLastResult({ type: 'deactivate', succeeded: result.restored, failed: result.failed })
     } catch (err: any) {
@@ -553,6 +555,27 @@ export function GameModePage() {
           >
             <Shield className="h-3.5 w-3.5 shrink-0" />
             {t('configLockedWhileActive')}
+          </div>
+        )}
+
+        {/* ── Pending restore banner ──────────────────── */}
+        {!active && pendingRestore && (
+          <div
+            className="flex items-center gap-3 rounded-lg px-4 py-3 text-[12px]"
+            style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b' }}
+          >
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span className="flex-1">
+              Some settings from the last session couldn't be restored automatically. Retry once the cause (e.g. admin rights) is resolved.
+            </span>
+            <button
+              onClick={handleDeactivate}
+              disabled={isBusy}
+              className="shrink-0 rounded-md px-3 py-1.5 text-[11px] font-semibold transition-colors disabled:opacity-40"
+              style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
+            >
+              {isBusy ? 'Retrying…' : 'Retry cleanup'}
+            </button>
           </div>
         )}
 

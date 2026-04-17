@@ -73,6 +73,11 @@ function validateSnapshot(raw: unknown): GameModeSnapshot | null {
 
   if (typeof s.activatedAt !== 'string' || s.activatedAt.length > 50) return null
 
+  // `active` is optional for backward compat: snapshots written before this
+  // field was introduced came from a live Game Mode session, so absence means true.
+  if ('active' in s && typeof s.active !== 'boolean') return null
+  if (!('active' in s)) s.active = true
+
   // Validate services array — only accept names from our allowlist
   if (!Array.isArray(s.services)) return null
   for (const svc of s.services) {
@@ -504,6 +509,7 @@ export async function activateGameMode(
 
   const snapshot: GameModeSnapshot = {
     activatedAt: new Date().toISOString(),
+    active: true,
     services: [],
     killedProcesses: [],
     originalPowerPlanGuid: null,
@@ -643,13 +649,27 @@ export async function deactivateGameMode(
 
   let restored = 0
   const errors: GameModeDeactivateResult['errors'] = []
-  const steps: Array<{ id: string; fn: () => Promise<void> }> = []
+
+  // `residual` holds everything that still needs restoring. Each step that
+  // succeeds scrubs its own entries from it. If anything remains after all
+  // steps run, we persist it so the user can retry restoration without losing
+  // the captured pre-Game-Mode state.
+  const residual: GameModeSnapshot = {
+    ...snapshot,
+    services: [...snapshot.services],
+    killedProcesses: [...snapshot.killedProcesses],
+    nagleInterfaces: [...snapshot.nagleInterfaces],
+    registryTweaks: [...snapshot.registryTweaks],
+  }
+
+  const steps: Array<{ id: string; fn: () => Promise<void>; clear: () => void }> = []
 
   // Restore services
   for (const svc of snapshot.services) {
     steps.push({
       id: `svc-restore-${svc.name}`,
       fn: () => restoreService(svc),
+      clear: () => { residual.services = residual.services.filter((s) => s.name !== svc.name) },
     })
   }
 
@@ -658,6 +678,7 @@ export async function deactivateGameMode(
     steps.push({
       id: 'sys-power-plan',
       fn: () => restorePowerPlan(snapshot.originalPowerPlanGuid!),
+      clear: () => { residual.originalPowerPlanGuid = null },
     })
   }
 
@@ -666,6 +687,7 @@ export async function deactivateGameMode(
     steps.push({
       id: 'sys-focus-assist',
       fn: () => restoreFocusAssist(snapshot.originalFocusAssistState),
+      clear: () => { residual.originalFocusAssistState = null },
     })
   }
 
@@ -680,6 +702,7 @@ export async function deactivateGameMode(
         }
         activePowerBlockerId = null
       },
+      clear: () => { residual.powerSaveBlockerId = null },
     })
   }
 
@@ -688,6 +711,7 @@ export async function deactivateGameMode(
     steps.push({
       id: 'net-disable-nagle',
       fn: () => restoreNagle(snapshot.nagleInterfaces),
+      clear: () => { residual.nagleInterfaces = [] },
     })
   }
 
@@ -699,6 +723,7 @@ export async function deactivateGameMode(
         const r = await restoreRegistryTweaks(snapshot.registryTweaks)
         if (r.errors.length > 0) throw new Error(`${r.errors.length} registry value(s) failed to restore`)
       },
+      clear: () => { residual.registryTweaks = [] },
     })
   }
 
@@ -708,25 +733,31 @@ export async function deactivateGameMode(
     onProgress({ phase: 'deactivating', current: i + 1, total, currentLabel: step.id })
     try {
       await step.fn()
+      step.clear()
       restored++
     } catch (err: any) {
       errors.push({ optimizationId: step.id, reason: err?.message ?? 'Unknown error' })
     }
   }
 
-  // Always delete the snapshot so the user is never stuck in an "active" state
-  // they can't escape. Any unrestored items are reported in `errors` for the UI
-  // to surface — retrying deactivate on a half-restored snapshot would fail the
-  // same way, so exposing the failures is more useful than blocking the toggle.
-  deleteSnapshot()
+  // Mark inactive unconditionally so the UI toggle always releases. If every
+  // step succeeded, drop the snapshot entirely. Otherwise persist the residual
+  // (active: false) so a later retry can still access the original values.
+  if (errors.length === 0) {
+    deleteSnapshot()
+  } else {
+    residual.active = false
+    writeSnapshot(residual)
+  }
   return { restored, failed: errors.length, errors }
 }
 
 export function getGameModeStatus(): GameModeStatus {
   const snapshot = readSnapshot()
   return {
-    active: snapshot !== null,
+    active: snapshot?.active === true,
     activatedAt: snapshot?.activatedAt ?? null,
+    pendingRestore: snapshot !== null && snapshot.active === false,
   }
 }
 
@@ -792,9 +823,20 @@ export function registerGameModeIpc(getWindow: WindowGetter): void {
     if (!config) {
       return { succeeded: 0, failed: 1, errors: [{ optimizationId: 'config', reason: 'Invalid config' }], snapshot: null }
     }
-    // Prevent double-activation
-    if (readSnapshot() !== null) {
+    // Prevent double-activation. A snapshot with active:false means a previous
+    // deactivation left unrestored items — re-activating now would capture the
+    // already-mutated state as the new baseline and lose the original values.
+    const existing = readSnapshot()
+    if (existing?.active) {
       return { succeeded: 0, failed: 1, errors: [{ optimizationId: 'config', reason: 'Game Mode is already active' }], snapshot: null }
+    }
+    if (existing) {
+      return {
+        succeeded: 0,
+        failed: 1,
+        errors: [{ optimizationId: 'config', reason: 'Previous deactivation left unrestored items — please retry deactivation first' }],
+        snapshot: null,
+      }
     }
     autoActivated = false // manual activation
     return activateGameMode(config, sendProgress)

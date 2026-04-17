@@ -655,6 +655,10 @@ export interface GameModeConfig {
 
 export interface GameModeSnapshot {
   activatedAt: string
+  // True while Game Mode is actively applied. Set to false when deactivation
+  // runs but leaves unrestored items — the snapshot is kept so the user can
+  // retry restoration without losing the captured pre-Game-Mode state.
+  active: boolean
   services: Array<{ name: string; originalStartType: string; wasRunning: boolean }>
   killedProcesses: Array<{ pid: number; name: string }>
   originalPowerPlanGuid: string | null
@@ -687,6 +691,9 @@ export interface GameModeProgress {
 export interface GameModeStatus {
   active: boolean
   activatedAt: string | null
+  /** True when a previous deactivation left items unrestored. The toggle is
+   * not "on", but a cleanup retry is available. */
+  pendingRestore: boolean
 }
 
 // ─── Service Manager ────────────────────────────────────────
