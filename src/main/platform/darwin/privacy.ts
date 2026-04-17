@@ -40,13 +40,18 @@ function shellEscape(arg: string): string {
   return "'" + arg.replace(/'/g, "'\\''") + "'"
 }
 
+// Custom prompt shown in the macOS authentication dialog. Without this,
+// macOS falls back to "osascript wants to make changes", which looks
+// suspicious to non-technical users who don't recognize the binary name.
+const ELEVATION_PROMPT = 'Kudu needs your administrator password to apply system hardening settings.'
+
 async function elevatedExec(cmd: string, args: string[]): Promise<string> {
   if (isRoot()) {
     const { stdout } = await execFileAsync(cmd, args, { timeout: 10_000 })
     return stdout
   }
   const escaped = [cmd, ...args].map(shellEscape).join(' ')
-  const script = `do shell script ${JSON.stringify(escaped)} with administrator privileges`
+  const script = `do shell script ${JSON.stringify(escaped)} with prompt ${JSON.stringify(ELEVATION_PROMPT)} with administrator privileges`
   const { stdout } = await execFileAsync('/usr/bin/osascript', ['-e', script], { timeout: 30_000 })
   return stdout
 }
@@ -65,7 +70,7 @@ async function elevatedBatch(commands: Array<{ cmd: string; args: string[] }>): 
   }
   const parts = commands.map(({ cmd, args }) => [cmd, ...args].map(shellEscape).join(' '))
   const combined = parts.join(' && ')
-  const script = `do shell script ${JSON.stringify(combined)} with administrator privileges`
+  const script = `do shell script ${JSON.stringify(combined)} with prompt ${JSON.stringify(ELEVATION_PROMPT)} with administrator privileges`
   await execFileAsync('/usr/bin/osascript', ['-e', script], { timeout: 30_000 })
 }
 
