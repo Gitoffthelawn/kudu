@@ -1,3 +1,13 @@
+# [1.35.0](https://github.com/adventdevinc/kudu/compare/v1.34.0...v1.35.0) (2026-04-17)
+
+
+### Bug Fixes
+
+* **drivers:** skip driver scans on non-Windows platforms ([#131](https://github.com/adventdevinc/kudu/issues/131)) ([28df495](https://github.com/adventdevinc/kudu/commit/28df4953a9f6a01d5d6491d1c2202e77cf80d3ff))
+* **game-mode:** preserve snapshot on partial failure while releasing toggle ([50052e9](https://github.com/adventdevinc/kudu/commit/50052e9adb18e571a9498cfc972c92b2dfc86cb1))
+* **game-mode:** unstick active state when deactivation partially fails ([bf51144](https://github.com/adventdevinc/kudu/commit/bf51144e9650cebf8c0f75c5d28f0584a8caa256))
+* **game-mode:** unstick active state when deactivation partially fails ([#132](https://github.com/adventdevinc/kudu/issues/132)) ([a467a28](https://github.com/adventdevinc/kudu/commit/a467a283563b083f30a8aeab37478d068f749a75))
+* **privacy:** show custom prompt in macOS admin dialog ([e3ef0b1](https://github.com/adventdevinc/kudu/commit/e3ef0b1ba40ef9f6502418dc5686862cb9e58e6e))
 # [1.34.0](https://github.com/adventdevinc/kudu/compare/v1.33.0...v1.34.0) (2026-04-05)
 
 
