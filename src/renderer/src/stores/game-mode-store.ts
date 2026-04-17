@@ -9,6 +9,7 @@ interface GameModeStoreState {
   // Status
   active: boolean
   activatedAt: string | null
+  pendingRestore: boolean
 
   // UI state
   status: 'idle' | 'activating' | 'deactivating'
@@ -24,6 +25,7 @@ interface GameModeStoreState {
 
   // Actions
   setActive: (active: boolean, activatedAt: string | null) => void
+  setPendingRestore: (pending: boolean) => void
   setStatus: (status: 'idle' | 'activating' | 'deactivating') => void
   setProgress: (progress: GameModeProgress | null) => void
   setLastResult: (result: { type: 'activate' | 'deactivate'; succeeded: number; failed: number } | null) => void
@@ -55,6 +57,7 @@ const defaultConfig: GameModeConfig = {
 export const useGameModeStore = create<GameModeStoreState>((set, get) => ({
   active: false,
   activatedAt: null,
+  pendingRestore: false,
 
   status: 'idle',
   progress: null,
@@ -66,6 +69,7 @@ export const useGameModeStore = create<GameModeStoreState>((set, get) => ({
   expandedCategories: new Set<string>(),
 
   setActive: (active, activatedAt) => set({ active, activatedAt }),
+  setPendingRestore: (pendingRestore) => set({ pendingRestore }),
   setStatus: (status) => set({ status }),
   setProgress: (progress) => set({ progress }),
   setLastResult: (lastResult) => set({ lastResult }),
@@ -131,7 +135,9 @@ export function initGameModeStore(): void {
   }).catch(() => {})
 
   window.kudu?.gameModeStatus?.().then((status) => {
-    useGameModeStore.getState().setActive(status.active, status.activatedAt)
+    const s = useGameModeStore.getState()
+    s.setActive(status.active, status.activatedAt)
+    s.setPendingRestore(status.pendingRestore ?? false)
   }).catch(() => {})
 
   // Listen for auto-detect events globally so the store stays in sync
@@ -145,7 +151,9 @@ export function initGameModeStore(): void {
     }
     // Refresh active status from main process (source of truth)
     window.kudu?.gameModeStatus?.().then((status) => {
-      useGameModeStore.getState().setActive(status.active, status.activatedAt)
+      const st = useGameModeStore.getState()
+      st.setActive(status.active, status.activatedAt)
+      st.setPendingRestore(status.pendingRestore ?? false)
     }).catch(() => {})
   })
 }

@@ -27,6 +27,8 @@ function validateSnapshot(raw: unknown): boolean {
 
   if (typeof s.activatedAt !== 'string' || s.activatedAt.length > 50) return false
 
+  if ('active' in s && typeof s.active !== 'boolean') return false
+
   if (!Array.isArray(s.services)) return false
   for (const svc of s.services) {
     if (typeof svc !== 'object' || svc === null) return false
@@ -84,6 +86,7 @@ function validateSnapshot(raw: unknown): boolean {
 function validSnapshot() {
   return {
     activatedAt: '2025-06-15T10:30:00.000Z',
+    active: true,
     services: [
       { name: 'WSearch', originalStartType: 'Automatic', wasRunning: true },
       { name: 'SysMain', originalStartType: 'Manual', wasRunning: false },
@@ -116,6 +119,7 @@ describe('snapshot validation', () => {
   it('accepts a minimal snapshot with empty arrays', () => {
     expect(validateSnapshot({
       activatedAt: '2025-01-01T00:00:00Z',
+      active: true,
       services: [],
       killedProcesses: [],
       originalPowerPlanGuid: null,
@@ -124,6 +128,25 @@ describe('snapshot validation', () => {
       nagleInterfaces: [],
       registryTweaks: [],
     })).toBe(true)
+  })
+
+  it('accepts a snapshot without active field (pre-fix backward compat)', () => {
+    expect(validateSnapshot({
+      activatedAt: '2025-01-01T00:00:00Z',
+      services: [],
+      killedProcesses: [],
+      originalPowerPlanGuid: null,
+      originalFocusAssistState: null,
+      powerSaveBlockerId: null,
+      nagleInterfaces: [],
+      registryTweaks: [],
+    })).toBe(true)
+  })
+
+  it('rejects snapshot with non-boolean active', () => {
+    const snap = validSnapshot()
+    ;(snap as any).active = 'yes'
+    expect(validateSnapshot(snap)).toBe(false)
   })
 
   it('rejects null / non-object', () => {
