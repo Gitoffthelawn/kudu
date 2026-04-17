@@ -714,11 +714,11 @@ export async function deactivateGameMode(
     }
   }
 
-  // Only delete the snapshot if everything restored successfully.
-  // If some restores failed, keep the snapshot so the user can retry.
-  if (errors.length === 0) {
-    deleteSnapshot()
-  }
+  // Always delete the snapshot so the user is never stuck in an "active" state
+  // they can't escape. Any unrestored items are reported in `errors` for the UI
+  // to surface — retrying deactivate on a half-restored snapshot would fail the
+  // same way, so exposing the failures is more useful than blocking the toggle.
+  deleteSnapshot()
   return { restored, failed: errors.length, errors }
 }
 

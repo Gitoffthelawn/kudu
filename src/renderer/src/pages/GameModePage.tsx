@@ -264,12 +264,9 @@ export function GameModePage() {
 
     try {
       const result = await window.kudu.gameModeDeactivate()
-      // Only mark as inactive if all restores succeeded (snapshot deleted).
-      // If some failed, the snapshot is kept and Game Mode remains active so the user can retry.
-      if (result.failed === 0) {
-        store.getState().setActive(false, null)
-      } else {
-        toast.warning(`${result.failed} setting(s) could not be restored — Game Mode stays active so you can retry`)
+      store.getState().setActive(false, null)
+      if (result.failed > 0) {
+        toast.warning(`${result.failed} setting(s) could not be restored automatically — you may need to restore them manually`)
       }
       store.getState().setLastResult({ type: 'deactivate', succeeded: result.restored, failed: result.failed })
     } catch (err: any) {
