@@ -1,3 +1,4 @@
+# [1.36.0](https://github.com/adventdevinc/kudu/compare/v1.35.0...v1.36.0) (2026-04-23)
 # [1.35.0](https://github.com/adventdevinc/kudu/compare/v1.34.0...v1.35.0) (2026-04-17)
 
 
