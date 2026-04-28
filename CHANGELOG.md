@@ -1,3 +1,9 @@
+# [1.38.0](https://github.com/adventdevinc/kudu/compare/v1.37.0...v1.38.0) (2026-04-28)
+
+
+### Bug Fixes
+
+* **registry-cleaner:** handle trailing backslashes in value names ([#143](https://github.com/adventdevinc/kudu/issues/143)) ([3acfc74](https://github.com/adventdevinc/kudu/commit/3acfc7405d516b4ca3ae94ea4d2b06a8b84c4617))
 # [1.37.0](https://github.com/adventdevinc/kudu/compare/v1.36.0...v1.37.0) (2026-04-28)
 
 
