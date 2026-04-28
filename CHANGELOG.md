@@ -1,3 +1,9 @@
+# [1.37.0](https://github.com/adventdevinc/kudu/compare/v1.36.0...v1.37.0) (2026-04-28)
+
+
+### Bug Fixes
+
+* **cloud:** handle pusher-js v8.5+ named export breaking constructor ([419c63a](https://github.com/adventdevinc/kudu/commit/419c63a727b602b226f9183e34f6aefeddca8d5b))
 # [1.36.0](https://github.com/adventdevinc/kudu/compare/v1.35.0...v1.36.0) (2026-04-23)
 # [1.35.0](https://github.com/adventdevinc/kudu/compare/v1.34.0...v1.35.0) (2026-04-17)
 
