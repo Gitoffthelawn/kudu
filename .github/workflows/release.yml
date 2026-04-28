@@ -235,6 +235,14 @@ jobs:
         shell: bash
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
+      - name: Sync winget-pkgs fork with upstream
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.WINGET_GH_TOKEN }}
+        run: |
+          fork_owner=$(gh api user -q .login)
+          gh repo sync "$fork_owner/winget-pkgs" --source microsoft/winget-pkgs --force
+
       - name: Update winget manifest
         shell: pwsh
         run: |
