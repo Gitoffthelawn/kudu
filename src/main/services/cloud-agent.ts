@@ -55,7 +55,7 @@ import { threatMonitor } from './threat-monitor'
 import { isLikelyFalsePositive, deduplicateCves } from './cve-filter'
 
 const execFileAsync = promisify(execFile)
-const DEFAULT_SERVER_URL = app.isPackaged ? 'https://cloud.usekudu.com' : 'https://cloud.usekudu.com'
+const DEFAULT_SERVER_URL = 'https://cloud.usekudu.com'
 
 const COMMAND_TIMEOUT_MS = 5 * 60 * 1000
 const LONG_COMMAND_TIMEOUT_MS = 30 * 60 * 1000 // for bulk update / install commands

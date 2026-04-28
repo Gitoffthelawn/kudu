@@ -37,7 +37,23 @@ export default defineConfig({
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version)
     },
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        // The renderer's hardcoded CSP (script-src 'self') blocks Vite's
+        // inline HMR injection in dev → blank window. Strip the meta tag
+        // when serving dev only; the production HTML keeps the strict CSP.
+        name: 'kudu-strip-csp-in-dev',
+        apply: 'serve',
+        transformIndexHtml(html: string): string {
+          return html.replace(
+            /<meta\s+http-equiv=["']Content-Security-Policy["'][^>]*>\s*/i,
+            ''
+          )
+        }
+      }
+    ],
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src/renderer/src'),
