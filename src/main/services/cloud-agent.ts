@@ -9,7 +9,12 @@ import { join } from 'path'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 import { lookup } from 'dns/promises'
-import Pusher from 'pusher-js'
+import PusherImport from 'pusher-js'
+// pusher-js v8.5+ exports the constructor as a named export (`module.exports.Pusher`),
+// while older versions exported it as default. Pick whichever the installed version provides.
+const Pusher = ((PusherImport as unknown as { Pusher?: typeof PusherImport }).Pusher
+  ?? PusherImport) as typeof PusherImport
+type Pusher = PusherImport
 import { getSettings, setSettings, getMachineId } from './settings-store'
 import { scanDirectory, scanMultipleDirectories, scanDirectoriesAsItems, resolveChildSubdirs, cleanItems } from './file-utils'
 import { cacheItems } from './scan-cache'
