@@ -1,3 +1,10 @@
+# [1.39.0](https://github.com/adventdevinc/kudu/compare/v1.38.0...v1.39.0) (2026-04-30)
+
+
+### Bug Fixes
+
+* **registry-cleaner:** prune Kudu Backups to last 3 runs ([#146](https://github.com/adventdevinc/kudu/issues/146)) ([4056c47](https://github.com/adventdevinc/kudu/commit/4056c479014d45b8925258a7e0247ca75a2db267))
+* **software-updater:** resolve brew path on macOS GUI launches ([#147](https://github.com/adventdevinc/kudu/issues/147)) ([defbe22](https://github.com/adventdevinc/kudu/commit/defbe22a156adc7da971d4f518ee72fbe2f72c81))
 # [1.38.0](https://github.com/adventdevinc/kudu/compare/v1.37.0...v1.38.0) (2026-04-28)
 
 
