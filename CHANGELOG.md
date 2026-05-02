@@ -1,3 +1,12 @@
+# [1.40.0](https://github.com/adventdevinc/kudu/compare/v1.39.0...v1.40.0) (2026-05-02)
+
+
+### Features
+
+* **context-menu:** Windows shell-extension cleaner ([#151](https://github.com/adventdevinc/kudu/issues/151)) ([459c2d4](https://github.com/adventdevinc/kudu/commit/459c2d4895ff5be44ccd8a077e49fdddd5da8307))
+* **disk-maintenance:** SSD TRIM page with multi-select and safety rails ([#150](https://github.com/adventdevinc/kudu/issues/150)) ([dd1846c](https://github.com/adventdevinc/kudu/commit/dd1846cc65551d744a1442847afd98ba1d566d88))
+* **firewall-audit:** Windows Defender Firewall rules audit ([#149](https://github.com/adventdevinc/kudu/issues/149)) ([7405492](https://github.com/adventdevinc/kudu/commit/740549218412f43674b052bc0a1c9814a7d502d0))
+* **firewall,context-menu:** hide built-in Windows entries by default ([#152](https://github.com/adventdevinc/kudu/issues/152)) ([9f66901](https://github.com/adventdevinc/kudu/commit/9f66901ab328f3ac83cb754d86ad0328a5856571))
 # [1.39.0](https://github.com/adventdevinc/kudu/compare/v1.38.0...v1.39.0) (2026-04-30)
 
 
