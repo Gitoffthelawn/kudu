@@ -116,6 +116,34 @@ describe('validateSettingsPartial', () => {
     expect(validateSettingsPartial({ cleaner: { unknownKey: true } })).toBeNull()
   })
 
+  it('accepts a valid backupPath', () => {
+    // path.isAbsolute is platform-aware, so use a path absolute on the current OS.
+    const backupPath = process.platform === 'win32' ? 'C:\\Users\\dave\\Backups' : '/Users/dave/Backups'
+    const input = { backupPath }
+    expect(validateSettingsPartial(input)).toEqual(input)
+  })
+
+  it('accepts an empty backupPath (means default)', () => {
+    expect(validateSettingsPartial({ backupPath: '' })).toEqual({ backupPath: '' })
+  })
+
+  it('rejects non-string backupPath', () => {
+    expect(validateSettingsPartial({ backupPath: 42 })).toBeNull()
+  })
+
+  it('rejects backupPath with path traversal', () => {
+    expect(validateSettingsPartial({ backupPath: 'C:\\..\\evil' })).toBeNull()
+  })
+
+  it('rejects overly long backupPath', () => {
+    expect(validateSettingsPartial({ backupPath: 'x'.repeat(1001) })).toBeNull()
+  })
+
+  it('rejects a relative backupPath', () => {
+    // Relative paths would be silently ignored at runtime, so reject at the boundary.
+    expect(validateSettingsPartial({ backupPath: 'relative/dir' })).toBeNull()
+  })
+
   it('accepts valid theme values', () => {
     expect(validateSettingsPartial({ theme: 'dark' })).toEqual({ theme: 'dark' })
     expect(validateSettingsPartial({ theme: 'light' })).toEqual({ theme: 'light' })
