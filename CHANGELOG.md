@@ -1,3 +1,16 @@
+# [1.41.0](https://github.com/adventdevinc/kudu/compare/v1.40.0...v1.41.0) (2026-05-19)
+
+
+### Bug Fixes
+
+* **diagnostics:** log renderer crashes and harden updater broadcast ([#176](https://github.com/adventdevinc/kudu/issues/176)) ([48afafa](https://github.com/adventdevinc/kudu/commit/48afafad2fefc493b12b1be92a4037df49d29304))
+* **shortcuts:** don't flag File Explorer / shell-namespace .lnk files as dead ([#174](https://github.com/adventdevinc/kudu/issues/174)) ([c112943](https://github.com/adventdevinc/kudu/commit/c1129439dfb018771e114dfdf827c9cd483c2d2b))
+
+
+### Features
+
+* **registry-cleaner:** targeted backup mode (default) ([#175](https://github.com/adventdevinc/kudu/issues/175)) ([6beb61a](https://github.com/adventdevinc/kudu/commit/6beb61a05fb2dd3038940ef7affbcb5a135d368d))
+* **settings:** configurable backup folder ([#160](https://github.com/adventdevinc/kudu/issues/160)) ([8c4a8a5](https://github.com/adventdevinc/kudu/commit/8c4a8a591ea329f40ab5bfd90935a0439d894368))
 # [1.40.0](https://github.com/adventdevinc/kudu/compare/v1.39.0...v1.40.0) (2026-05-02)
 
 
