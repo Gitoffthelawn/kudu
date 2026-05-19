@@ -1,0 +1,61 @@
+import { describe, it, expect, afterAll, vi } from 'vitest'
+import { tmpdir } from 'os'
+import { join } from 'path'
+import { rmSync, existsSync } from 'fs'
+import { randomUUID } from 'crypto'
+
+const TEST_DIR = join(tmpdir(), `kudu-test-${randomUUID()}`)
+
+vi.mock('electron', () => ({
+  app: {
+    isPackaged: false,
+    getPath: () => TEST_DIR,
+  },
+  safeStorage: {
+    isEncryptionAvailable: () => false,
+    encryptString: (s: string) => Buffer.from(s),
+    decryptString: (b: Buffer) => b.toString(),
+  },
+}))
+
+import { setSettings, getSettings, flushSettings } from './settings-store'
+
+describe('settings persistence — game mode toggle round-trip (issue #172)', () => {
+  afterAll(() => {
+    if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true, force: true })
+  })
+
+  it('keeps a game mode optimization disabled across a simulated restart', async () => {
+    const initial = getSettings()
+    expect(initial.gameMode.enabledOptimizations).toContain('svc-sysmain')
+
+    const without = initial.gameMode.enabledOptimizations.filter((o) => o !== 'svc-sysmain')
+    setSettings({
+      gameMode: {
+        ...initial.gameMode,
+        enabledOptimizations: without,
+      },
+    })
+    await flushSettings()
+
+    const afterRestart = getSettings()
+    expect(afterRestart.gameMode.enabledOptimizations).not.toContain('svc-sysmain')
+    expect(afterRestart.gameMode.enabledOptimizations).toEqual(without)
+  })
+
+  it('keeps an empty enabledOptimizations array empty across a simulated restart', async () => {
+    setSettings({
+      gameMode: {
+        enabledOptimizations: [],
+        customProcessKillList: [],
+        autoDetect: false,
+        autoDeactivate: true,
+        customGameProcesses: [],
+      },
+    })
+    await flushSettings()
+
+    const afterRestart = getSettings()
+    expect(afterRestart.gameMode.enabledOptimizations).toEqual([])
+  })
+})
