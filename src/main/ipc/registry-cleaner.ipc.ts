@@ -5,9 +5,10 @@ import { execFile } from 'child_process'
 import { promisify } from 'util'
 import { join } from 'path'
 import { getBackupDir } from '../services/backup-dir'
-import { getSettings } from '../services/settings-store'
+import { getSettings, updateRegistryIgnoredTweaks } from '../services/settings-store'
 import { IPC } from '../../shared/channels'
 import type { RegistryEntry } from '../../shared/types'
+import { applyIgnoredTweaks } from '../../shared/registry-tweaks'
 import { randomUUID } from 'crypto'
 import type { WindowGetter } from './index'
 import { validateStringArray } from '../services/ipc-validation'
@@ -1953,6 +1954,10 @@ export function registerRegistryCleanerIpc(getWindow: WindowGetter): void {
       if (scanAbort?.signal === signal) scanAbort = null
     }
 
+    // Don't pre-select recurring tweaks the user has chosen to ignore (issue #172)
+    // so they can't be applied by accident on a later run.
+    applyIgnoredTweaks(entries, getSettings().registryIgnoredTweaks ?? [])
+
     // Store entries in a new scan session
     const sessionMap = new Map<string, RegistryEntry>()
     for (const entry of entries) {
@@ -2000,6 +2005,15 @@ export function registerRegistryCleanerIpc(getWindow: WindowGetter): void {
     } finally {
       if (fixAbort?.signal === signal) fixAbort = null
     }
+  })
+
+  // Persist the user's "ignore this tweak" choices (issue #172). The merge is
+  // done atomically in the main process so rapid toggles — or a toggle that
+  // races app startup — can't drop previously-ignored signatures.
+  ipcMain.handle(IPC.REGISTRY_SET_TWEAK_IGNORED, (_event, signatures: string[], ignored: boolean) => {
+    const valid = validateStringArray(signatures, 200, 1024)
+    if (!valid || typeof ignored !== 'boolean') return
+    updateRegistryIgnoredTweaks(valid, ignored)
   })
 
   // Cancel handlers

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { RegistryEntry } from '@shared/types'
+import { isPersistentTweak, tweakSignature } from '@shared/registry-tweaks'
 
 interface FixResult {
   fixed: number
@@ -32,7 +33,24 @@ interface RegistryState {
   reset: () => void
 }
 
-export const useRegistryStore = create<RegistryState>((set) => ({
+/**
+ * Persist the user's de-selection of recurring advisory tweaks so the box isn't
+ * re-ticked on the next scan/restart (issue #172). We send only the affected
+ * signatures and let the main process merge them into the saved list under its
+ * write lock — the renderer never holds the authoritative list, so a toggle can
+ * never drop previously-ignored signatures. `selectedNow` is the state *after*
+ * the toggle: deselected ⇒ ignore, selected ⇒ un-ignore.
+ */
+function persistTweakChoice(
+  entries: Pick<RegistryEntry, 'type' | 'keyPath' | 'valueName'>[],
+  selectedNow: boolean
+): void {
+  const signatures = entries.filter((e) => isPersistentTweak(e.type)).map(tweakSignature)
+  if (signatures.length === 0) return
+  window.kudu?.registrySetTweakIgnored?.(signatures, !selectedNow).catch(() => {})
+}
+
+export const useRegistryStore = create<RegistryState>((set, get) => ({
   entries: [],
   scanning: false,
   scanned: false,
@@ -57,20 +75,26 @@ export const useRegistryStore = create<RegistryState>((set) => ({
   setFixResult: (fixResult) => set({ fixResult }),
   setShowFailures: (showFailures) => set({ showFailures }),
   setError: (error) => set({ error }),
-  toggleEntry: (id) =>
+  toggleEntry: (id) => {
+    const entry = get().entries.find((e) => e.id === id)
+    if (!entry) return
+    const selectedNow = !entry.selected
     set((s) => ({
-      entries: s.entries.map((e) => (e.id === id ? { ...e, selected: !e.selected } : e))
-    })),
-  toggleCardAll: (types) =>
-    set((s) => {
-      const cardEntries = s.entries.filter((e) => types.includes(e.type))
-      const allSelected = cardEntries.length > 0 && cardEntries.every((e) => e.selected)
-      return {
-        entries: s.entries.map((e) =>
-          types.includes(e.type) ? { ...e, selected: !allSelected } : e
-        )
-      }
-    }),
+      entries: s.entries.map((e) => (e.id === id ? { ...e, selected: selectedNow } : e))
+    }))
+    persistTweakChoice([entry], selectedNow)
+  },
+  toggleCardAll: (types) => {
+    const cardEntries = get().entries.filter((e) => types.includes(e.type))
+    const allSelected = cardEntries.length > 0 && cardEntries.every((e) => e.selected)
+    const selectedNow = !allSelected
+    set((s) => ({
+      entries: s.entries.map((e) =>
+        types.includes(e.type) ? { ...e, selected: selectedNow } : e
+      )
+    }))
+    persistTweakChoice(cardEntries, selectedNow)
+  },
   reset: () =>
     set({
       entries: [],
