@@ -118,7 +118,6 @@ describe('linux privacy', () => {
 
       const ids = settings.map((s) => s.id)
       expect(ids).toContain('core-dump-disable')
-      expect(ids).toContain('usb-storage-disable')
       expect(ids).toContain('ssh-root-login')
       expect(ids).toContain('ssh-password-auth')
     })
@@ -268,26 +267,6 @@ describe('linux privacy', () => {
 
       mockExecFile.mockResolvedValueOnce({ stdout: '1\n', stderr: '' })
       const result = await coreDump.check()
-      expect(result).toBe(false)
-    })
-
-    it('usb-storage-disable check reads the modprobe config file', async () => {
-      const privacy = createLinuxPrivacy()
-      const settings = privacy.getSettings()
-      const usb = settings.find((s) => s.id === 'usb-storage-disable')!
-
-      mockReadFile.mockResolvedValueOnce('# Kudu: block USB mass storage\ninstall usb-storage /bin/true\n')
-      const result = await usb.check()
-      expect(result).toBe(true)
-    })
-
-    it('usb-storage-disable check returns false when file is missing', async () => {
-      const privacy = createLinuxPrivacy()
-      const settings = privacy.getSettings()
-      const usb = settings.find((s) => s.id === 'usb-storage-disable')!
-
-      mockReadFile.mockRejectedValueOnce(new Error('ENOENT'))
-      const result = await usb.check()
       expect(result).toBe(false)
     })
 

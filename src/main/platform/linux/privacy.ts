@@ -325,27 +325,6 @@ const ACCESS_CONTROL_SETTINGS: PrivacySettingDef[] = [
     },
   },
   {
-    id: 'usb-storage-disable',
-    category: 'access',
-    label: 'Block USB Mass Storage',
-    description: 'Prevent USB storage devices from being mounted to protect against data exfiltration',
-    requiresAdmin: true,
-    async check() {
-      try {
-        const content = await readFile('/etc/modprobe.d/kudu-usb.conf', 'utf8')
-        return content.includes('install usb-storage /bin/true')
-      } catch { return false }
-    },
-    async apply() {
-      await mkdir('/etc/modprobe.d', { recursive: true })
-      await writeFile(
-        '/etc/modprobe.d/kudu-usb.conf',
-        '# Kudu: block USB mass storage\ninstall usb-storage /bin/true\n',
-        'utf8',
-      )
-    },
-  },
-  {
     id: 'ssh-root-login',
     category: 'access',
     label: 'Disable SSH Root Login',
