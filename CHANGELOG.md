@@ -1,3 +1,11 @@
+# [1.42.0](https://github.com/adventdevinc/kudu/compare/v1.41.0...v1.42.0) (2026-05-24)
+
+
+### Bug Fixes
+
+* **privacy:** remove Linux USB mass storage blocking ([1514de2](https://github.com/adventdevinc/kudu/commit/1514de2838c5068a831cec453affb8aa220c3dbf)), closes [#187](https://github.com/adventdevinc/kudu/issues/187)
+* **registry:** persist deselected tweaks across restarts ([#172](https://github.com/adventdevinc/kudu/issues/172)) ([#189](https://github.com/adventdevinc/kudu/issues/189)) ([59b3a93](https://github.com/adventdevinc/kudu/commit/59b3a93c2357d206228c0e129ddad944ee963df9))
+* **scanner:** require behavioral signal for Suspicious.PE heuristic ([#156](https://github.com/adventdevinc/kudu/issues/156)) ([ecc1a56](https://github.com/adventdevinc/kudu/commit/ecc1a5616c372552c790e3b152be1ad417f8efeb))
 # [1.41.0](https://github.com/adventdevinc/kudu/compare/v1.40.0...v1.41.0) (2026-05-19)
 
 
