@@ -1,3 +1,10 @@
+# [1.43.0](https://github.com/adventdevinc/kudu/compare/v1.42.0...v1.43.0) (2026-05-29)
+
+
+### Features
+
+* **malware:** allowlist false positives so trusted files stop being flagged ([#193](https://github.com/adventdevinc/kudu/issues/193)) ([c752129](https://github.com/adventdevinc/kudu/commit/c752129292348f7b867c21be442643b8b47d8445))
+* **malware:** surface quarantine reason and add quick access ([#190](https://github.com/adventdevinc/kudu/issues/190)) ([ef155f9](https://github.com/adventdevinc/kudu/commit/ef155f904abecf368d36772430747f0e3d877be6))
 # [1.42.0](https://github.com/adventdevinc/kudu/compare/v1.41.0...v1.42.0) (2026-05-24)
 
 
