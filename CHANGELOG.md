@@ -1,3 +1,9 @@
+# [1.44.0](https://github.com/adventdevinc/kudu/compare/v1.43.0...v1.44.0) (2026-06-09)
+
+
+### Bug Fixes
+
+* **main:** recover from fatal GPU process launch failure on Windows ([#203](https://github.com/adventdevinc/kudu/issues/203)) ([#206](https://github.com/adventdevinc/kudu/issues/206)) ([736912b](https://github.com/adventdevinc/kudu/commit/736912b3a5e7e95d8af5183a9710550a74c298a0))
 # [1.43.0](https://github.com/adventdevinc/kudu/compare/v1.42.0...v1.43.0) (2026-05-29)
 
 
