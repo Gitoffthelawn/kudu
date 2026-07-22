@@ -21,7 +21,7 @@ import { cacheItems } from './scan-cache'
 import { psUtf8 } from './exec-utf8'
 import { getPlatform } from '../platform'
 import { CleanerType } from '../../shared/enums'
-import { checkForUpdates, runUpdates, isValidAppId } from './software-updater'
+import { checkForUpdates, runUpdates, isValidAppIdForSource } from './software-updater'
 import { scanRegistry, fixRegistryEntries } from '../ipc/registry-cleaner.ipc'
 import { scanMalware } from '../ipc/malware-scanner.ipc'
 import { scanPrivacy } from '../ipc/privacy-shield.ipc'
@@ -2409,12 +2409,28 @@ class CloudAgentService {
       await this.postCommandResult(requestId, false, undefined, 'Invalid appIds')
       return
     }
-    // Validate appId format to prevent argument injection into package manager
-    if (appIds.some((id) => !isValidAppId(id))) {
+    // Resolve each id back to the manager(s) that own it (aggregation-aware).
+    // The remote protocol sends only ids, so if the same id is outdated under
+    // two managers (e.g. choco/git + scoop/git) we update every instance rather
+    // than guessing one. Ids absent from the scan fall back to the primary.
+    const check = await checkForUpdates()
+    const sourcesById = new Map<string, string[]>()
+    for (const a of check.apps) {
+      const list = sourcesById.get(a.id) ?? []
+      list.push(a.source)
+      sourcesById.set(a.id, list)
+    }
+    const items = appIds.flatMap((id) => {
+      const sources = sourcesById.get(id) ?? [check.packageManagerName ?? 'winget']
+      return sources.map((source) => ({ id, source }))
+    })
+    // Validate each id against its owning manager's pattern (npm scoped names
+    // and Scoop `+` names are valid but rejected by the legacy winget pattern).
+    if (items.some((it) => !isValidAppIdForSource(it.id, it.source))) {
       await this.postCommandResult(requestId, false, undefined, 'Invalid appId format')
       return
     }
-    const result = await runUpdates(appIds, () => {})
+    const result = await runUpdates(items, () => {})
     // Strip raw error reasons which may contain local paths or system info
     await this.postCommandResult(requestId, true, {
       succeeded: result.succeeded,

@@ -16,7 +16,14 @@ import {
   parsePacmanQu,
   parseChocoOutdatedOutput,
   parseChocoListOutput,
+  parseScoopStatus,
+  parseScoopExport,
+  parseNpmOutdated,
+  parseNpmListGlobal,
   isValidAppId,
+  isValidAppIdForSource,
+  classifyScoopUpdate,
+  groupWindowsUpdateItems,
   BREW_PATH_CANDIDATES,
 } from './software-updater'
 
@@ -397,6 +404,211 @@ describe('parsePacmanQu', () => {
   })
 })
 
+// ─── parseScoopStatus ──────────────────────────────────────
+
+describe('parseScoopStatus', () => {
+  it('parses scoop status table output', () => {
+    const output = [
+      'Name  Installed Version Latest Version Missing Dependencies Info',
+      '----  ----------------- -------------- -------------------- ----',
+      '7zip  23.01             24.07',
+      'git   2.44.0            2.45.0',
+    ].join('\n')
+
+    const apps = parseScoopStatus(output)
+    expect(apps).toHaveLength(2)
+    expect(apps[0]).toMatchObject({
+      id: '7zip',
+      name: '7zip',
+      currentVersion: '23.01',
+      availableVersion: '24.07',
+      source: 'scoop',
+      selected: true,
+    })
+    expect(apps[1].id).toBe('git')
+    expect(apps[1].availableVersion).toBe('2.45.0')
+  })
+
+  it('ignores trailing Missing Dependencies / Info columns', () => {
+    const output = [
+      'Name  Installed Version Latest Version Missing Dependencies Info',
+      '----  ----------------- -------------- -------------------- ----',
+      'nodejs 18.0.0           20.0.0         python               Held',
+    ].join('\n')
+
+    const apps = parseScoopStatus(output)
+    expect(apps).toHaveLength(1)
+    expect(apps[0].availableVersion).toBe('20.0.0')
+  })
+
+  it('returns empty when nothing is outdated (no table)', () => {
+    expect(parseScoopStatus('Scoop is up to date.\n')).toEqual([])
+  })
+
+  it('returns empty for empty input', () => {
+    expect(parseScoopStatus('')).toEqual([])
+  })
+
+  it('skips rows where installed equals latest', () => {
+    const output = [
+      'Name  Installed Version Latest Version',
+      '----  ----------------- --------------',
+      '7zip  24.07             24.07',
+    ].join('\n')
+    expect(parseScoopStatus(output)).toEqual([])
+  })
+})
+
+// ─── parseScoopExport ──────────────────────────────────────
+
+describe('parseScoopExport', () => {
+  it('parses the modern { apps: [...] } JSON shape', () => {
+    const json = JSON.stringify({
+      apps: [
+        { Source: 'main', Name: '7zip', Version: '24.07' },
+        { Source: 'main', Name: 'git', Version: '2.45.0' },
+      ],
+    })
+    const apps = parseScoopExport(json)
+    expect(apps).toHaveLength(2)
+    expect(apps[0]).toEqual({ id: '7zip', name: '7zip', version: '24.07', source: 'scoop' })
+  })
+
+  it('parses a bare array shape', () => {
+    const json = JSON.stringify([{ Name: 'git', Version: '2.45.0' }])
+    const apps = parseScoopExport(json)
+    expect(apps).toHaveLength(1)
+    expect(apps[0].id).toBe('git')
+  })
+
+  it('returns empty for invalid JSON', () => {
+    expect(parseScoopExport('not json')).toEqual([])
+  })
+})
+
+// ─── classifyScoopUpdate ───────────────────────────────────
+
+describe('classifyScoopUpdate', () => {
+  it('treats an explicit success marker as success on clean exit', () => {
+    expect(classifyScoopUpdate("'git' (2.45.0) was updated.", false)).toEqual({ success: true })
+  })
+
+  it('treats "is already installed" as success', () => {
+    expect(classifyScoopUpdate("'7zip' (24.07) is already installed.", false)).toEqual({ success: true })
+  })
+
+  it('assumes success only when the exit is clean and output is ambiguous', () => {
+    expect(classifyScoopUpdate('Updating scoop...\nChecking repo...', false)).toEqual({ success: true })
+  })
+
+  it('treats a nonzero exit with ambiguous output as failure (does not mask it)', () => {
+    const res = classifyScoopUpdate('Updating scoop...\nChecking repo...', true, 'network unreachable')
+    expect(res.success).toBe(false)
+    expect(res.error).toBe('network unreachable')
+  })
+
+  it('falls back to the last stdout line when a nonzero exit has no stderr', () => {
+    const res = classifyScoopUpdate('Updating scoop...\naborted', true)
+    expect(res).toEqual({ success: false, error: 'aborted' })
+  })
+
+  it('detects an error marker even when the exit code was zero', () => {
+    const res = classifyScoopUpdate("Couldn't find manifest for 'ghost'.", false)
+    expect(res.success).toBe(false)
+  })
+
+  it('truncates very long error messages', () => {
+    const long = 'x'.repeat(300)
+    const res = classifyScoopUpdate('progress', true, long)
+    expect(res.success).toBe(false)
+    expect(res.error!.length).toBe(203) // 200 + '...'
+    expect(res.error!.endsWith('...')).toBe(true)
+  })
+})
+
+// ─── groupWindowsUpdateItems ───────────────────────────────
+
+describe('groupWindowsUpdateItems', () => {
+  it('groups items by their manager source', () => {
+    const groups = groupWindowsUpdateItems([
+      { id: 'git', source: 'choco' },
+      { id: 'git', source: 'scoop' },
+      { id: 'vscode', source: 'winget' },
+    ])
+    expect(groups.get('choco')).toEqual([{ id: 'git', source: 'choco' }])
+    expect(groups.get('scoop')).toEqual([{ id: 'git', source: 'scoop' }])
+    expect(groups.get('winget')).toEqual([{ id: 'vscode', source: 'winget' }])
+  })
+
+  it('routes a winget-owned non-manager source (msstore) through winget but preserves the original source', () => {
+    const groups = groupWindowsUpdateItems([{ id: 'SomeStoreApp', source: 'msstore' }])
+    // routed under winget for the actual upgrade pipeline...
+    expect(groups.has('winget')).toBe(true)
+    // ...but the original source is kept so failures match the renderer's key
+    expect(groups.get('winget')).toEqual([{ id: 'SomeStoreApp', source: 'msstore' }])
+  })
+
+  it('defaults an untagged/empty source to winget for both routing and reporting', () => {
+    const groups = groupWindowsUpdateItems([{ id: 'legacy', source: '' }])
+    expect(groups.get('winget')).toEqual([{ id: 'legacy', source: 'winget' }])
+  })
+})
+
+// ─── parseNpmOutdated ──────────────────────────────────────
+
+describe('parseNpmOutdated', () => {
+  it('parses npm outdated -g --json output', () => {
+    const json = JSON.stringify({
+      typescript: { current: '5.3.0', wanted: '5.4.0', latest: '5.5.0' },
+      eslint: { current: '8.0.0', wanted: '8.0.0', latest: '9.0.0' },
+    })
+    const apps = parseNpmOutdated(json)
+    expect(apps).toHaveLength(2)
+    expect(apps[0]).toMatchObject({
+      id: 'typescript',
+      currentVersion: '5.3.0',
+      availableVersion: '5.5.0',
+      source: 'npm',
+      severity: 'minor',
+    })
+    expect(apps[1].severity).toBe('major')
+  })
+
+  it('skips packages already at latest', () => {
+    const json = JSON.stringify({ pkg: { current: '1.0.0', latest: '1.0.0' } })
+    expect(parseNpmOutdated(json)).toEqual([])
+  })
+
+  it('returns empty for invalid or empty JSON', () => {
+    expect(parseNpmOutdated('not json')).toEqual([])
+    expect(parseNpmOutdated('{}')).toEqual([])
+  })
+})
+
+// ─── parseNpmListGlobal ────────────────────────────────────
+
+describe('parseNpmListGlobal', () => {
+  it('parses npm ls -g --json dependencies', () => {
+    const json = JSON.stringify({
+      dependencies: {
+        npm: { version: '10.5.0' },
+        typescript: { version: '5.5.0' },
+      },
+    })
+    const apps = parseNpmListGlobal(json)
+    expect(apps).toHaveLength(2)
+    expect(apps[0]).toEqual({ id: 'npm', name: 'npm', version: '10.5.0', source: 'npm' })
+  })
+
+  it('returns empty when there are no dependencies', () => {
+    expect(parseNpmListGlobal('{}')).toEqual([])
+  })
+
+  it('returns empty for invalid JSON', () => {
+    expect(parseNpmListGlobal('nope')).toEqual([])
+  })
+})
+
 // ─── isValidAppId ───────────────────────────────────────────
 
 describe('isValidAppId', () => {
@@ -432,6 +644,41 @@ describe('isValidAppId', () => {
 
   it('rejects very long IDs', () => {
     expect(isValidAppId('a'.repeat(300))).toBe(false)
+  })
+})
+
+// ─── isValidAppIdForSource ─────────────────────────────────
+
+describe('isValidAppIdForSource', () => {
+  it('accepts npm scoped package names (rejected by the winget pattern)', () => {
+    expect(isValidAppIdForSource('@angular/cli', 'npm')).toBe(true)
+    expect(isValidAppIdForSource('typescript', 'npm')).toBe(true)
+    // The winget validator would reject the scoped form (platform-independent —
+    // isValidAppId delegates to the host platform's validator, which varies)
+    expect(isValidAppIdForSource('@angular/cli', 'winget')).toBe(false)
+  })
+
+  it('accepts Scoop names containing + (rejected by the winget pattern)', () => {
+    expect(isValidAppIdForSource('notepad++', 'scoop')).toBe(true)
+    // brew/apt accept '+', so assert against winget rather than the
+    // platform-dependent isValidAppId (which is true on macOS/Linux)
+    expect(isValidAppIdForSource('notepad++', 'winget')).toBe(false)
+  })
+
+  it('accepts typical ids for each Windows manager', () => {
+    expect(isValidAppIdForSource('Google.Chrome', 'winget')).toBe(true)
+    expect(isValidAppIdForSource('googlechrome', 'choco')).toBe(true)
+    expect(isValidAppIdForSource('7zip', 'scoop')).toBe(true)
+  })
+
+  it('rejects injection-style ids regardless of manager', () => {
+    expect(isValidAppIdForSource('--source evil', 'winget')).toBe(false)
+    expect(isValidAppIdForSource('pkg; rm -rf /', 'npm')).toBe(false)
+    expect(isValidAppIdForSource('a b', 'scoop')).toBe(false)
+  })
+
+  it('falls back to the platform validator for unknown sources', () => {
+    expect(isValidAppIdForSource('', 'mystery')).toBe(false)
   })
 })
 

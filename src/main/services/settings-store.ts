@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join } from 'path'
 import { app, safeStorage } from 'electron'
 import { randomUUID } from 'crypto'
-import type { KuduSettings, AppStats, ScheduleEntry, ScheduleTaskType, MalwareAllowlistEntry } from '../../shared/types'
+import type { KuduSettings, AppStats, ScheduleEntry, ScheduleTaskType, MalwareAllowlistEntry, WindowsPackageManager } from '../../shared/types'
 
 let _dataDir: string | null = null
 let _configPath: string | null = null
@@ -73,6 +73,7 @@ const defaults: StoreData = {
       allowRemoteConfig: true
     },
     windowsPackageManager: 'winget' as const,
+    windowsPackageManagers: ['winget', 'choco', 'scoop', 'npm'] as WindowsPackageManager[],
     gameMode: {
       enabledOptimizations: [
         'svc-wsearch', 'svc-sysmain',
@@ -173,6 +174,20 @@ function readStore(): StoreData {
       // Decrypt API key if stored encrypted
       if (merged.settings.cloud.apiKey) {
         merged.settings.cloud.apiKey = decryptApiKey(merged.settings.cloud.apiKey)
+      }
+      // Migrate legacy single-manager preference → aggregation list. Existing
+      // installs kept exactly one manager (winget or choco); preserve that as
+      // their scanned set so an upgrade doesn't silently start scanning every
+      // manager. Fresh installs (no persisted legacy value) get the
+      // aggregate-all default. Only runs when the new field was never persisted.
+      if (
+        parsed?.settings &&
+        parsed.settings.windowsPackageManagers === undefined &&
+        (parsed.settings.windowsPackageManager === 'winget' ||
+          parsed.settings.windowsPackageManager === 'choco')
+      ) {
+        merged.settings.windowsPackageManagers = [parsed.settings.windowsPackageManager]
+        try { writeStore(merged) } catch { /* best-effort */ }
       }
       // Migrate legacy single schedule → schedules array
       if (merged.settings.schedule.enabled && merged.settings.schedules.length === 0) {

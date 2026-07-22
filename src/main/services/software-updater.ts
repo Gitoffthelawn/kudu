@@ -1,12 +1,16 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 import type {
+  PackageManagerName,
+  PackageManagerStatus,
   UpdatableApp,
   UpToDateApp,
   UpdateCheckResult,
   UpdateProgress,
+  UpdateRequestItem,
   UpdateResult,
   UpdateSeverity,
+  WindowsPackageManager,
 } from '../../shared/types'
 import { isAdmin } from './elevation'
 import { psUtf8 } from './exec-utf8'
@@ -53,7 +57,7 @@ export function computeSeverity(current: string, available: string): UpdateSever
 
 function emptyResult(
   packageManagerAvailable: boolean,
-  packageManagerName: UpdateCheckResult['packageManagerName'],
+  packageManagerName: PackageManagerName | null,
 ): UpdateCheckResult {
   return {
     apps: [],
@@ -64,6 +68,28 @@ function emptyResult(
     patchCount: 0,
     packageManagerAvailable,
     packageManagerName,
+    managers: packageManagerName
+      ? [{ name: packageManagerName, available: packageManagerAvailable, outdatedCount: 0 }]
+      : [],
+  }
+}
+
+/** Build a single-manager check result with derived counts + status. */
+function buildResult(
+  name: PackageManagerName,
+  apps: UpdatableApp[],
+  upToDate: UpToDateApp[],
+): UpdateCheckResult {
+  return {
+    apps,
+    upToDate,
+    totalCount: apps.length,
+    majorCount: apps.filter((a) => a.severity === 'major').length,
+    minorCount: apps.filter((a) => a.severity === 'minor').length,
+    patchCount: apps.filter((a) => a.severity === 'patch').length,
+    packageManagerAvailable: true,
+    packageManagerName: name,
+    managers: [{ name, available: true, outdatedCount: apps.length }],
   }
 }
 
@@ -254,16 +280,7 @@ async function checkForUpdatesWinget(): Promise<UpdateCheckResult> {
       // Non-critical — just skip the up-to-date list
     }
 
-    return {
-      apps,
-      upToDate,
-      totalCount: apps.length,
-      majorCount: apps.filter((a) => a.severity === 'major').length,
-      minorCount: apps.filter((a) => a.severity === 'minor').length,
-      patchCount: apps.filter((a) => a.severity === 'patch').length,
-      packageManagerAvailable: true,
-      packageManagerName: 'winget',
-    }
+    return buildResult('winget', apps, upToDate)
   } catch {
     return emptyResult(true, 'winget')
   }
@@ -377,9 +394,6 @@ async function attemptElevatedUpgrade(appId: string): Promise<{ success: boolean
   }
 }
 
-/** Concurrency limit for parallel winget upgrades — sequential to avoid winget lock contention */
-const WINGET_UPDATE_CONCURRENCY = 1
-
 /** Run a single app through the winget upgrade pipeline: normal → elevated → force */
 async function upgradeAppWinget(
   appId: string,
@@ -418,71 +432,6 @@ async function upgradeAppWinget(
 
   const lastLine = cleanOutput(result.output).trim().split('\n').pop() || 'Upgrade failed'
   return { success: false, error: lastLine.length > 200 ? lastLine.slice(0, 200) + '...' : lastLine }
-}
-
-async function runUpdatesWinget(
-  appIds: string[],
-  onProgress: (progress: UpdateProgress) => void,
-): Promise<UpdateResult> {
-  let succeeded = 0
-  let failed = 0
-  let completed = 0
-  const errors: UpdateResult['errors'] = []
-  const alreadyAdmin = isAdmin()
-  const total = appIds.length
-
-  // Process in concurrent batches
-  for (let batchStart = 0; batchStart < total; batchStart += WINGET_UPDATE_CONCURRENCY) {
-    const batch = appIds.slice(batchStart, batchStart + WINGET_UPDATE_CONCURRENCY)
-
-    // Report all in-progress
-    for (const appId of batch) {
-      onProgress({
-        phase: 'updating',
-        current: completed + 1,
-        total,
-        currentApp: appId,
-        percent: Math.round((completed / total) * 100),
-        status: 'in-progress',
-      })
-    }
-
-    const results = await Promise.allSettled(
-      batch.map((appId) => upgradeAppWinget(appId, alreadyAdmin).then((r) => ({ appId, ...r }))),
-    )
-
-    for (const settled of results) {
-      completed++
-      if (settled.status === 'fulfilled' && settled.value.success) {
-        succeeded++
-        onProgress({
-          phase: 'updating',
-          current: completed,
-          total,
-          currentApp: settled.value.appId,
-          percent: Math.round((completed / total) * 100),
-          status: 'done',
-        })
-      } else {
-        failed++
-        const appId = settled.status === 'fulfilled' ? settled.value.appId : batch[results.indexOf(settled)]
-        const reason = settled.status === 'fulfilled'
-          ? (settled.value.error || 'Upgrade failed')
-          : (settled.reason?.message || 'Unknown error')
-        errors.push({ appId, name: appId, reason })
-        onProgress({
-          phase: 'updating',
-          current: completed,
-          total,
-          currentApp: appId,
-          percent: Math.round((completed / total) * 100),
-          status: 'failed',
-        })
-      }
-    }
-  }
-
-  return { succeeded, failed, errors }
 }
 
 // ─── Chocolatey (Windows) ──────────────────────────────────
@@ -596,16 +545,7 @@ async function checkForUpdatesChoco(): Promise<UpdateCheckResult> {
       // Non-critical — just skip the up-to-date list
     }
 
-    return {
-      apps,
-      upToDate,
-      totalCount: apps.length,
-      majorCount: apps.filter((a) => a.severity === 'major').length,
-      minorCount: apps.filter((a) => a.severity === 'minor').length,
-      patchCount: apps.filter((a) => a.severity === 'patch').length,
-      packageManagerAvailable: true,
-      packageManagerName: 'choco',
-    }
+    return buildResult('choco', apps, upToDate)
   } catch {
     return emptyResult(true, 'choco')
   }
@@ -733,98 +673,503 @@ async function upgradeAppChoco(
   return { success: false, error: lastLine.length > 200 ? lastLine.slice(0, 200) + '...' : lastLine }
 }
 
-async function runUpdatesChoco(
-  appIds: string[],
+// ─── Shim runner (scoop / npm) ─────────────────────────────
+
+/**
+ * Run a `.cmd` shim tool (scoop, npm) via cmd.exe.
+ *
+ * These tools ship as `.cmd`/`.ps1` shims, not native `.exe`, so `execFile`
+ * can't resolve a bare name. We route through `cmd.exe` rather than
+ * `powershell.exe` on purpose: PowerShell command resolution can pick the
+ * `.ps1` shim (npm.ps1 / scoop.ps1), which fails under the default
+ * Restricted / AllSigned execution policy before the tool ever runs. cmd.exe
+ * resolves the `.cmd` shim via PATHEXT (which excludes `.ps1`), and those
+ * shims invoke PowerShell with their own bypass, so they work regardless of
+ * the machine's execution policy.
+ *
+ * `chcp 65001` forces UTF-8 output. Callers MUST validate any dynamic argument
+ * (app id) against the tool's id pattern first; shim ids contain no cmd.exe
+ * metacharacters, so building the command line is safe.
+ */
+async function runShim(tool: 'scoop' | 'npm', args: string[], timeout = 60_000): Promise<string> {
+  const cmdLine = `chcp 65001>nul && ${tool} ${args.join(' ')}`
+  const { stdout } = await execFileAsync(
+    'cmd.exe',
+    ['/d', '/v:off', '/s', '/c', cmdLine],
+    { timeout, maxBuffer: 10 * 1024 * 1024, windowsHide: true, windowsVerbatimArguments: true },
+  )
+  return stdout
+}
+
+// ─── Scoop (Windows) ────────────────────────────────────────
+
+/** Scoop app name: lowercase alphanumeric, hyphens, dots, underscores, plus */
+const SCOOP_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._+-]{0,200}$/
+
+const runScoop = (args: string[], timeout = 60_000): Promise<string> => runShim('scoop', args, timeout)
+
+async function isScoopAvailable(): Promise<boolean> {
+  try {
+    const out = await runScoop(['--version'], 15_000)
+    // scoop --version prints its git revision; any non-empty output means it ran
+    return out.trim().length > 0
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Parse `scoop status` table output.
+ * Columns: Name | Installed Version | Latest Version | Missing Dependencies | Info
+ * Version strings never contain spaces, so the "Latest Version" cell is read as
+ * its first whitespace-delimited token — robust against trailing columns.
+ */
+export function parseScoopStatus(stdout: string): UpdatableApp[] {
+  const lines = cleanOutput(stdout).split(/\r?\n/)
+
+  let headerIdx = -1
+  for (let i = 0; i < lines.length; i++) {
+    if (/Installed Version/i.test(lines[i]) && /Latest Version/i.test(lines[i])) {
+      headerIdx = i
+      break
+    }
+  }
+  if (headerIdx === -1) return []
+
+  const header = lines[headerIdx]
+  const installedStart = header.indexOf('Installed Version')
+  const latestStart = header.indexOf('Latest Version')
+  if (installedStart < 0 || latestStart < 0) return []
+
+  let start = headerIdx + 1
+  // Skip the dashes separator row that Format-Table emits under the header
+  if (start < lines.length && /^[-\s]+$/.test(lines[start])) start++
+
+  const apps: UpdatableApp[] = []
+  for (let i = start; i < lines.length; i++) {
+    const line = lines[i]
+    if (!line.trim()) continue
+
+    const name = line.substring(0, installedStart).trim()
+    const currentVersion = line.substring(installedStart, latestStart).trim()
+    const availableVersion = line.substring(latestStart).trim().split(/\s+/)[0] ?? ''
+
+    if (!name || !availableVersion) continue
+    if (currentVersion === availableVersion) continue
+
+    apps.push({
+      id: name,
+      name,
+      currentVersion,
+      availableVersion,
+      source: 'scoop',
+      severity: computeSeverity(currentVersion, availableVersion),
+      selected: true,
+    })
+  }
+  return apps
+}
+
+/**
+ * Parse `scoop export` JSON into the installed list.
+ * Modern scoop emits `{ apps: [{ Name, Version, Source }] }`; some builds emit a
+ * bare array. Both shapes are handled; anything else yields an empty list.
+ */
+export function parseScoopExport(stdout: string): UpToDateApp[] {
+  let data: unknown
+  try {
+    data = JSON.parse(stdout)
+  } catch {
+    return []
+  }
+
+  const entries: any[] = Array.isArray(data)
+    ? data
+    : Array.isArray((data as any)?.apps)
+      ? (data as any).apps
+      : []
+
+  const apps: UpToDateApp[] = []
+  for (const entry of entries) {
+    const name = entry?.Name ?? entry?.name
+    const version = entry?.Version ?? entry?.version ?? ''
+    if (!name) continue
+    apps.push({ id: name, name, version, source: 'scoop' })
+  }
+  return apps
+}
+
+async function checkForUpdatesScoop(): Promise<UpdateCheckResult> {
+  if (!(await isScoopAvailable())) return emptyResult(false, 'scoop')
+
+  try {
+    // Refresh bucket manifests first. `scoop status` compares installed
+    // versions against the *local* bucket checkout, so a stale checkout reports
+    // apps as up to date even when newer versions exist. `scoop update` with no
+    // app argument only updates Scoop and its buckets — it never upgrades an
+    // installed app — so it's safe to run during a read-only check. Best-effort:
+    // if the refresh fails (offline, etc.) we still read whatever status we can.
+    try {
+      await runScoop(['update'], 120_000)
+    } catch {
+      // Bucket refresh failed — fall through and read status against local manifests.
+    }
+
+    // `scoop status` compares installed versions against the refreshed manifests
+    let statusStdout = ''
+    try {
+      statusStdout = await runScoop(['status'], 120_000)
+    } catch (err: any) {
+      if (err?.stdout) statusStdout = err.stdout
+      else return emptyResult(true, 'scoop')
+    }
+
+    const apps = parseScoopStatus(statusStdout)
+
+    let upToDate: UpToDateApp[] = []
+    try {
+      const exportStdout = await runScoop(['export'], 60_000)
+      const allApps = parseScoopExport(exportStdout)
+      const outdatedIds = new Set(apps.map((a) => a.id))
+      upToDate = allApps.filter((a) => !outdatedIds.has(a.id))
+    } catch {
+      // Non-critical — just skip the up-to-date list
+    }
+
+    return buildResult('scoop', apps, upToDate)
+  } catch {
+    return emptyResult(true, 'scoop')
+  }
+}
+
+const truncateError = (msg: string): string => (msg.length > 200 ? msg.slice(0, 200) + '...' : msg)
+
+/**
+ * Decide whether a `scoop update` succeeded from its output and exit status.
+ * Exported for tests. `nonZeroExit` is true when scoop exited nonzero (stdout
+ * may still carry progress). Ambiguous output is only assumed successful on a
+ * clean exit — a nonzero exit with no explicit success marker is a failure, so
+ * a broken update can't be masked by partial progress output. Exported for tests.
+ */
+export function classifyScoopUpdate(
+  output: string,
+  nonZeroExit: boolean,
+  stderrMsg = '',
+): { success: boolean; error?: string } {
+  const cleaned = cleanOutput(output)
+  const lower = cleaned.toLowerCase()
+  // scoop prints "'app' was updated" / "was installed" on success; "is already
+  // installed" means it's up to date (also a success from the user's view)
+  if (/(was updated|was installed|is already installed|latest version)/.test(lower)) {
+    return { success: true }
+  }
+  if (/error|failed|couldn't|could not/.test(lower)) {
+    return { success: false, error: truncateError(cleaned.trim().split('\n').pop() || 'Update failed') }
+  }
+  // Nonzero exit with no explicit success marker → treat as a failure rather
+  // than letting ambiguous progress output mask it. stderr is the best signal.
+  if (nonZeroExit) {
+    return { success: false, error: truncateError(stderrMsg || cleaned.trim().split('\n').pop() || 'Update failed') }
+  }
+  // Clean exit with ambiguous output — assume success
+  return { success: true }
+}
+
+/** Attempt a single `scoop update <app>` */
+async function upgradeAppScoop(appId: string): Promise<{ success: boolean; error?: string }> {
+  if (!SCOOP_ID_PATTERN.test(appId)) {
+    return { success: false, error: 'Invalid app name format' }
+  }
+  let output = ''
+  let nonZeroExit = false
+  let stderrMsg = ''
+  try {
+    output = await runScoop(['update', appId], 10 * 60 * 1000)
+  } catch (err: any) {
+    // A nonzero exit still often carries useful progress on stdout; keep it,
+    // but remember the failure and preserve stderr for diagnostics.
+    nonZeroExit = true
+    stderrMsg = err?.stderr ? cleanOutput(err.stderr).trim() : ''
+    if (err?.stdout) output = err.stdout
+    else return { success: false, error: stderrMsg || err?.message || 'Unknown error' }
+  }
+
+  return classifyScoopUpdate(output, nonZeroExit, stderrMsg)
+}
+
+// ─── npm global (Windows) ───────────────────────────────────
+
+/** npm package name incl. scoped (@scope/name); npm enforces the rest */
+const NPM_ID_PATTERN = /^(@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]{0,200}$/i
+
+const runNpm = (args: string[], timeout = 60_000): Promise<string> => runShim('npm', args, timeout)
+
+async function isNpmAvailable(): Promise<boolean> {
+  try {
+    const out = await runNpm(['--version'], 15_000)
+    return /\d+\.\d+/.test(out)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Parse `npm outdated -g --json` output.
+ * Shape: `{ "pkg": { "current": "1.0.0", "wanted": "1.2.0", "latest": "2.0.0" } }`
+ */
+export function parseNpmOutdated(stdout: string): UpdatableApp[] {
+  let data: Record<string, { current?: string; wanted?: string; latest?: string }>
+  try {
+    data = JSON.parse(stdout)
+  } catch {
+    return []
+  }
+  if (!data || typeof data !== 'object') return []
+
+  const apps: UpdatableApp[] = []
+  for (const [name, info] of Object.entries(data)) {
+    const current = info?.current ?? ''
+    const available = info?.latest ?? info?.wanted ?? ''
+    if (!available) continue
+    if (current && current === available) continue
+    apps.push({
+      id: name,
+      name,
+      currentVersion: current || '—',
+      availableVersion: available,
+      source: 'npm',
+      severity: computeSeverity(current, available),
+      selected: true,
+    })
+  }
+  return apps
+}
+
+/**
+ * Parse `npm ls -g --depth=0 --json` output into the installed list.
+ * Shape: `{ "dependencies": { "pkg": { "version": "1.0.0" } } }`
+ */
+export function parseNpmListGlobal(stdout: string): UpToDateApp[] {
+  let data: { dependencies?: Record<string, { version?: string }> }
+  try {
+    data = JSON.parse(stdout)
+  } catch {
+    return []
+  }
+  const deps = data?.dependencies
+  if (!deps || typeof deps !== 'object') return []
+
+  const apps: UpToDateApp[] = []
+  for (const [name, info] of Object.entries(deps)) {
+    apps.push({ id: name, name, version: info?.version ?? '', source: 'npm' })
+  }
+  return apps
+}
+
+async function checkForUpdatesNpm(): Promise<UpdateCheckResult> {
+  if (!(await isNpmAvailable())) return emptyResult(false, 'npm')
+
+  try {
+    // `npm outdated` exits non-zero when packages are outdated, but still
+    // emits JSON on stdout — recover it from the error like the other managers.
+    let outdatedStdout = ''
+    try {
+      outdatedStdout = await runNpm(['outdated', '-g', '--json'], 90_000)
+    } catch (err: any) {
+      outdatedStdout = err?.stdout ?? ''
+    }
+
+    const apps = parseNpmOutdated(outdatedStdout)
+
+    let upToDate: UpToDateApp[] = []
+    try {
+      let listStdout = ''
+      try {
+        listStdout = await runNpm(['ls', '-g', '--depth=0', '--json'], 60_000)
+      } catch (err: any) {
+        // npm ls exits non-zero on peer-dep warnings but still prints JSON
+        listStdout = err?.stdout ?? ''
+      }
+      const allApps = parseNpmListGlobal(listStdout)
+      const outdatedIds = new Set(apps.map((a) => a.id))
+      upToDate = allApps.filter((a) => !outdatedIds.has(a.id))
+    } catch {
+      // Non-critical — just skip the up-to-date list
+    }
+
+    return buildResult('npm', apps, upToDate)
+  } catch {
+    return emptyResult(true, 'npm')
+  }
+}
+
+/** Attempt a single `npm install -g <pkg>@latest` */
+async function upgradeAppNpm(appId: string): Promise<{ success: boolean; error?: string }> {
+  if (!NPM_ID_PATTERN.test(appId)) {
+    return { success: false, error: 'Invalid package name format' }
+  }
+  try {
+    await runNpm(['install', '-g', `${appId}@latest`], 10 * 60 * 1000)
+    return { success: true }
+  } catch (err: any) {
+    const output = cleanOutput(err?.stderr || err?.stdout || err?.message || 'Unknown error')
+    const lastLine = output.trim().split('\n').pop() || 'Update failed'
+    return { success: false, error: lastLine.length > 200 ? lastLine.slice(0, 200) + '...' : lastLine }
+  }
+}
+
+// ─── Windows: aggregation dispatcher ───────────────────────
+
+const WINDOWS_MANAGERS: WindowsPackageManager[] = ['winget', 'choco', 'scoop', 'npm']
+
+const WINDOWS_CHECKERS: Record<WindowsPackageManager, () => Promise<UpdateCheckResult>> = {
+  winget: checkForUpdatesWinget,
+  choco: checkForUpdatesChoco,
+  scoop: checkForUpdatesScoop,
+  npm: checkForUpdatesNpm,
+}
+
+/** Managers the user has enabled for aggregation (all supported when unset). */
+function enabledWindowsManagers(): WindowsPackageManager[] {
+  const configured = getSettings().windowsPackageManagers
+  if (!configured || configured.length === 0) return WINDOWS_MANAGERS
+  return WINDOWS_MANAGERS.filter((m) => configured.includes(m))
+}
+
+/**
+ * Scan every enabled Windows manager concurrently and merge the results into a
+ * single list. Each app keeps its `source`, so it can be routed back to its
+ * owning manager on update (UniGetUI-style aggregation).
+ */
+async function checkForUpdatesWindows(): Promise<UpdateCheckResult> {
+  const enabled = enabledWindowsManagers()
+  const results = await Promise.all(
+    enabled.map((m) => WINDOWS_CHECKERS[m]().catch(() => emptyResult(false, m))),
+  )
+
+  const apps = results.flatMap((r) => r.apps)
+  const upToDate = results.flatMap((r) => r.upToDate)
+  const managers: PackageManagerStatus[] = results.map((r, i) => ({
+    name: enabled[i],
+    available: r.packageManagerAvailable,
+    outdatedCount: r.apps.length,
+  }))
+
+  return {
+    apps,
+    upToDate,
+    totalCount: apps.length,
+    majorCount: apps.filter((a) => a.severity === 'major').length,
+    minorCount: apps.filter((a) => a.severity === 'minor').length,
+    patchCount: apps.filter((a) => a.severity === 'patch').length,
+    packageManagerAvailable: managers.some((m) => m.available),
+    packageManagerName: managers.find((m) => m.available)?.name ?? null,
+    managers,
+  }
+}
+
+/** Upgrade a single package with the pipeline appropriate to its manager. */
+function upgradeWindowsApp(
+  source: WindowsPackageManager,
+  appId: string,
+  alreadyAdmin: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  switch (source) {
+    case 'winget':
+      return upgradeAppWinget(appId, alreadyAdmin)
+    case 'choco':
+      return upgradeAppChoco(appId, alreadyAdmin)
+    case 'scoop':
+      return upgradeAppScoop(appId)
+    case 'npm':
+      return upgradeAppNpm(appId)
+  }
+}
+
+/**
+ * Update packages spanning multiple managers. Items are grouped by their
+ * `source`, then each manager's packages are upgraded in turn while a single
+ * progress stream is reported across the whole batch.
+ */
+/**
+ * Group Windows update items by their routing manager, preserving a stable
+ * manager order. Each entry keeps its *original* source so failures can be
+ * reported under the source the renderer keyed the row by: a winget-owned
+ * package from a non-manager source (e.g. `msstore`) routes through winget but
+ * must be reported as `msstore`, or the renderer's `source␟id` lookup won't
+ * match it. Exported for tests.
+ */
+export function groupWindowsUpdateItems(
+  items: UpdateRequestItem[],
+): Map<WindowsPackageManager, Array<{ id: string; source: string }>> {
+  const groups = new Map<WindowsPackageManager, Array<{ id: string; source: string }>>()
+  for (const item of items) {
+    const manager = WINDOWS_MANAGERS.includes(item.source as WindowsPackageManager)
+      ? (item.source as WindowsPackageManager)
+      : 'winget' // default routing for un-tagged / winget-owned sources (msstore, etc.)
+    const list = groups.get(manager) ?? []
+    list.push({ id: item.id, source: item.source || manager })
+    groups.set(manager, list)
+  }
+  return groups
+}
+
+async function runUpdatesWindows(
+  items: UpdateRequestItem[],
   onProgress: (progress: UpdateProgress) => void,
 ): Promise<UpdateResult> {
+  const alreadyAdmin = isAdmin()
+  const total = items.length
+  let completed = 0
   let succeeded = 0
   let failed = 0
-  let completed = 0
   const errors: UpdateResult['errors'] = []
-  const alreadyAdmin = isAdmin()
-  const total = appIds.length
 
-  for (const appId of appIds) {
-    onProgress({
-      phase: 'updating',
-      current: completed + 1,
-      total,
-      currentApp: appId,
-      percent: Math.round((completed / total) * 100),
-      status: 'in-progress',
-    })
+  const groups = groupWindowsUpdateItems(items)
 
-    const result = await upgradeAppChoco(appId, alreadyAdmin)
-    completed++
+  for (const manager of WINDOWS_MANAGERS) {
+    const entries = groups.get(manager)
+    if (!entries?.length) continue
 
-    if (result.success) {
-      succeeded++
+    for (const { id: appId, source: origSource } of entries) {
+      completed++
       onProgress({
         phase: 'updating',
         current: completed,
         total,
         currentApp: appId,
-        percent: Math.round((completed / total) * 100),
-        status: 'done',
+        percent: Math.round(((completed - 1) / total) * 100),
+        status: 'in-progress',
       })
-    } else {
-      failed++
-      errors.push({ appId, name: appId, reason: result.error || 'Upgrade failed' })
-      onProgress({
-        phase: 'updating',
-        current: completed,
-        total,
-        currentApp: appId,
-        percent: Math.round((completed / total) * 100),
-        status: 'failed',
-      })
+
+      const result = await upgradeWindowsApp(manager, appId, alreadyAdmin)
+
+      if (result.success) {
+        succeeded++
+        onProgress({
+          phase: 'updating',
+          current: completed,
+          total,
+          currentApp: appId,
+          percent: Math.round((completed / total) * 100),
+          status: 'done',
+        })
+      } else {
+        failed++
+        errors.push({ appId, name: appId, reason: result.error || 'Upgrade failed', source: origSource })
+        onProgress({
+          phase: 'updating',
+          current: completed,
+          total,
+          currentApp: appId,
+          percent: Math.round((completed / total) * 100),
+          status: 'failed',
+        })
+      }
     }
   }
 
   return { succeeded, failed, errors }
-}
-
-// ─── Windows: dispatcher ───────────────────────────────────
-
-async function checkForUpdatesWindows(): Promise<UpdateCheckResult> {
-  const settings = getSettings()
-  const preferChoco = settings.windowsPackageManager === 'choco'
-
-  // Try preferred manager first, fall back to the other if unavailable
-  const primary = preferChoco ? await checkForUpdatesChoco() : await checkForUpdatesWinget()
-  if (primary.packageManagerAvailable) return primary
-
-  const fallback = preferChoco ? await checkForUpdatesWinget() : await checkForUpdatesChoco()
-  return fallback
-}
-
-async function runUpdatesWindows(
-  appIds: string[],
-  onProgress: (progress: UpdateProgress) => void,
-  source?: string,
-): Promise<UpdateResult> {
-  // If the caller tells us which manager produced these IDs, use it directly
-  if (source === 'choco') return runUpdatesChoco(appIds, onProgress)
-  if (source === 'winget') return runUpdatesWinget(appIds, onProgress)
-
-  // Fallback: use the setting preference with availability check
-  const settings = getSettings()
-  const preferChoco = settings.windowsPackageManager === 'choco'
-
-  if (preferChoco) {
-    if (await isChocoAvailable()) return runUpdatesChoco(appIds, onProgress)
-    if (await isWingetAvailable()) return runUpdatesWinget(appIds, onProgress)
-  } else {
-    if (await isWingetAvailable()) return runUpdatesWinget(appIds, onProgress)
-    if (await isChocoAvailable()) return runUpdatesChoco(appIds, onProgress)
-  }
-
-  // Neither manager available — report per-app failures
-  return {
-    succeeded: 0,
-    failed: appIds.length,
-    errors: appIds.map((id) => ({ appId: id, name: id, reason: 'No package manager available' })),
-  }
 }
 
 // ─── Homebrew (macOS) ───────────────────────────────────────
@@ -1013,16 +1358,7 @@ async function checkForUpdatesBrew(): Promise<UpdateCheckResult> {
       // Non-critical — just skip the up-to-date list
     }
 
-    return {
-      apps,
-      upToDate,
-      totalCount: apps.length,
-      majorCount: apps.filter((a) => a.severity === 'major').length,
-      minorCount: apps.filter((a) => a.severity === 'minor').length,
-      patchCount: apps.filter((a) => a.severity === 'patch').length,
-      packageManagerAvailable: true,
-      packageManagerName: 'brew',
-    }
+    return buildResult('brew', apps, upToDate)
   } catch {
     return emptyResult(true, 'brew')
   }
@@ -1197,16 +1533,7 @@ async function checkForUpdatesApt(): Promise<UpdateCheckResult> {
       upToDate = allInstalled.filter((a) => !outdatedIds.has(a.id))
     } catch { /* non-critical */ }
 
-    return {
-      apps,
-      upToDate,
-      totalCount: apps.length,
-      majorCount: apps.filter((a) => a.severity === 'major').length,
-      minorCount: apps.filter((a) => a.severity === 'minor').length,
-      patchCount: apps.filter((a) => a.severity === 'patch').length,
-      packageManagerAvailable: true,
-      packageManagerName: 'apt',
-    }
+    return buildResult('apt', apps, upToDate)
   } catch {
     return emptyResult(true, 'apt')
   }
@@ -1286,16 +1613,7 @@ async function checkForUpdatesDnf(): Promise<UpdateCheckResult> {
       }
     } catch { /* non-critical */ }
 
-    return {
-      apps,
-      upToDate,
-      totalCount: apps.length,
-      majorCount: apps.filter((a) => a.severity === 'major').length,
-      minorCount: apps.filter((a) => a.severity === 'minor').length,
-      patchCount: apps.filter((a) => a.severity === 'patch').length,
-      packageManagerAvailable: true,
-      packageManagerName: 'dnf',
-    }
+    return buildResult('dnf', apps, upToDate)
   } catch {
     return emptyResult(true, 'dnf')
   }
@@ -1366,16 +1684,7 @@ async function checkForUpdatesPacman(): Promise<UpdateCheckResult> {
       }
     } catch { /* non-critical */ }
 
-    return {
-      apps,
-      upToDate,
-      totalCount: apps.length,
-      majorCount: apps.filter((a) => a.severity === 'major').length,
-      minorCount: apps.filter((a) => a.severity === 'minor').length,
-      patchCount: apps.filter((a) => a.severity === 'patch').length,
-      packageManagerAvailable: true,
-      packageManagerName: 'pacman',
-    }
+    return buildResult('pacman', apps, upToDate)
   } catch {
     return emptyResult(true, 'pacman')
   }
@@ -1489,19 +1798,50 @@ export async function checkForUpdates(): Promise<UpdateCheckResult> {
 }
 
 export async function runUpdates(
-  appIds: string[],
+  items: UpdateRequestItem[],
   onProgress: (progress: UpdateProgress) => void,
-  source?: string,
 ): Promise<UpdateResult> {
+  if (process.platform === 'win32') return runUpdatesWindows(items, onProgress)
+  // Single-manager platforms ignore per-item source — every id belongs to the
+  // one active manager.
+  const appIds = items.map((i) => i.id)
   if (process.platform === 'darwin') return runUpdatesBrew(appIds, onProgress)
-  if (process.platform === 'win32') return runUpdatesWindows(appIds, onProgress, source)
   if (process.platform === 'linux') return runUpdatesLinux(appIds, onProgress)
   return { succeeded: 0, failed: 0, errors: [] }
 }
+
+/** Winget package id: alphanumeric plus dot/dash/underscore */
+const WINGET_ID_PATTERN = /^[\w][\w.\-]{0,200}$/
 
 /** Validate an app ID for the current platform's package manager */
 export function isValidAppId(id: string): boolean {
   if (process.platform === 'darwin') return BREW_ID_PATTERN.test(id) && id.length <= 200
   if (process.platform === 'linux') return LINUX_PKG_PATTERN.test(id)
-  return /^[\w][\w.\-]{0,200}$/.test(id)
+  return WINGET_ID_PATTERN.test(id)
+}
+
+/**
+ * Validate an app ID against the pattern of the manager that owns it. Needed
+ * for aggregation: npm scoped names (`@scope/pkg`) and Scoop names containing
+ * `+` are valid for their manager but rejected by the winget/legacy pattern.
+ */
+export function isValidAppIdForSource(id: string, source: string): boolean {
+  switch (source) {
+    case 'winget':
+      return WINGET_ID_PATTERN.test(id)
+    case 'choco':
+      return CHOCO_ID_PATTERN.test(id)
+    case 'scoop':
+      return SCOOP_ID_PATTERN.test(id)
+    case 'npm':
+      return NPM_ID_PATTERN.test(id)
+    case 'brew':
+      return BREW_ID_PATTERN.test(id) && id.length <= 200
+    case 'apt':
+    case 'dnf':
+    case 'pacman':
+      return LINUX_PKG_PATTERN.test(id)
+    default:
+      return isValidAppId(id)
+  }
 }
